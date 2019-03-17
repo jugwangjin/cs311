@@ -16,23 +16,23 @@ module ALU (A, B, FuncCode, C, OverflowFlag);
 	/*
 		YOUR VARIABLE DECLARATION...
 	*/
-	`define ADD		4'b0000;
-	`define SUB 	4'b0001;
-	`define ID 		4'b0010;
-	`define NOT 	4'b0011;
-	`define AND 	4'b0100;
-	`define OR 		4'b0101;
-	`define NAND 	4'b0110;
-	`define NOR 	4'b0111;	
+	`define ADD		4'b0000
+	`define SUB 	4'b0001
+	`define ID 		4'b0010
+	`define NOT 	4'b0011
+	`define AND 	4'b0100
+	`define OR 		4'b0101
+	`define NAND 	4'b0110
+	`define NOR 	4'b0111	
 
-	`define XOR 	4'b1000;
-	`define XNOR 	4'b1001;
-	`define LLS 	4'b1010;
-	`define LRS 	4'b1011;
-	`define ALS 	4'b1100;
-	`define ARS 	4'b1101;
-	`define TCP 	4'b1110;
-	`define ZERO 	4'b1111;
+	`define XOR 	4'b1000
+	`define XNOR 	4'b1001
+	`define LLS 	4'b1010
+	`define LRS 	4'b1011
+	`define ALS 	4'b1100
+	`define ARS 	4'b1101
+	`define TCP 	4'b1110
+	`define ZERO 	4'b1111
 
 	initial begin
 		C = 0;
