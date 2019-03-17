@@ -49,6 +49,7 @@ module cpu (readM, writeM, address, data, ackOutput, inputReady, reset_n, clk);
 				default : controls[4:1] <= `ZERO;
 			endcase
 			controls[0] <= 1'b0;
+		end
 	  end else if (opcode == 4'd4) begin
 	    controls[11:5] <= 7'b0000001;
 		controls[4:1] <= `ADD;
