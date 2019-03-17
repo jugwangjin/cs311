@@ -20,8 +20,6 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
 
     wire [`WORD_SIZE-1:0]data;
     wire [`WORD_SIZE-1:0]address;
-    
-    assign data = data_local;
 
     reg [`WORD_SIZE-1:0]PC;
     reg InstructionLoad;
@@ -79,7 +77,7 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
     assign ImmSignExtend = {{8{imm[7]}}, imm[7:0]};
     assign ALUInput1 = (Branch == 1) ? PC : ReadData1;
     assign ALUInput2 = (ALUSrc == 1) ? ImmSignExtend : ReadData2;
-    assign WriteData = (MemtoReg == 1) ? data : ALUOutput;
+    assign WriteData = (MemtoReg == 1) ? data_local : ALUOutput;
 
     assign address = (InstructionLoad == 1) ? PC : ALUOutput;
 
@@ -98,9 +96,9 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
     always @(posedge clk) begin
         readM <= 1'b1;
         InstructionLoad <= 1'b1;
-        display("%d", address);
         wait (inputReady == 1'b1);
-        instruction <= data;
+        data_local <= data;
+        instruction <= data_local;
         
         InstructionLoad <= 1'b0;
         readM <= 1'b0;
@@ -144,10 +142,12 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
             7 : begin
                 readM <= 1;
                 wait (inputReady == 1'b1);
+                data_local <= data;
                 readM <= 0;
             end
             8 : begin
                 data_local <= ReadData2;
+                data <= data_local;
                 writeM <= 1;
                 wait (ackOutput == 1'b1);
                 writeM <= 0;
