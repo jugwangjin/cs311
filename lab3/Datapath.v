@@ -5,12 +5,12 @@
 module datapath (readM, writeM, instruction, address, data, ackOutput, inputReady, controls, clk);
     output readM;
     output writeM;
-    output instruction;
-    output address;
-    inout data;
+    output [`WORD_SIZE-1:0]instruction;
+    output [`WORD_SIZE-1:0]address;
+    inout [`WORD_SIZE-1:0]data;
     input ackOutput;
     input inputReady;
-    input controls;
+    input [11:0]controls;
     input clk;
 
     reg readM;
