@@ -18,7 +18,7 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
     reg [`WORD_SIZE-1:0]data_local;
     reg [`WORD_SIZE-1:0]instruction;
 
-    wire [`WORD_SIZE-1:0]data;
+    reg [`WORD_SIZE-1:0]data;
     wire [`WORD_SIZE-1:0]address;
 
     reg [`WORD_SIZE-1:0]PC;
