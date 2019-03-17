@@ -15,8 +15,8 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
 
     reg readM;
     reg writeM;
-    reg [`WORD_SIZE-1:0 data_to_reg;
-    reg [`WORD_SIZE-1:0]data_to_me;
+    reg [`WORD_SIZE-1:0]data_to_reg;
+    reg [`WORD_SIZE-1:0]data_to_mem;
     reg [`WORD_SIZE-1:0]instruction;
 
     wire [`WORD_SIZE-1:0]data;
@@ -101,7 +101,7 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
 
     always @(posedge clk) begin
         RegUpdate <= 0;
-        
+
         InstructionLoad <= 1'b1;
         wait(InstructionLoad == 1'b1);
         readM <= 1'b1;
