@@ -18,8 +18,10 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
     reg [`WORD_SIZE-1:0]data_local;
     reg [`WORD_SIZE-1:0]instruction;
 
-    reg [`WORD_SIZE-1:0]data;
+    wire [`WORD_SIZE-1:0]data;
     wire [`WORD_SIZE-1:0]address;
+
+  	assign data = (writeM || ackOutput) ? data_local : `WORD_SIZE'bz;
 
     reg [`WORD_SIZE-1:0]PC;
     reg InstructionLoad;
@@ -146,9 +148,8 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
                 readM <= 0;
             end
             8 : begin
-                data_local <= ReadData2;
-                data <= data_local;
                 writeM <= 1;
+                data_local <= ReadData2;
                 wait (ackOutput == 1'b1);
                 writeM <= 0;
             end
