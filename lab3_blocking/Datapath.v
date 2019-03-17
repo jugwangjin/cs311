@@ -105,7 +105,6 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
         readM = 1'b1;
         wait (inputReady == 1'b1);
         instruction = data;
-        wait (inputReady == 1'b0);
         InstructionLoad = 1'b0;
         readM = 1'b0;
 
@@ -149,7 +148,6 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
                 readM = 1;
                 wait (inputReady == 1'b1);
                 data_to_reg = data;
-                wait (inputReady == 1'b0);
                 readM = 0;
             end
             8 : begin
@@ -174,16 +172,14 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
         endcase
 
 
+        RegUpdate = 1;
+
         if(MemWrite==1) begin
-            wait (data == ReadData2);
             writeM=1;
             wait(ackOutput==1'b1);
-            wait(ackOutput==1'b0);
             writeM=0;
         end
 
-        RegUpdate = 1;
-        
         if(Jump == 0 && Branch == 0) begin
             PC = PC+1;
         end
