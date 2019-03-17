@@ -98,8 +98,10 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
     always @(posedge clk) begin
         readM <= 1'b1;
         InstructionLoad <= 1'b1;
+        display("%d", address);
         wait (inputReady == 1'b1);
         instruction <= data;
+        
         InstructionLoad <= 1'b0;
         readM <= 1'b0;
 
