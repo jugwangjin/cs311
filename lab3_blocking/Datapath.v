@@ -13,21 +13,24 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
     input [11:0]controls;
     input clk;
 
+    // states inside 
+    reg [`WORD_SIZE-1:0]PC;
+    reg RegUpdate; // to notify register that EX stage is done
+    reg InstructionFetch; // to check if it is IF stage or not 
+
+    // for output
     reg readM;
     reg writeM;
-    reg [`WORD_SIZE-1:0]data_to_reg;
-    reg [`WORD_SIZE-1:0]data_to_mem;
     reg [`WORD_SIZE-1:0]instruction;
-
     wire [`WORD_SIZE-1:0]data;
     wire [`WORD_SIZE-1:0]address;
+    assign address = (InstructionFetch == 1) ? PC : ALUOutput;
 
+    // for data in/out
+    reg [`WORD_SIZE-1:0]data_to_reg; // data read from memory, ALU output, ...
+    reg [`WORD_SIZE-1:0]data_to_mem; // data to be written to memory, from register.
 
-    reg [`WORD_SIZE-1:0]PC;
-    reg InstructionLoad;
-    reg RegUpdate;
-
-    //controls decode
+    // controls decode (just for readibility)
     wire Jump;
 	wire Branch;
 	wire MemtoReg;
@@ -46,14 +49,8 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
 	assign RegWrite = controls[5];
 	assign ALUOp = controls[4:1];
 	assign ALUSrc = controls[0];
-
-    //for ALU
-    wire [`WORD_SIZE-1:0]ALUInput1;
-    wire [`WORD_SIZE-1:0]ALUInput2;
-    wire [`WORD_SIZE-1:0]ALUOutput;
-    wire OverflowFlag;
     
-    //for Register
+    // for Register
     wire [3:0]opcode;
 	wire [1:0]rs;
 	wire [1:0]rt;
@@ -62,7 +59,9 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
 	wire [5:0]func;
 	wire [7:0]imm;
 	wire [11:0]target_address;
-
+    wire [`WORD_SIZE-1:0] ReadData1;
+    wire [`WORD_SIZE-1:0] ReadData2;
+    wire [`WORD_SIZE-1:0] WriteData;
     assign opcode = instruction[15:12];
     assign rs = instruction[11:10];
     assign rt = (Jump == 1) ? 2'b10 : instruction[9:8];
@@ -71,26 +70,30 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
     assign func = instruction[5:0];
     assign imm = instruction[7:0];
     assign target_address = instruction[11:0];
-
-    wire [`WORD_SIZE-1:0] ReadData1;
-    wire [`WORD_SIZE-1:0] ReadData2;
-    wire [`WORD_SIZE-1:0] WriteData;
-    wire [`WORD_SIZE-1:0] ImmSignExtend;
+    assign WriteData = (MemtoReg == 1) ? data_to_reg : ALUOutput;
     
+    // imm value (for I-type)
+    wire [`WORD_SIZE-1:0] ImmSignExtend;
     assign ImmSignExtend = {{8{imm[7]}}, imm[7:0]};
+
+    // for ALU
+    wire [`WORD_SIZE-1:0]ALUInput1;
+    wire [`WORD_SIZE-1:0]ALUInput2;
+    wire [`WORD_SIZE-1:0]ALUOutput;
+    wire OverflowFlag;
     assign ALUInput1 = (Branch == 1) ? PC : ReadData1;
     assign ALUInput2 = (ALUSrc == 1) ? ImmSignExtend : ReadData2;
-    assign WriteData = (MemtoReg == 1) ? data_to_reg : ALUOutput;
-    assign address = (InstructionLoad == 1) ? PC : ALUOutput;
 
-  assign data = (InstructionLoad!=1 && MemWrite==1) ? data_to_mem : `WORD_SIZE'bz;
+    // data wire is connected to data_to_mem only when we write to memory.
+    assign data = (InstructionFetch!=1 && MemWrite==1) ? data_to_mem : `WORD_SIZE'bz;
 
-    register REGISTER_MODULE(clk, rs, rt, write_register, WriteData, RegWrite, ReadData1, ReadData2, RegUpdate); 
+    // connect and send signals to other modules. 
+    register REGISTER_MODULE(clk, rs, rt, write_register, WriteData, RegWrite, RegUpdate, ReadData1, ReadData2); 
     ALU ALU_MODULE (ALUInput1, ALUInput2, ALUOp, ALUOutput, OverflowFlag);
 
     initial begin
         PC = 0;
-        InstructionLoad = 0;
+        InstructionFetch = 0;
         readM = 0;
         writeM = 0;
         data_to_reg = 0;
@@ -101,21 +104,20 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
 
     always @(posedge clk) begin
         RegUpdate = 0;
-        InstructionLoad = 1'b1;
+        // IF
+        InstructionFetch = 1'b1;
         readM = 1'b1;
         wait (inputReady == 1'b1);
         readM = 1'b0;
         instruction = data;
-        InstructionLoad = 1'b0;
-$display("instruction %x opcode %d PC is %x",instruction,opcode, PC);
+        InstructionFetch = 1'b0;
 	
-	if (Jump == 0) begin
-		PC = PC + 1;
-	end
+        // increment PC
+        PC = PC + 1;
+        // it needs to wait for cpu to decode instruction
+        wait(inputReady==1'b0);
 
-	wait(inputReady==1'b0);
-	
-
+        // EX
         case (opcode) 
             0 : begin
                 if (ReadData1 != ReadData2) begin
@@ -137,44 +139,45 @@ $display("instruction %x opcode %d PC is %x",instruction,opcode, PC);
                     PC = ALUOutput;
                 end
             end
+
             6 : begin
                 data_to_reg = {imm[7:0], {8{1'b0}}};
             end
+
             7 : begin
                 readM = 1;
                 wait (inputReady == 1'b1);
                 readM = 0;
                 data_to_reg = data;
-		wait (inputReady == 1'b0);
+		        wait (inputReady == 1'b0);
             end
             8 : begin
                 data_to_mem = ReadData2;
+                writeM=1;
+                wait(ackOutput==1'b1);
+                writeM=0;
             end
+
             9 : begin
                 PC = {PC[15:12], target_address[11:0]};
             end
             10 : begin
-                data_to_reg = PC+1;
+                data_to_reg = PC;
                 PC = {PC[15:12], target_address[11:0]};
             end
+
             15 : begin
                 if (func == 25) begin
                     PC = ReadData1;
                 end
                 else if (func == 26) begin
-                    data_to_reg = PC + 1;
+                    data_to_reg = PC;
                     PC = ReadData1;
                 end
             end
         endcase
 
-
+        // notify register that ALU job is done. WB 
         RegUpdate = 1;
-
-        if(MemWrite==1) begin
-            writeM=1;
-            wait(ackOutput==1'b1);
-            writeM=0;
-        end
     end
 endmodule

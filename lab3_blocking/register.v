@@ -1,16 +1,15 @@
 `include "opcodes.v"
-module register(clk, ReadRegister1, ReadRegister2, WriteRegister, WriteData, RegWrite, ReadData1, ReadData2, RegUpdate); 
+module register(clk, ReadRegister1, ReadRegister2, WriteRegister, WriteData, RegWrite, RegUpdate, ReadData1, ReadData2); 
     input clk;
     input [1:0]ReadRegister1;
     input [1:0]ReadRegister2;
     input [1:0]WriteRegister;
     input [`WORD_SIZE-1:0]WriteData;
     input RegWrite;
+    input RegUpdate;
     output [`WORD_SIZE-1:0]ReadData1;
     output [`WORD_SIZE-1:0]ReadData2;
-    input RegUpdate;
-
-                                                                                                            
+                                                                                
     reg [`WORD_SIZE-1:0] registers [0:`NUM_REGS-1];
     assign ReadData1 = registers[ReadRegister1];
     assign ReadData2 = registers[ReadRegister2];
@@ -27,6 +26,5 @@ module register(clk, ReadRegister1, ReadRegister2, WriteRegister, WriteData, Reg
         if (RegWrite == 1) begin
             registers[WriteRegister] = WriteData;
         end
-$display("regitsers: %h, %h, %h, %h", registers[0],registers[1],registers[2],registers[3]);
     end
 endmodule
