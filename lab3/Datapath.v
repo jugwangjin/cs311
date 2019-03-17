@@ -174,6 +174,7 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
         RegUpdate <= 1;
 
         if(MemWrite==1) begin
+            wait (data = ReadData2);
             writeM<=1;
             wait(ackOutput==1'b1);
             writeM<=0;
