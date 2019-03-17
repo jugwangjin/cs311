@@ -121,7 +121,7 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
                 end
             end
             6 : begin
-                data <= {imm[7:0], 8{0}};
+                data <= {imm[7:0], {8{0}}};
             end
             7 : begin
                 address <= ALUOutput;
@@ -151,6 +151,7 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
                     data <= PC + 1;
                     PC <= ReadData1;
                 end
+            end
         endcase
 
         if(Jump == 0 && Branch == 0) begin
