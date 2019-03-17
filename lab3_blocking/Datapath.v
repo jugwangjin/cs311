@@ -121,9 +121,6 @@ $display("instruction %x opcode %d PC is %x",instruction,opcode, PC);
                 if (ReadData1 != ReadData2) begin
                     PC = ALUOutput;
                 end
-                else begin
-                    PC = PC + 1;
-                end
             end
             1 : begin
                 if (ReadData1 == ReadData2) begin
