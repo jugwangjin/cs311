@@ -1,13 +1,13 @@
 `include "opcodes.v"
 module register(clk, ReadRegister1, ReadRegister2, WriteRegister, WriteData, RegWrite, ReadData1, ReadData2); 
     input clk;
-    input ReadRegister1;
-    input ReadRegister2;
-    input WriteRegister;
-    input WriteData;
+    input [1:0]ReadRegister1;
+    input [1:0]ReadRegister2;
+    input [1:0]WriteRegister;
+    input [`WORD_SIZE-1:0]WriteData;
     input RegWrite;
-    output ReadData1;
-    output ReadData2;
+    output [`Word_SIZE-1:0]ReadData1;
+    output [`WORD_SIZE-1:0]ReadData2;
 
                                                                                                             
     reg [`WORD_SIZE-1:0] registers [0:`NUM_REGS-1];
