@@ -66,6 +66,9 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
     wire [`WORD_SIZE-1:0]ALUInput2;
     wire [`WORD_SIZE-1:0]ALUOutput;
     wire OverflowFlag;
+    // imm value (for I-type)
+    wire [`WORD_SIZE-1:0] ImmSignExtend;
+
     // assigning register wires
     assign opcode = instruction[15:12];
     assign rs = instruction[11:10];
@@ -79,9 +82,7 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
     // assigning ALU wires
     assign ALUInput1 = (Branch == 1) ? PC : ReadData1;
     assign ALUInput2 = (ALUSrc == 1) ? ImmSignExtend : ReadData2;
-    
-    // imm value (for I-type)
-    wire [`WORD_SIZE-1:0] ImmSignExtend;
+    // imm value
     assign ImmSignExtend = {{8{imm[7]}}, imm[7:0]};
 
     // data wire is connected to data_to_mem only when we write to memory.
