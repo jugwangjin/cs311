@@ -15,16 +15,17 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
 
     reg readM;
     reg writeM;
-    reg [`WORD_SIZE-1:0]data_local;
+    reg [`WORD_SIZE-1:0 data_to_reg;
+    reg [`WORD_SIZE-1:0]data_to_me;
     reg [`WORD_SIZE-1:0]instruction;
 
     wire [`WORD_SIZE-1:0]data;
     wire [`WORD_SIZE-1:0]address;
 
-  	assign data = (writeM || ackOutput) ? data_local : `WORD_SIZE'bz;
 
     reg [`WORD_SIZE-1:0]PC;
     reg InstructionLoad;
+    reg RegUpdate;
 
     //controls decode
     wire Jump;
@@ -79,11 +80,12 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
     assign ImmSignExtend = {{8{imm[7]}}, imm[7:0]};
     assign ALUInput1 = (Branch == 1) ? PC : ReadData1;
     assign ALUInput2 = (ALUSrc == 1) ? ImmSignExtend : ReadData2;
-    assign WriteData = (MemtoReg == 1) ? data_local : ALUOutput;
-
+    assign WriteData = (MemtoReg == 1) ? data_to_reg : ALUOutput;
     assign address = (InstructionLoad == 1) ? PC : ALUOutput;
 
-    register REGISTER_MODULE(clk, rs, rt, write_register, WriteData, RegWrite, ReadData1, ReadData2); 
+  	assign data = (InstructionLoad!=1 && MemWrite==1) ? data_to_mem : `WORD_SIZE'bz;
+
+    register REGISTER_MODULE(clk, rs, rt, write_register, WriteData, RegWrite, ReadData1, ReadData2, RegUpdate); 
     ALU ALU_MODULE (ALUInput1, ALUInput2, ALUOp, ALUOutput, OverflowFlag);
 
     initial begin
@@ -91,87 +93,98 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
         InstructionLoad = 0;
         readM = 0;
         writeM = 0;
-        data_local = 0;
+        data_to_reg = 0;
+        data_to_mem = 0;
         instruction = 0;
+        RegUpdate = 0;
     end
 
     always @(posedge clk) begin
-        readM <= 1'b1;
-        InstructionLoad <= 1'b1;
+        RegUpdate = 0;
+        InstructionLoad = 1'b1;
+        readM = 1'b1;
         wait (inputReady == 1'b1);
-        instruction <= data;
+        instruction = data;
+        wait (inputReady == 1'b0);
+        InstructionLoad = 1'b0;
+        readM = 1'b0;
         
-        InstructionLoad <= 1'b0;
-        readM <= 1'b0;
-
         case (opcode) 
             0 : begin
                 if (ReadData1 != ReadData2) begin
-                    PC <= ALUOutput;
+                    PC = ALUOutput;
                 end
                 else begin
-                    PC <= PC + 1;
+                    PC = PC + 1;
                 end
             end
             1 : begin
                 if (ReadData1 == ReadData2) begin
-                    PC <= ALUOutput;
+                    PC = ALUOutput;
                 end
                 else begin
-                    PC <= PC + 1;
+                    PC = PC + 1;
                 end
             end
             2 : begin
                 if (ReadData1 > 0) begin
-                    PC <= ALUOutput;
+                    PC = ALUOutput;
                 end
                 else begin
-                    PC <= PC + 1;
+                    PC = PC + 1;
                 end
             end
             3 : begin
                 if (ReadData1 < 0) begin
-                    PC <= ALUOutput;
+                    PC = ALUOutput;
                 end
                 else begin
-                    PC <= PC + 1;
+                    PC = PC + 1;
                 end
             end
             6 : begin
-                data_local <= {imm[7:0], {8{1'b0}}};
+                data_to_reg = {imm[7:0], {8{1'b0}}};
             end
             7 : begin
-                readM <= 1;
+                readM = 1;
                 wait (inputReady == 1'b1);
-                data_local <= data;
-                readM <= 0;
+                data_to_reg = data;
+                wait (inputReady == 1'b0);
+                readM = 0;
             end
             8 : begin
-                data_local <= ReadData2;
-                writeM <= 1;
-                wait (ackOutput == 1'b1);
-                writeM <= 0;
+                data_to_mem = ReadData2;
             end
             9 : begin
-                PC <= {PC[15:12], target_address[11:0]};
+                PC = {PC[15:12], target_address[11:0]};
             end
             10 : begin
-                data_local <= PC+1;
-                PC <= {PC[15:12], target_address[11:0]};
+                data_to_reg = PC+1;
+                PC = {PC[15:12], target_address[11:0]};
             end
             15 : begin
                 if (func == 25) begin
-                    PC <= ReadData1;
+                    PC = ReadData1;
                 end
                 else if (func == 26) begin
-                    data_local <= PC + 1;
-                    PC <= ReadData1;
+                    data_to_reg = PC + 1;
+                    PC = ReadData1;
                 end
             end
         endcase
 
+        RegUpdate = 1;
+
+        if(MemWrite==1) begin
+            wait (data == ReadData2);
+            writeM=1;
+            wait(ackOutput==1'b1);
+            wait(ackOutput==1'b0);
+            writeM=0;
+        end
+
         if(Jump == 0 && Branch == 0) begin
-            PC <= PC+1;
+            PC = PC+1;
         end
     end
 endmodule
