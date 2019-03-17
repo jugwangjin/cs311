@@ -31,6 +31,10 @@ module cpu (readM, writeM, address, data, ackOutput, inputReady, reset_n, clk);
 	end
 
 	// when datapath changes instruction, starts decoding
+	// also possible with expression below
+	// always @(posedge clk) begin
+	// 	instruction = 0;
+	//  wait (instruction != 0); 
 	always @(instruction) begin
 	  if (opcode == 15) begin // R-Type
 	    if (func == 25) begin // JPR
