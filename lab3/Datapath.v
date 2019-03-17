@@ -83,7 +83,7 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
     assign WriteData = (MemtoReg == 1) ? data_to_reg : ALUOutput;
     assign address = (InstructionLoad == 1) ? PC : ALUOutput;
 
-  	assign data = (InstructionLoad!=1 && MemWrite==1) ? data_to_mem : `WORD_SIZE'bz;
+  	assign data = (InstructionLoad==0 && MemWrite==1) ? data_to_mem : `WORD_SIZE'bz;
 
     register REGISTER_MODULE(clk, rs, rt, write_register, WriteData, RegWrite, ReadData1, ReadData2, RegUpdate); 
     ALU ALU_MODULE (ALUInput1, ALUInput2, ALUOp, ALUOutput, OverflowFlag);
@@ -101,15 +101,17 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
 
     always @(posedge clk) begin
         RegUpdate <= 0;
+        
         InstructionLoad <= 1'b1;
         wait(InstructionLoad == 1'b1);
         readM <= 1'b1;
         wait (inputReady == 1'b1);
         instruction <= data;
         wait (inputReady == 1'b0);
-        InstructionLoad <= 1'b0;
         readM <= 1'b0;
+        InstructionLoad <= 1'b0;
         wait (InstructionLoad == 0);
+
         case (opcode) 
             0 : begin
                 if (ReadData1 != ReadData2) begin
