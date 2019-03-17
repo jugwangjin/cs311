@@ -2,7 +2,7 @@
 `include "register.v"
 `include "ALU.v"
 
-module datapath (readM, writeM, instruction, data, address, ackOutput, inputReady, controls);
+module datapath (readM, writeM, instruction, data, address, ackOutput, inputReady, controls, clk);
     output readM;
     output writeM;
     output instruction;
@@ -11,6 +11,7 @@ module datapath (readM, writeM, instruction, data, address, ackOutput, inputRead
     input ackOutput;
     input inputReady;
     input controls;
+    input clk;
 
     reg readM;
     reg writeM;

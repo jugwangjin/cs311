@@ -22,7 +22,7 @@ module cpu (readM, writeM, address, data, ackOutput, inputReady, reset_n, clk);
 	assign opcode = instruction[15:12];
 	assign func = instruction[5:0];
 
-    datapath DATAPATH_MODULE (PC, instruction, data, address, readM, writeM, ackOutput, inputReady, controls);
+    datapath DATAPATH_MODULE (PC, instruction, data, address, readM, writeM, ackOutput, inputReady, controls, clk);
 // Fill it your codes	
 // 11 Jump, 10 Branch, 9 MemtoReg, 8 MemRead, 7 MemWrite, 6 RegDst, 5 RegWrite, 4:1 [3:0]ALUOp, 0 ALUSrc;
 	always @(instruction) begin
