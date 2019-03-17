@@ -6,7 +6,7 @@ module register(clk, ReadRegister1, ReadRegister2, WriteRegister, WriteData, Reg
     input [1:0]WriteRegister;
     input [`WORD_SIZE-1:0]WriteData;
     input RegWrite;
-    output [`Word_SIZE-1:0]ReadData1;
+    output [`WORD_SIZE-1:0]ReadData1;
     output [`WORD_SIZE-1:0]ReadData2;
 
                                                                                                             
