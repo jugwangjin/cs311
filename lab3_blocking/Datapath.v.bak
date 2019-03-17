@@ -107,22 +107,19 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
         readM = 1'b0;
         instruction = data;
         InstructionLoad = 1'b0;
+$display("instruction %x opcode %d PC is %x",instruction,opcode, PC);
 	
 	if (Jump == 0) begin
 		PC = PC + 1;
 	end
 
 	wait(inputReady==1'b0);
-$display("instruction %x opcode %d",instruction,opcode);
 	
 
         case (opcode) 
             0 : begin
                 if (ReadData1 != ReadData2) begin
                     PC = ALUOutput;
-                end
-                else begin
-                    PC = PC + 1;
                 end
             end
             1 : begin
@@ -148,9 +145,7 @@ $display("instruction %x opcode %d",instruction,opcode);
                 wait (inputReady == 1'b1);
                 readM = 0;
                 data_to_reg = data;
-$display("address %d data_TO_REG is %d, data is %d",address, data_to_reg, data);
 		wait (inputReady == 1'b0);
-$display("%d : memtoreg, %d : writedata, %d : write_register", MemtoReg, WriteData, write_register);
             end
             8 : begin
                 data_to_mem = ReadData2;

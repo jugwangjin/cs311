@@ -145,9 +145,7 @@ $display("instruction %x opcode %d PC is %x",instruction,opcode, PC);
                 wait (inputReady == 1'b1);
                 readM = 0;
                 data_to_reg = data;
-$display("address %d data_TO_REG is %d, data is %d",address, data_to_reg, data);
 		wait (inputReady == 1'b0);
-$display("%d : memtoreg, %d : writedata, %d : write_register", MemtoReg, WriteData, write_register);
             end
             8 : begin
                 data_to_mem = ReadData2;
@@ -174,7 +172,6 @@ $display("%d : memtoreg, %d : writedata, %d : write_register", MemtoReg, WriteDa
         RegUpdate = 1;
 
         if(MemWrite==1) begin
-$display("data %d, address %d", data, address);
             writeM=1;
             wait(ackOutput==1'b1);
             writeM=0;

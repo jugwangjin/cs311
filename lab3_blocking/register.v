@@ -27,6 +27,6 @@ module register(clk, ReadRegister1, ReadRegister2, WriteRegister, WriteData, Reg
         if (RegWrite == 1) begin
             registers[WriteRegister] = WriteData;
         end
-$display("regitsers: %d, %d, %d, %d", registers[0],registers[1],registers[2],registers[3]);
+$display("regitsers: %h, %h, %h, %h", registers[0],registers[1],registers[2],registers[3]);
     end
 endmodule
