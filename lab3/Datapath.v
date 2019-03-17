@@ -70,7 +70,7 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
     wire [`WORD_SIZE-1:0] WriteData;
     wire [`WORD_SIZE-1:0] ImmSignExtend;
     
-    assign ImmSignExtend = {8{imm[7]}, imm[7:0]};
+    assign ImmSignExtend = {{8{imm[7]}}, imm[7:0]};
     assign ALUInput1 = (Branch == 1) ? PC : ReadData1;
     assign ALUInput2 = (ALUSrc == 1) ? ImmSignExtend : ReadData2;
     assign WriteData = (MemtoReg == 1) ? data : ALUOutput;
@@ -87,54 +87,68 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
         InstructionLoad <= 1'b0;
         readM <= 1'b0;
 
-        case (opcode) begin
-            '0' : begin
+        case (opcode) 
+            0 : begin
                 if (ReadData1 != ReadData2) begin
                     PC <= ALUOutput;
                 end
+                else begin
+                    PC <= PC + 1;
+                end
             end
-            '1' : begin
+            1 : begin
                 if (ReadData1 == ReadData2) begin
                     PC <= ALUOutput;
                 end
+                else begin
+                    PC <= PC + 1;
+                end
             end
-            '2' : begin
+            2 : begin
                 if (ReadData1 > 0) begin
                     PC <= ALUOutput;
                 end
+                else begin
+                    PC <= PC + 1;
+                end
             end
-            '3' : begin
+            3 : begin
                 if (ReadData1 < 0) begin
                     PC <= ALUOutput;
                 end
+                else begin
+                    PC <= PC + 1;
+                end
             end
-            '6' : begin
+            6 : begin
                 data <= {imm[7:0], 8{0}};
             end
-            '7' : begin
+            7 : begin
                 address <= ALUOutput;
                 readM <= 1;
                 wait (inputReady == 1'b1);
+                readM <= 0;
             end
-            '8' : begin
+            8 : begin
                 address <= ALUOutput;
                 data <= ReadData2;
                 writeM <= 1;
                 wait (ackOutput == 1'b1);
+                writeM <= 0;
             end
-            '9' : begin
+            9 : begin
                 PC <= {PC[15:12], target_address[11:0]};
             end
-            '10' : begin
+            10 : begin
                 data <= PC+1;
                 PC <= {PC[15:12], target_address[11:0]};
             end
-            '15' : begin
+            15 : begin
                 if (func == 25) begin
                     PC <= ReadData1;
                 end
                 else if (func == 26) begin
-                    data <= PC+1;
+                    data <= PC + 1;
                     PC <= ReadData1;
                 end
         endcase
