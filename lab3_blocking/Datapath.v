@@ -173,7 +173,6 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
             end
         endcase
 
-        RegUpdate = 1;
 
         if(MemWrite==1) begin
             wait (data == ReadData2);
@@ -183,6 +182,8 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
             writeM=0;
         end
 
+        RegUpdate = 1;
+        
         if(Jump == 0 && Branch == 0) begin
             PC = PC+1;
         end

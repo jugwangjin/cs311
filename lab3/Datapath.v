@@ -182,8 +182,8 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
             wait (data == ReadData2);
             writeM<=1;
             wait(ackOutput==1'b1);
-            wait(ackOutput==1'b0);
             writeM<=0;
+            wait(ackOutput==1'b0);
         end
 
         if(Jump == 0 && Branch == 0) begin
