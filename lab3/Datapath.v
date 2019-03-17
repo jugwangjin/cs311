@@ -99,8 +99,7 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
         readM <= 1'b1;
         InstructionLoad <= 1'b1;
         wait (inputReady == 1'b1);
-        data_local <= data;
-        instruction <= data_local;
+        instruction <= data;
         
         InstructionLoad <= 1'b0;
         readM <= 1'b0;
@@ -148,8 +147,8 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
                 readM <= 0;
             end
             8 : begin
-                writeM <= 1;
                 data_local <= ReadData2;
+                writeM <= 1;
                 wait (ackOutput == 1'b1);
                 writeM <= 0;
             end
