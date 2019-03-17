@@ -12,7 +12,7 @@ module cpu (readM, writeM, address, data, ackOutput, inputReady, reset_n, clk);
 	input reset_n;									
 	input clk;	
 
-	wire [`WORD_SIZE:0]instruction; 
+	wire [`WORD_SIZE-1:0]instruction; 
 
 	reg [11:0]controls; // 11 Jump, 10 Branch, 9 MemtoReg, 8 MemRead, 7 MemWrite, 6 RegDst, 5 RegWrite, 4:1 [3:0]ALUOp, 0 ALUSrc;
 
