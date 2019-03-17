@@ -1,5 +1,6 @@
 `include "opcodes.v"
-module register(ReadRegister1, ReadRegister2, WriteRegister, WriteData, RegWrite, ReadData1, ReadData2); 
+module register(clk, ReadRegister1, ReadRegister2, WriteRegister, WriteData, RegWrite, ReadData1, ReadData2); 
+    input clk;
     input ReadRegister1;
     input ReadRegister2;
     input WriteRegister;

@@ -75,7 +75,7 @@ module datapath (readM, writeM, instruction, data, address, ackOutput, inputRead
     assign ALUInput2 = (ALUSrc == 1) ? ImmSignExtend : ReadData2;
     assign WriteData = (MemtoReg == 1) ? data : ALUOutput;
 
-    register REGISTER_MODULE(rs, rt, write_register, WriteData, RegWrite, ReadData1, ReadData2); 
+    register REGISTER_MODULE(clk, rs, rt, write_register, WriteData, RegWrite, ReadData1, ReadData2); 
     ALU ALU_MODULE (ALUInput1, ALUInput2, ALUOp, ALUOutput, OverflowFlag);
 
     always @(posedge clk) begin
