@@ -15,7 +15,8 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
 
     reg readM;
     reg writeM;
-    reg [`WORD_SIZE-1:0]data_local;
+    reg [`WORD_SIZE-1:0 data_to_reg;
+    reg [`WORD_SIZE-1:0]data_to_me;
     reg [`WORD_SIZE-1:0]instruction;
 
     wire [`WORD_SIZE-1:0]data;
@@ -79,10 +80,10 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
     assign ImmSignExtend = {{8{imm[7]}}, imm[7:0]};
     assign ALUInput1 = (Branch == 1) ? PC : ReadData1;
     assign ALUInput2 = (ALUSrc == 1) ? ImmSignExtend : ReadData2;
-    assign WriteData = (MemtoReg == 1) ? data_local : ALUOutput;
+    assign WriteData = (MemtoReg == 1) ? data_to_reg : ALUOutput;
     assign address = (InstructionLoad == 1) ? PC : ALUOutput;
 
-  	assign data = (InstructionLoad!=1 && MemWrite==1) ? data_local : `WORD_SIZE'bz;
+  	assign data = (InstructionLoad!=1 && MemWrite==1) ? data_to_mem : `WORD_SIZE'bz;
 
     register REGISTER_MODULE(clk, rs, rt, write_register, WriteData, RegWrite, ReadData1, ReadData2, RegUpdate); 
     ALU ALU_MODULE (ALUInput1, ALUInput2, ALUOp, ALUOutput, OverflowFlag);
@@ -92,7 +93,8 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
         InstructionLoad = 0;
         readM = 0;
         writeM = 0;
-        data_local = 0;
+        data_to_reg = 0;
+        data_to_mem = 0;
         instruction = 0;
         RegUpdate = 0;
     end
@@ -142,23 +144,23 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
                 end
             end
             6 : begin
-                data_local <= {imm[7:0], {8{1'b0}}};
+                data_to_reg <= {imm[7:0], {8{1'b0}}};
             end
             7 : begin
                 readM <= 1;
                 wait (inputReady == 1'b1);
-                data_local <= data;
+                data_to_reg <= data;
                 wait (inputReady == 1'b0);
                 readM <= 0;
             end
             8 : begin
-                data_local <= ReadData2;
+                data_to_mem <= ReadData2;
             end
             9 : begin
                 PC <= {PC[15:12], target_address[11:0]};
             end
             10 : begin
-                data_local <= PC+1;
+                data_to_reg <= PC+1;
                 PC <= {PC[15:12], target_address[11:0]};
             end
             15 : begin
@@ -166,7 +168,7 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
                     PC <= ReadData1;
                 end
                 else if (func == 26) begin
-                    data_local <= PC + 1;
+                    data_to_reg <= PC + 1;
                     PC <= ReadData1;
                 end
             end
