@@ -15,10 +15,13 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
 
     reg readM;
     reg writeM;
-    reg [`WORD_SIZE-1:0]data;
+    reg [`WORD_SIZE-1:0]data_local;
     reg [`WORD_SIZE-1:0]instruction;
 
+    wire [`WORD_SIZE-1:0]data;
     wire [`WORD_SIZE-1:0]address;
+    
+    assign data = data_local;
 
     reg [`WORD_SIZE-1:0]PC;
     reg InstructionLoad;
@@ -125,7 +128,7 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
                 end
             end
             6 : begin
-                data <= {imm[7:0], {8{1'b0}}};
+                data_local <= {imm[7:0], {8{1'b0}}};
             end
             7 : begin
                 readM <= 1;
@@ -133,7 +136,7 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
                 readM <= 0;
             end
             8 : begin
-                data <= ReadData2;
+                data_local <= ReadData2;
                 writeM <= 1;
                 wait (ackOutput == 1'b1);
                 writeM <= 0;
@@ -142,7 +145,7 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
                 PC <= {PC[15:12], target_address[11:0]};
             end
             10 : begin
-                data <= PC+1;
+                data_local <= PC+1;
                 PC <= {PC[15:12], target_address[11:0]};
             end
             15 : begin
@@ -150,7 +153,7 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
                     PC <= ReadData1;
                 end
                 else if (func == 26) begin
-                    data <= PC + 1;
+                    data_local <= PC + 1;
                     PC <= ReadData1;
                 end
             end
