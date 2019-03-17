@@ -61,6 +61,12 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
     wire [`WORD_SIZE-1:0] ReadData1;
     wire [`WORD_SIZE-1:0] ReadData2;
     wire [`WORD_SIZE-1:0] WriteData;
+    // for ALU
+    wire [`WORD_SIZE-1:0]ALUInput1;
+    wire [`WORD_SIZE-1:0]ALUInput2;
+    wire [`WORD_SIZE-1:0]ALUOutput;
+    wire OverflowFlag;
+    // assigning register wires
     assign opcode = instruction[15:12];
     assign rs = instruction[11:10];
     assign rt = (Jump == 1) ? 2'b10 : instruction[9:8];
@@ -70,18 +76,13 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
     assign imm = instruction[7:0];
     assign target_address = instruction[11:0];
     assign WriteData = (MemtoReg == 1) ? data_to_reg : ALUOutput;
+    // assigning ALU wires
+    assign ALUInput1 = (Branch == 1) ? PC : ReadData1;
+    assign ALUInput2 = (ALUSrc == 1) ? ImmSignExtend : ReadData2;
     
     // imm value (for I-type)
     wire [`WORD_SIZE-1:0] ImmSignExtend;
     assign ImmSignExtend = {{8{imm[7]}}, imm[7:0]};
-
-    // for ALU
-    wire [`WORD_SIZE-1:0]ALUInput1;
-    wire [`WORD_SIZE-1:0]ALUInput2;
-    wire [`WORD_SIZE-1:0]ALUOutput;
-    wire OverflowFlag;
-    assign ALUInput1 = (Branch == 1) ? PC : ReadData1;
-    assign ALUInput2 = (ALUSrc == 1) ? ImmSignExtend : ReadData2;
 
     // data wire is connected to data_to_mem only when we write to memory.
     assign data = (InstructionFetch!=1 && MemWrite==1) ? data_to_mem : `WORD_SIZE'bz;
