@@ -1,4 +1,5 @@
 `include "opcodes.v" 	   
+`include "register.v"
 
 module cpu (readM, writeM, address, data, ackOutput, inputReady, reset_n, clk);
 	output readM;									
@@ -9,6 +10,8 @@ module cpu (readM, writeM, address, data, ackOutput, inputReady, reset_n, clk);
 	input inputReady;								
 	input reset_n;									
 	input clk;		
+
+	register REGISTER_MODULE (readM, writeM, address, data, ackOutput, inputReady, reset_n, clk);																				
 
 // Fill it your codes	
 	always @(posedge clk) begin
