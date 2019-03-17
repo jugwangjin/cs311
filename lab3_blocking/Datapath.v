@@ -96,12 +96,11 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
     end
 
     always @(posedge clk) begin
-        data_local <= 0;
         readM <= 1'b1;
         InstructionLoad <= 1'b1;
         wait (inputReady == 1'b1);
         instruction <= data;
-        wait (inputReady == 1'b0);
+        
         InstructionLoad <= 1'b0;
         readM <= 1'b0;
 
@@ -145,7 +144,6 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
                 readM <= 1;
                 wait (inputReady == 1'b1);
                 data_local <= data;
-                wait (inputReady == 1'b0);
                 readM <= 0;
             end
             8 : begin
