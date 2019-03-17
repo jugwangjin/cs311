@@ -25,6 +25,7 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
 
     reg [`WORD_SIZE-1:0]PC;
     reg InstructionLoad;
+    reg RegUpdate;
 
     //controls decode
     wire Jump;
@@ -80,10 +81,9 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
     assign ALUInput1 = (Branch == 1) ? PC : ReadData1;
     assign ALUInput2 = (ALUSrc == 1) ? ImmSignExtend : ReadData2;
     assign WriteData = (MemtoReg == 1) ? data_local : ALUOutput;
-
     assign address = (InstructionLoad == 1) ? PC : ALUOutput;
 
-    register REGISTER_MODULE(clk, rs, rt, write_register, WriteData, RegWrite, ReadData1, ReadData2); 
+    register REGISTER_MODULE(clk, rs, rt, write_register, WriteData, RegWrite, ReadData1, ReadData2, RegUpdate); 
     ALU ALU_MODULE (ALUInput1, ALUInput2, ALUOp, ALUOutput, OverflowFlag);
 
     initial begin
@@ -93,10 +93,11 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
         writeM = 0;
         data_local = 0;
         instruction = 0;
+        RegUpdate = 0;
     end
 
     always @(posedge clk) begin
-        data_local <= 0;
+        RegUpdate <= 0;
         readM <= 1'b1;
         InstructionLoad <= 1'b1;
         wait (inputReady == 1'b1);
@@ -104,7 +105,7 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
         wait (inputReady == 1'b0);
         InstructionLoad <= 1'b0;
         readM <= 1'b0;
-
+        wait (InstructionLoad == 0);
         case (opcode) 
             0 : begin
                 if (ReadData1 != ReadData2) begin
@@ -149,8 +150,9 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
                 readM <= 0;
             end
             8 : begin
-                data_local <= ReadData2;
                 writeM <= 1;
+                data_local <= ReadData2;
+                wait (data_local == data);
                 wait (ackOutput == 1'b1);
                 writeM <= 0;
             end
@@ -171,7 +173,7 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
                 end
             end
         endcase
-
+        RegUpdate <= 1;
         if(Jump == 0 && Branch == 0) begin
             PC <= PC+1;
         end
