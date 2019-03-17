@@ -24,7 +24,6 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
     reg [`WORD_SIZE-1:0]instruction;
     wire [`WORD_SIZE-1:0]data;
     wire [`WORD_SIZE-1:0]address;
-    assign address = (InstructionFetch == 1) ? PC : ALUOutput;
 
     // for data in/out
     reg [`WORD_SIZE-1:0]data_to_reg; // data read from memory, ALU output, ...
@@ -86,6 +85,7 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
 
     // data wire is connected to data_to_mem only when we write to memory.
     assign data = (InstructionFetch!=1 && MemWrite==1) ? data_to_mem : `WORD_SIZE'bz;
+    assign address = (InstructionFetch == 1) ? PC : ALUOutput;
 
     // connect and send signals to other modules. 
     register REGISTER_MODULE(clk, rs, rt, write_register, WriteData, RegWrite, RegUpdate, ReadData1, ReadData2); 
