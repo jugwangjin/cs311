@@ -14,6 +14,8 @@ module register(ReadRegister1, ReadRegister2, WriteRegister, WriteData, RegWrite
     assign ReadData2 = registers[ReadRegister2];
 
     always @(negedge clk) begin
-        registers[WriteRegister] <= WriteData;
+        if (RegWrite == 1) begin
+            registers[WriteRegister] <= WriteData;
+        end
     end
 endmodule
