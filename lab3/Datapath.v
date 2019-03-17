@@ -16,6 +16,7 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
     reg readM;
     reg writeM;
     reg [`WORD_SIZE-1:0]data;
+    reg [`WORD_SIZE-1:0]instruction;
 
     wire [`WORD_SIZE-1:0]address;
 
@@ -124,7 +125,7 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
                 end
             end
             6 : begin
-                data <= {imm[7:0], {8{0}}};
+                data <= {imm[7:0], {8{1'b0}}};
             end
             7 : begin
                 readM <= 1;
