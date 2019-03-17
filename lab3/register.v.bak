@@ -21,12 +21,12 @@ module register(clk, ReadRegister1, ReadRegister2, WriteRegister, WriteData, Reg
         for(i=0; i<`NUM_REGS; i=i+1) begin
             registers[i] = 0;
 		end
+$display("registers: %d, %d, %d, %d", registers[0],registers[1],registers[2],registers[3]);
     end
 
     always @(posedge RegUpdate) begin
         if (RegWrite == 1) begin
-            registers[WriteRegister] = WriteData;
+            registers[WriteRegister] <= WriteData;
         end
-$display("regitsers: %d, %d, %d, %d", registers[0],registers[1],registers[2],registers[3]);
     end
 endmodule

@@ -107,13 +107,13 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
         readM = 1'b0;
         instruction = data;
         InstructionLoad = 1'b0;
-$display("instruction %x opcode %d PC is %x",instruction,opcode, PC);
 	
 	if (Jump == 0) begin
 		PC = PC + 1;
 	end
 
 	wait(inputReady==1'b0);
+$display("instruction %x opcode %d",instruction,opcode);
 	
 
         case (opcode) 

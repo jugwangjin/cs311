@@ -83,7 +83,7 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
     assign WriteData = (MemtoReg == 1) ? data_to_reg : ALUOutput;
     assign address = (InstructionLoad == 1) ? PC : ALUOutput;
 
-  assign data = (InstructionLoad!=1 && MemWrite==1) ? data_to_mem : `WORD_SIZE'bz;
+  	assign data = (InstructionLoad==0 && MemWrite==1) ? data_to_mem : `WORD_SIZE'bz;
 
     register REGISTER_MODULE(clk, rs, rt, write_register, WriteData, RegWrite, ReadData1, ReadData2, RegUpdate); 
     ALU ALU_MODULE (ALUInput1, ALUInput2, ALUOp, ALUOutput, OverflowFlag);
@@ -100,87 +100,101 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
     end
 
     always @(posedge clk) begin
-        RegUpdate = 0;
-        InstructionLoad = 1'b1;
-        readM = 1'b1;
-        wait (inputReady == 1'b1);
-        readM = 1'b0;
-        instruction = data;
-        InstructionLoad = 1'b0;
-$display("instruction %x opcode %d PC is %x",instruction,opcode, PC);
-	
-	if (Jump == 0) begin
-		PC = PC + 1;
-	end
+$display("clkstart");
+        RegUpdate <= 0;
 
-	wait(inputReady==1'b0);
-	
+        InstructionLoad <= 1'b1;
+        wait(InstructionLoad == 1'b1);
+        readM <= 1'b1;
+        wait (inputReady == 1'b1);
+        instruction <= data;
+        wait (inputReady == 1'b0);
+        readM <= 1'b0;
+        InstructionLoad <= 1'b0;
+        wait (InstructionLoad == 0);
 
         case (opcode) 
             0 : begin
                 if (ReadData1 != ReadData2) begin
-                    PC = ALUOutput;
+                    PC <= ALUOutput;
                 end
                 else begin
-                    PC = PC + 1;
+                    PC <= PC + 1;
                 end
             end
             1 : begin
                 if (ReadData1 == ReadData2) begin
-                    PC = ALUOutput;
+                    PC <= ALUOutput;
+                end
+                else begin
+                    PC <= PC + 1;
                 end
             end
             2 : begin
                 if (ReadData1 > 0) begin
-                    PC = ALUOutput;
+                    PC <= ALUOutput;
+                end
+                else begin
+                    PC <= PC + 1;
                 end
             end
             3 : begin
                 if (ReadData1 < 0) begin
-                    PC = ALUOutput;
+                    PC <= ALUOutput;
+                end
+                else begin
+                    PC <= PC + 1;
                 end
             end
             6 : begin
-                data_to_reg = {imm[7:0], {8{1'b0}}};
+                data_to_reg <= {imm[7:0], {8{1'b0}}};
             end
             7 : begin
-                readM = 1;
+                readM <= 1;
                 wait (inputReady == 1'b1);
-                readM = 0;
-                data_to_reg = data;
-$display("address %d data_TO_REG is %d, data is %d",address, data_to_reg, data);
-		wait (inputReady == 1'b0);
-$display("%d : memtoreg, %d : writedata, %d : write_register", MemtoReg, WriteData, write_register);
+                data_to_reg <= data;
+                wait (inputReady == 1'b0);
+                readM <= 0;
             end
             8 : begin
-                data_to_mem = ReadData2;
+                data_to_mem <= ReadData2;
             end
             9 : begin
-                PC = {PC[15:12], target_address[11:0]};
+                PC <= {PC[15:12], target_address[11:0]};
             end
             10 : begin
-                data_to_reg = PC+1;
-                PC = {PC[15:12], target_address[11:0]};
+                data_to_reg <= PC+1;
+                PC <= {PC[15:12], target_address[11:0]};
             end
             15 : begin
                 if (func == 25) begin
-                    PC = ReadData1;
+                    PC <= ReadData1;
                 end
                 else if (func == 26) begin
-                    data_to_reg = PC + 1;
-                    PC = ReadData1;
+                    data_to_reg <= PC + 1;
+                    PC <= ReadData1;
                 end
             end
         endcase
 
-
-        RegUpdate = 1;
+        RegUpdate <= 1;
 
         if(MemWrite==1) begin
-$display("data %d, address %d", data, address);
-            writeM=1;
+            wait (data == ReadData2);
+$display("%d is data, %d is ReadData2",data, ReadData2);
+            writeM<=1;
+$display("data %d at 1th", data);
             wait(ackOutput==1'b1);
-            writeM=0;
+$display("data %d at 2th", data);
+            wait(ackOutput==1'b0);
+$display("data %d at 3th", data);
+            writeM<=0;
+$display("data %d at 4th", data);
         end
+
+        if(Jump == 0 && Branch == 0) begin
+            PC <= PC+1;
+        end
+$display("clkend");
     end
 endmodule
