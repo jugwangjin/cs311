@@ -86,6 +86,15 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
     register REGISTER_MODULE(clk, rs, rt, write_register, WriteData, RegWrite, ReadData1, ReadData2); 
     ALU ALU_MODULE (ALUInput1, ALUInput2, ALUOp, ALUOutput, OverflowFlag);
 
+    initial begin
+        PC = 0;
+        InstructionLoad = 0;
+        readM = 0;
+        writeM = 0;
+        data_local = 0;
+        instruction = 0;
+    end
+
     always @(posedge clk) begin
         readM <= 1'b1;
         InstructionLoad <= 1'b1;

@@ -23,8 +23,11 @@ module cpu (readM, writeM, address, data, ackOutput, inputReady, reset_n, clk);
 	assign func = instruction[5:0];
 
     datapath DATAPATH_MODULE (readM, writeM, instruction, address, data, ackOutput, inputReady, controls, clk);
-// Fill it your codes	
-// 11 Jump, 10 Branch, 9 MemtoReg, 8 MemRead, 7 MemWrite, 6 RegDst, 5 RegWrite, 4:1 [3:0]ALUOp, 0 ALUSrc;
+
+	initial begin
+		controls = 0;
+	end
+
 	always @(instruction) begin
 	  if (opcode == 15) begin // R-Type
 	    if (func == 25) begin // JPR

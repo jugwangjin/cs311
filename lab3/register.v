@@ -13,6 +13,14 @@ module register(clk, ReadRegister1, ReadRegister2, WriteRegister, WriteData, Reg
     reg [`WORD_SIZE-1:0] registers [0:`NUM_REGS-1];
     assign ReadData1 = registers[ReadRegister1];
     assign ReadData2 = registers[ReadRegister2];
+    
+    integer i;
+
+    initial begin
+        for(i=0; i<`NUM_REGS; i=i+1) begin
+            registers[i] = 0;
+		end
+    end
 
     always @(negedge clk) begin
         if (RegWrite == 1) begin
