@@ -21,7 +21,6 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
     wire [`WORD_SIZE-1:0]data;
     wire [`WORD_SIZE-1:0]address;
 
-  	assign data = (writeM || ackOutput) ? data_local : `WORD_SIZE'bz;
 
     reg [`WORD_SIZE-1:0]PC;
     reg InstructionLoad;
@@ -82,6 +81,8 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
     assign ALUInput2 = (ALUSrc == 1) ? ImmSignExtend : ReadData2;
     assign WriteData = (MemtoReg == 1) ? data_local : ALUOutput;
     assign address = (InstructionLoad == 1) ? PC : ALUOutput;
+    
+  	assign data = (MemWrite) ? data_local : `WORD_SIZE'bz;
 
     register REGISTER_MODULE(clk, rs, rt, write_register, WriteData, RegWrite, ReadData1, ReadData2, RegUpdate); 
     ALU ALU_MODULE (ALUInput1, ALUInput2, ALUOp, ALUOutput, OverflowFlag);
