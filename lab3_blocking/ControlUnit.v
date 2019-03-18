@@ -2,7 +2,7 @@
 `include "opcodes.v"
 
 module ConrolUnit (instruction, controls);
-    input instruction;
+    input [`WORD_SIZE-1:0]instruction;
     output [11:0]controls;
 
     reg [11:0]controls;
