@@ -1,6 +1,5 @@
 `include "opcodes.v" 	   
 `include "register.v"
-`include "ALU.v"
 `include "ControlUnit.v"
 
 module cpu (readM, writeM, address, data, ackOutput, inputReady, reset_n, clk);
