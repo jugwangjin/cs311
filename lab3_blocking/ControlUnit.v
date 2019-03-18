@@ -24,32 +24,31 @@ module ConrolUnit (instruction, controls);
 	//  wait (instruction != 0); 
     always @(instruction)
         if (opcode == 15) begin // R-Type
-	    if (func == 25) begin // JPR
-			controls[11:5] = 7'b1000000;
-			controls[4:1] = `ZERO;
-			controls[0] = 1'b0;
+            if (func == 25) begin // JPR
+                controls[11:5] = 7'b1000000;
+                controls[4:1] = `ZERO;
+                controls[0] = 1'b0;
 
-		end else if (func == 26) begin // JRL
-			controls[11:5] = 7'b1010001;
-			controls[4:1] = `ZERO;
-			controls[0] = 1'b0;
+            end else if (func == 26) begin // JRL
+                controls[11:5] = 7'b1010001;
+                controls[4:1] = `ZERO;
+                controls[0] = 1'b0;
 
-		end else begin //other R-Types
-			controls[11:5] = 7'b0000011;
-			case (func) 
-				`INST_FUNC_ADD : controls[4:1] = `ADD; 
-				`INST_FUNC_SUB : controls[4:1] = `SUB;
-				`INST_FUNC_AND : controls[4:1] = `AND;
-				`INST_FUNC_ORR : controls[4:1] = `OR;
-				`INST_FUNC_NOT : controls[4:1] = `NOT;
-				`INST_FUNC_TCP : controls[4:1] = `TCP;
-				`INST_FUNC_SHL : controls[4:1] = `ALS;
-				`INST_FUNC_SHR : controls[4:1] = `ARS;
-				default : controls[4:1] = `ZERO;
-			endcase
-			controls[0] = 1'b0;
-		end
-
+		    end else begin //other R-Types
+                controls[11:5] = 7'b0000011;
+                case (func) 
+                    `INST_FUNC_ADD : controls[4:1] = `ADD; 
+                    `INST_FUNC_SUB : controls[4:1] = `SUB;
+                    `INST_FUNC_AND : controls[4:1] = `AND;
+                    `INST_FUNC_ORR : controls[4:1] = `OR;
+                    `INST_FUNC_NOT : controls[4:1] = `NOT;
+                    `INST_FUNC_TCP : controls[4:1] = `TCP;
+                    `INST_FUNC_SHL : controls[4:1] = `ALS;
+                    `INST_FUNC_SHR : controls[4:1] = `ARS;
+                    default : controls[4:1] = `ZERO;
+                endcase
+                controls[0] = 1'b0;
+            end
 	  end else if (opcode == 4'd4) begin // ADI
 	    controls[11:5] = 7'b0000001;
 			controls[4:1] = `ADD;
