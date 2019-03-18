@@ -1,7 +1,7 @@
 `include "ALU.v"
 `include "opcodes.v"
 
-module ConrolUnit (instruction, controls);
+module ControlUnit (instruction, controls);
     input [`WORD_SIZE-1:0]instruction;
     output [11:0]controls;
 
