@@ -1,4 +1,6 @@
 `include "ALU.v"
+`include "opcodes.v"
+
 module ConrolUnit (instruction, controls);
     input instruction;
     output [11:0]controls;
