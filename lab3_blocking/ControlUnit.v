@@ -22,7 +22,7 @@ module ConrolUnit (instruction, controls);
 	// always @(posedge clk) begin
 	// 	instruction = 0;
 	//  wait (instruction != 0); 
-    always @(instruction)
+    always @(instruction) begin
         if (opcode == 15) begin // R-Type
             if (func == 25) begin // JPR
                 controls[11:5] = 7'b1000000;
