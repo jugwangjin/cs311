@@ -59,7 +59,6 @@ module ControlUnit (clk, instruction, microPC, controls, num_inst, is_halted, re
 					end
 				end
 				`ID : begin
-					if (!is_halted) begin	
 						if (opcode == 4'd15) begin // R-Type
 							if (func == `INST_FUNC_JPR) begin // JPR
 								controls[12:5] = 8'b01000000;
@@ -125,17 +124,14 @@ module ControlUnit (clk, instruction, microPC, controls, num_inst, is_halted, re
 						end else begin // other case (just in case)
 							controls[12:0] = 13'd0;
 						end
-						nextMicroPC = `EX;
-					end
+					nextMicroPC = `EX;
 				end
 				`EX : begin
 					if (opcode ==  4'd15 && func == `INST_FUNC_WWD) begin // WWD
-						num_inst = num_inst + 1;
 						nextMicroPC = `IF1;
 					end else if (opcode == `LWD_OP || opcode == `SWD_OP) begin // L & S
 						nextMicroPC = `MEM1;
 					end else if (opcode >= 4'd0 && opcode <= 4'd3) begin // BXX
-						num_inst = num_inst + 1;
 						nextMicroPC = `IF1;
 					end else begin
 						nextMicroPC = `WB;
@@ -146,12 +142,10 @@ module ControlUnit (clk, instruction, microPC, controls, num_inst, is_halted, re
 					if (opcode == `LWD_OP) begin // L
 						nextMicroPC = `WB;
 					end else if (opcode == `SWD_OP) begin // S 
-						num_inst = num_inst + 1;
 						nextMicroPC = `IF1;
 					end
 				end
 				`WB : begin
-					num_inst = num_inst + 1;
 					nextMicroPC = `IF1;
 				end
 			endcase
