@@ -115,14 +115,14 @@ module ControlUnit (clk, instruction, microPC, controls, num_inst, is_halted, re
 							controls[12:5] = 8'b00100000;
 							controls[4:1] = `ADD;
 							controls[0] = 1'b1;
-						end else if (opcode == `JMP_OP) begin // JMP
-							controls[12:5] = 8'b01000000;
-							controls[4:1] = `ZERO;
-							controls[0] = 1'b1;
-						end else if (opcode == `JAL_OP) begin // JAL
-							controls[12:5] = 8'b01010001;
-							controls[4:1] = `ZERO;
-							controls[0] = 1'b1;
+						// end else if (opcode == `JMP_OP) begin // JMP
+						// 	controls[12:5] = 8'b01000000;
+						// 	controls[4:1] = `ZERO;
+						// 	controls[0] = 1'b1;
+						// end else if (opcode == `JAL_OP) begin // JAL
+						// 	controls[12:5] = 8'b01010001;
+						// 	controls[4:1] = `ZERO;
+						// 	controls[0] = 1'b1;
 						end else begin // other case (just in case)
 							controls[12:0] = 13'd0;
 						end
