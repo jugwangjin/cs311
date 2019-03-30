@@ -25,7 +25,7 @@ module ControlUnit (clk, instruction, microPC, controls, num_inst, is_halted, re
 		microPC = 0;
 		nextMicroPC = 0;
 		controls = 0;
-		num_inst = 0;
+		num_inst = {WORD_SIZE{1}};
 		is_halted = 0;
 	end
 
@@ -40,13 +40,16 @@ module ControlUnit (clk, instruction, microPC, controls, num_inst, is_halted, re
 			microPC = 0;
 			nextMicroPC = 0;
 			controls = 0;
-			num_inst = 0;
+			num_inst = {WORD_SIZE{1}};
 			is_halted = 0;
 		end
 		else if(!is_halted) begin
 			microPC = nextMicroPC;
 			case (microPC)
-				`IF1 : nextMicroPC = `IF2;
+				`IF1 : begin
+					num_inst = num_inst + 1;
+					nextMicroPC = `IF2;
+				end
 				`IF2 : nextMicroPC = `IF3;
 				`IF3 : begin
 					if (opcode == `JMP_OP || opcode == `JAL_OP) begin // JAL
@@ -67,10 +70,6 @@ module ControlUnit (clk, instruction, microPC, controls, num_inst, is_halted, re
 								controls[12:5] = 8'b01010001;
 								controls[4:1] = `ZERO;
 								controls[0] = 1'b0;
-							end
-							else if (func == `INST_FUNC_WWD) begin // WWD
-								controls[12] = 1'b1;
-								controls[11:0] = 12'b0;
 							end
 							else if (func == `INST_FUNC_HLT) begin // HLT
 								controls[12:0] = 13'b0;

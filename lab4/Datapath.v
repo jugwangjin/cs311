@@ -137,7 +137,11 @@ module datapath (readM, writeM, instruction, address, data, output_port, microPC
 				`IF3 : begin
 					nextPC = ALUOutput;
 				end
-
+				`ID : begin
+				 	if (opcode == 15 && func == `INST_FUNC_WWD) begin
+						output_port = ReadData1;
+					end
+				end
 				`EX : begin
 					case(opcode) 
 						`LHI_OP : begin
@@ -176,8 +180,6 @@ module datapath (readM, writeM, instruction, address, data, output_port, microPC
 							end else if (func == `INST_FUNC_JRL) begin
 										data_to_reg = nextPC;
 										nextPC = ReadData1;
-							end else if (func == `INST_FUNC_WWD) begin
-								output_port = ReadData1;
 							end
 						end
 					endcase
