@@ -21,7 +21,6 @@ module datapath (readM, writeM, instruction, address, data, output_port, microPC
 
     // states inside 
 	reg [`WORD_SIZE-1:0]PC;
-	reg [`WORD_SIZE-1:0]nextPC;
 
     // for output
 	reg readM;
@@ -107,7 +106,6 @@ module datapath (readM, writeM, instruction, address, data, output_port, microPC
 
     initial begin
 		PC = 0;
-		nextPC = 0;
 		readM = 0;
 		writeM = 0;
 		data_to_mem = 0;
@@ -117,7 +115,6 @@ module datapath (readM, writeM, instruction, address, data, output_port, microPC
 	always @(posedge clk) begin
 		if (!reset_n) begin
 			PC = 0;
-			nextPC = 0;
 			readM = 0;
 			writeM = 0;
 			data_to_mem = 0;
@@ -155,12 +152,12 @@ module datapath (readM, writeM, instruction, address, data, output_port, microPC
 								end
 						end
 						`BGZ_OP : begin
-								if (ReadData1 > 0) begin
+								if (ReadData1[`WORD_SIZE-1]==0 && ReadData1 != 0) begin
 									PC = ALUOutput;
 								end
 						end
 						`BLZ_OP : begin
-								if (ReadData1 < 0) begin
+								if (ReadData1[`WORD_SIZE-1]==1) begin
 									PC = ALUOutput;
 								end
 						end
@@ -173,10 +170,10 @@ module datapath (readM, writeM, instruction, address, data, output_port, microPC
 						end
 						15 : begin
 							if (func == `INST_FUNC_JPR) begin
-										nextPC = ReadData1;	
+										PC = ReadData1;	
 							end else if (func == `INST_FUNC_JRL) begin
-										data_to_reg = nextPC;
-										nextPC = ReadData1;
+										data_to_reg = PC;
+										PC = ReadData1;
 							end
 						end
 					endcase
