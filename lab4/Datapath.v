@@ -123,11 +123,8 @@ module datapath (readM, writeM, instruction, address, data, output_port, microPC
 			data_to_mem = 0;
 			instruction = 0;
 		end else if(!is_halted) begin
-			readM = 0;
-			writeM = 0;
 			case (microPC)
 				`IF1 : begin
-					PC = nextPC;
 					readM = 1'b1;
 				end
 				`IF2 : begin
@@ -135,7 +132,7 @@ module datapath (readM, writeM, instruction, address, data, output_port, microPC
 					readM = 1'b0;
 				end
 				`IF3 : begin
-					nextPC = ALUOutput;
+					PC = ALUOutput;
 				end
 				`ID : begin
 				 	if (opcode == 15 && func == `INST_FUNC_WWD) begin
@@ -149,30 +146,30 @@ module datapath (readM, writeM, instruction, address, data, output_port, microPC
 						end
 						`BNE_OP : begin
 								if (ReadData1 != ReadData2) begin
-									nextPC = ALUOutput;
+									PC = ALUOutput;
 								end
 							end
 						`BEQ_OP : begin
 								if (ReadData1 == ReadData2) begin
-									nextPC = ALUOutput;
+									PC = ALUOutput;
 								end
 						end
 						`BGZ_OP : begin
 								if (ReadData1 > 0) begin
-									nextPC = ALUOutput;
+									PC = ALUOutput;
 								end
 						end
 						`BLZ_OP : begin
 								if (ReadData1 < 0) begin
-									nextPC = ALUOutput;
+									PC = ALUOutput;
 								end
 						end
 						`JMP_OP : begin
-								nextPC = {nextPC[15:12], target_address[11:0]};
+								PC = {PC[15:12], target_address[11:0]};
 						end
 						`JAL_OP : begin
 								data_to_reg = PC;
-								nextPC = {nextPC[15:12], target_address[11:0]};
+								PC = {PC[15:12], target_address[11:0]};
 						end
 						15 : begin
 							if (func == `INST_FUNC_JPR) begin
