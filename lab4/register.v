@@ -5,7 +5,7 @@ module register(clk, ReadRegister1, ReadRegister2, WriteRegister, WriteData, mic
     input [1:0]ReadRegister2;
     input [1:0]WriteRegister;
     input [`WORD_SIZE-1:0]WriteData;
-    input [3:0] microPC;
+    input [2:0] microPC;
     output [`WORD_SIZE-1:0]ReadData1;
     output [`WORD_SIZE-1:0]ReadData2;
                                                                                 
