@@ -35,87 +35,6 @@ module ControlUnit (clk, instruction, microPC, controls, num_inst, is_halted, re
 	// 	instruction = 0;
 	//  wait (instruction != 0); 
 
-	always @(instruction) begin
-		if(!reset_n) begin
-			microPC = 0;
-			nextMicroPC = 0;
-			controls = 0;
-			num_inst = 0;
-			is_halted = 0;
-		end
-		else if (!is_halted) begin	
-			if (opcode == 4'd15) begin // R-Type
-				if (func == `INST_FUNC_JPR) begin // JPR
-		                	controls[12:5] = 8'b01000000;
-		                	controls[4:1] = `ZERO;
-		                	controls[0] = 1'b0;
-		            	end
-				else if (func == `INST_FUNC_JRL) begin // JRL
-		                	controls[12:5] = 8'b01010001;
-		                	controls[4:1] = `ZERO;
-		                	controls[0] = 1'b0;
-				end
-				else if (func == `INST_FUNC_WWD) begin // WWD
-					controls[12] = 1'b1;
-					controls[11:0] = 12'b0;
-				end
-				else if (func == `INST_FUNC_HLT) begin // HLT
-					controls[12:0] = 13'b0;
-					is_halted = 1'b1;
-				end
-				else begin //other R-Types
-		                	controls[12:5] = 8'b00000011;
-		                end
-				case (func) 
-		                	`INST_FUNC_ADD : controls[4:1] = `ADD; 
-		                	`INST_FUNC_SUB : controls[4:1] = `SUB;
-		                	`INST_FUNC_AND : controls[4:1] = `AND;
-		                	`INST_FUNC_ORR : controls[4:1] = `OR;
-		                	`INST_FUNC_NOT : controls[4:1] = `NOT;
-		                	`INST_FUNC_TCP : controls[4:1] = `TCP;
-		                	`INST_FUNC_SHL : controls[4:1] = `ALS;
-		                	`INST_FUNC_SHR : controls[4:1] = `ARS;
-		                	default : controls[4:1] = `ZERO;
-		                endcase
-				controls[0] = 1'b0;
-			end else if (opcode == `ADI_OP) begin // ADI
-				controls[12:5] = 8'b00000001;
-				controls[4:1] = `ADD;
-				controls[0] = 1'b1;
-			end else if (opcode == `ORI_OP) begin // ORI
-				controls[12:5] = 8'b00000001;
-				controls[4:1] = `OR;
-				controls[0] = 1'b1;
-			end else if (opcode == `LHI_OP) begin // LHI
-				controls[12:5] = 8'b00010001;
-				controls[4:1] = `ZERO;
-				controls[0] = 1'b0;
-			end else if (opcode == `LWD_OP) begin // LWD
-				controls[12:5] = 8'b00011001;
-				controls[4:1] = `ADD;
-				controls[0] = 1'b1;
-			end else if (opcode == `SWD_OP) begin // SWD
-				controls[12:5] = 8'b00000100;
-				controls[4:1] = `ADD;
-				controls[0] = 1'b1;
-			end else if (opcode >= 4'd0 && opcode <= 4'd3) begin // BNE BEQ BGZ BLZ
-				controls[12:5] = 8'b00100000;
-				controls[4:1] = `ADD;
-				controls[0] = 1'b1;
-			end else if (opcode == `JMP_OP) begin // JMP
-				controls[12:5] = 8'b01000000;
-				controls[4:1] = `ZERO;
-				controls[0] = 1'b1;
-			end else if (opcode == `JAL_OP) begin // JAL
-				controls[12:5] = 8'b01010001;
-				controls[4:1] = `ZERO;
-				controls[0] = 1'b1;
-			end else begin // other case (just in case)
-				controls[12:0] = 13'd0;
-			end
-		end
-	end
-
 	always @(posedge clk) begin
 		if(!reset_n) begin
 			microPC = 0;
@@ -136,7 +55,80 @@ module ControlUnit (clk, instruction, microPC, controls, num_inst, is_halted, re
 						nextMicroPC = `ID;
 					end
 				end
-				`ID : nextMicroPC = `EX;
+				`ID : begin
+					if (!is_halted) begin	
+						if (opcode == 4'd15) begin // R-Type
+							if (func == `INST_FUNC_JPR) begin // JPR
+								controls[12:5] = 8'b01000000;
+								controls[4:1] = `ZERO;
+								controls[0] = 1'b0;
+							end
+							else if (func == `INST_FUNC_JRL) begin // JRL
+								controls[12:5] = 8'b01010001;
+								controls[4:1] = `ZERO;
+								controls[0] = 1'b0;
+							end
+							else if (func == `INST_FUNC_WWD) begin // WWD
+								controls[12] = 1'b1;
+								controls[11:0] = 12'b0;
+							end
+							else if (func == `INST_FUNC_HLT) begin // HLT
+								controls[12:0] = 13'b0;
+								is_halted = 1'b1;
+							end
+							else begin //other R-Types
+								controls[12:5] = 8'b00000011;
+							end
+							case (func) 
+								`INST_FUNC_ADD : controls[4:1] = `ADD; 
+								`INST_FUNC_SUB : controls[4:1] = `SUB;
+								`INST_FUNC_AND : controls[4:1] = `AND;
+								`INST_FUNC_ORR : controls[4:1] = `OR;
+								`INST_FUNC_NOT : controls[4:1] = `NOT;
+								`INST_FUNC_TCP : controls[4:1] = `TCP;
+								`INST_FUNC_SHL : controls[4:1] = `ALS;
+								`INST_FUNC_SHR : controls[4:1] = `ARS;
+								default : controls[4:1] = `ZERO;
+							endcase
+							controls[0] = 1'b0;
+						end else if (opcode == `ADI_OP) begin // ADI
+							controls[12:5] = 8'b00000001;
+							controls[4:1] = `ADD;
+							controls[0] = 1'b1;
+						end else if (opcode == `ORI_OP) begin // ORI
+							controls[12:5] = 8'b00000001;
+							controls[4:1] = `OR;
+							controls[0] = 1'b1;
+						end else if (opcode == `LHI_OP) begin // LHI
+							controls[12:5] = 8'b00010001;
+							controls[4:1] = `ZERO;
+							controls[0] = 1'b0;
+						end else if (opcode == `LWD_OP) begin // LWD
+							controls[12:5] = 8'b00011001;
+							controls[4:1] = `ADD;
+							controls[0] = 1'b1;
+						end else if (opcode == `SWD_OP) begin // SWD
+							controls[12:5] = 8'b00000100;
+							controls[4:1] = `ADD;
+							controls[0] = 1'b1;
+						end else if (opcode >= 4'd0 && opcode <= 4'd3) begin // BNE BEQ BGZ BLZ
+							controls[12:5] = 8'b00100000;
+							controls[4:1] = `ADD;
+							controls[0] = 1'b1;
+						end else if (opcode == `JMP_OP) begin // JMP
+							controls[12:5] = 8'b01000000;
+							controls[4:1] = `ZERO;
+							controls[0] = 1'b1;
+						end else if (opcode == `JAL_OP) begin // JAL
+							controls[12:5] = 8'b01010001;
+							controls[4:1] = `ZERO;
+							controls[0] = 1'b1;
+						end else begin // other case (just in case)
+							controls[12:0] = 13'd0;
+						end
+						nextMicroPC = `EX;
+					end
+				end
 				`EX : begin
 					if (opcode ==  4'd15 && func == `INST_FUNC_WWD) begin // WWD
 						num_inst = num_inst + 1;

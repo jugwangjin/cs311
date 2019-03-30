@@ -17,7 +17,7 @@ module datapath (readM, writeM, instruction, address, data, output_port, microPC
 	input is_halted;
 	input reset_n;
 
-	wire [`WORD_SIZE-1:0]output_port;
+	reg [`WORD_SIZE-1:0]output_port;
 
     // states inside 
 	reg [`WORD_SIZE-1:0]PC;
@@ -105,9 +105,6 @@ module datapath (readM, writeM, instruction, address, data, output_port, microPC
 	register REGISTER_MODULE(clk, rs, rt, write_register, WriteData, microPC, ReadData1, ReadData2); 
 	ALU ALU_MODULE (ALUInput1, ALUInput2, ALUOp, ALUOutput, OverflowFlag);
 
-	// output port always refers to rs. so assign it when instruction is wwd
-	assign output_port = (WWD) ? ReadData1 : 16'b0;
-
     initial begin
 		PC = 0;
 		nextPC = 0;
@@ -140,6 +137,7 @@ module datapath (readM, writeM, instruction, address, data, output_port, microPC
 				`IF3 : begin
 					nextPC = ALUOutput;
 				end
+
 				`EX : begin
 					case(opcode) 
 						`LHI_OP : begin
@@ -178,6 +176,8 @@ module datapath (readM, writeM, instruction, address, data, output_port, microPC
 							end else if (func == `INST_FUNC_JRL) begin
 										data_to_reg = nextPC;
 										nextPC = ReadData1;
+							end else if (func == `INST_FUNC_WWD) begin
+								output_port = ReadData1;
 							end
 						end
 					endcase
