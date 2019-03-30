@@ -22,7 +22,6 @@ module datapath (readM, writeM, instruction, address, data, output_port, microPC
     // states inside 
 	reg [`WORD_SIZE-1:0]PC;
 	reg [`WORD_SIZE-1:0]nextPC;
-	reg InstructionFetch; // to check if it is `IF stage or not 
 
     // for output
 	reg readM;
@@ -116,7 +115,6 @@ module datapath (readM, writeM, instruction, address, data, output_port, microPC
 		writeM = 0;
 		data_to_mem = 0;
 		instruction = 0;
-		InstructionFetch = 0;
 		output_port = 0;
     end
 
@@ -128,7 +126,6 @@ module datapath (readM, writeM, instruction, address, data, output_port, microPC
 			writeM = 0;
 			data_to_mem = 0;
 			instruction = 0;
-			InstructionFetch = 0;
 			output_port = 0;
 		end else if(!is_halted) begin
 			readM = 0;
@@ -136,7 +133,6 @@ module datapath (readM, writeM, instruction, address, data, output_port, microPC
 			case (microPC)
 				`IF1 : begin
 					PC = nextPC;
-					InstructionFetch = 1'b1;
 					readM = 1'b1;
 				end
 				`IF2 : begin

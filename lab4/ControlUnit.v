@@ -60,8 +60,8 @@ module ControlUnit (clk, instruction, microPC, controls, num_inst, is_halted, re
 					controls[11:0] = 12'b0;
 				end
 				else if (func == `INST_FUNC_HLT) begin // HLT
+					controls[12:0] = 13'b0;
 					is_halted = 1'b1;
-					microPC = `HALT;
 				end
 				else begin //other R-Types
 		                	controls[12:5] = 8'b00000011;
@@ -142,7 +142,7 @@ module ControlUnit (clk, instruction, microPC, controls, num_inst, is_halted, re
 					if (opcode ==  4'd15 && func == `INST_FUNC_WWD) begin // WWD
 						num_inst = num_inst + 1;
 						nextMicroPC = `IF1;
-					else if (opcode == `LWD_OP || opcode == `SWD_OP) begin // L & S
+					end else if (opcode == `LWD_OP || opcode == `SWD_OP) begin // L & S
 						nextMicroPC = `MEM1;
 					end else if (opcode >= 4'd0 && opcode <= 4'd3) begin // BXX
 						num_inst = num_inst + 1;
