@@ -52,7 +52,7 @@ module datapath (readM, writeM, instruction, address, data, output_port, microPC
 	assign MemRead = controls[8];
 	assign MemWrite = controls[7];
 	assign RegDst = controls[6];
-	assign ALUOp = (microPC == `IF2 || microPC == `IF3) ? `ADD : `controls[4:1];
+	assign ALUOp = (microPC == `IF2 || microPC == `IF3) ? `ADD : controls[4:1];
 	assign ALUSrc = controls[0];
     
     // for Register
