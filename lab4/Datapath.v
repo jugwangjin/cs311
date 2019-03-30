@@ -98,7 +98,7 @@ module datapath (readM, writeM, instruction, address, data, output_port, microPC
 	assign ImmSignExtend = {{8{imm[7]}}, imm[7:0]};
 
     // data wire is connected to data_to_mem only when we write to memory.
-	assign data = (MemWrite==1) ? data_to_mem : `WORD_SIZE'bz;
+	assign data = (microPC[2] == 1 && MemWrite==1) ? data_to_mem : `WORD_SIZE'bz;
 	assign address = (microPC == `IF1 || microPC == `IF2) ? PC : ALUOutput;
 
     // connect and send signals to other modules. 
@@ -125,6 +125,7 @@ module datapath (readM, writeM, instruction, address, data, output_port, microPC
 		end else if(!is_halted) begin
 			case (microPC)
 				`IF1 : begin
+					pc = nextPC;
 					readM = 1'b1;
 				end
 				`IF2 : begin
@@ -132,7 +133,7 @@ module datapath (readM, writeM, instruction, address, data, output_port, microPC
 					readM = 1'b0;
 				end
 				`IF3 : begin
-					PC = ALUOutput;
+					nextPC = ALUOutput;
 				end
 				`ID : begin
 				 	if (opcode == 15 && func == `INST_FUNC_WWD) begin
@@ -146,30 +147,30 @@ module datapath (readM, writeM, instruction, address, data, output_port, microPC
 						end
 						`BNE_OP : begin
 								if (ReadData1 != ReadData2) begin
-									PC = ALUOutput;
+									nextPC = ALUOutput;
 								end
 							end
 						`BEQ_OP : begin
 								if (ReadData1 == ReadData2) begin
-									PC = ALUOutput;
+									nextPC = ALUOutput;
 								end
 						end
 						`BGZ_OP : begin
 								if (ReadData1 > 0) begin
-									PC = ALUOutput;
+									nextPC = ALUOutput;
 								end
 						end
 						`BLZ_OP : begin
 								if (ReadData1 < 0) begin
-									PC = ALUOutput;
+									nextPC = ALUOutput;
 								end
 						end
 						`JMP_OP : begin
-								PC = {PC[15:12], target_address[11:0]};
+								nextPC = {nextPC[15:12], target_address[11:0]};
 						end
 						`JAL_OP : begin
 								data_to_reg = PC;
-								PC = {PC[15:12], target_address[11:0]};
+								nextPC = {nextPC[15:12], target_address[11:0]};
 						end
 						15 : begin
 							if (func == `INST_FUNC_JPR) begin
@@ -182,20 +183,20 @@ module datapath (readM, writeM, instruction, address, data, output_port, microPC
 					endcase
 				end
 				`MEM1 : begin
-					if (MemWrite) begin // L
+					if (MemRead) begin // L
 						readM = 1;			
 					end
-					else if (MemRead) begin //S
+					else if (MemWrite) begin //S
 				                data_to_mem = ReadData2;
 				                writeM=1;
 					end
 				end
 				`MEM2 : begin
-					if (MemWrite) begin // L
+					if (MemRead) begin // L
 				                data_to_reg = data;		
 				                readM = 0;
 					end
-					else if (MemRead) begin
+					else if (MemWrite) begin
 				                writeM = 0;
 					end
 				end
