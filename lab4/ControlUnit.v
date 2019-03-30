@@ -51,7 +51,7 @@ module ControlUnit (clk, instruction, microPC, controls, num_inst, is_halted, re
 				end
 				`IF2 : nextMicroPC = `IF3;
 				`IF3 : begin
-					if (opcode == `JMP_OP || opcode == `JAL_OP) begin // JAL
+					if (opcode == `JMP_OP) begin // JAL
 						nextMicroPC = `EX;
 					end else begin // not JAL
 						nextMicroPC = `ID;
@@ -119,10 +119,10 @@ module ControlUnit (clk, instruction, microPC, controls, num_inst, is_halted, re
 						// 	controls[12:5] = 8'b01000000;
 						// 	controls[4:1] = `ZERO;
 						// 	controls[0] = 1'b1;
-						// end else if (opcode == `JAL_OP) begin // JAL
-						// 	controls[12:5] = 8'b01010001;
-						// 	controls[4:1] = `ZERO;
-						// 	controls[0] = 1'b1;
+						end else if (opcode == `JAL_OP) begin // JAL
+							controls[12:5] = 8'b01010001;
+							controls[4:1] = `ZERO;
+							controls[0] = 1'b1;
 						end else begin // other case (just in case)
 							controls[12:0] = 13'd0;
 						end
