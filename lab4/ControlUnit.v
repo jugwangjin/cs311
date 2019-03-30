@@ -44,7 +44,6 @@ module ControlUnit (clk, instruction, microPC, controls, num_inst, is_halted, re
 			is_halted = 0;
 		end
 		else if(!is_halted) begin
-			microPC = nextMicroPC;
 			case (microPC)
 				`IF1 : begin
 					num_inst = num_inst + 1;
@@ -154,6 +153,8 @@ module ControlUnit (clk, instruction, microPC, controls, num_inst, is_halted, re
 					nextMicroPC = `IF1;
 				end
 			endcase
+			
+			microPC = nextMicroPC;
 		end
 	end
 endmodule
