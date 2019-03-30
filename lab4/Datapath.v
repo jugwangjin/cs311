@@ -82,7 +82,7 @@ module datapath (readM, writeM, instruction, address, data, output_port, microPC
 	assign rs = instruction[11:10];
 	assign rt = (Jump == 1) ? 2'b10 : instruction[9:8];
 	assign rd = instruction[7:6];
-	assign write_register = (RegDst == 1) ? rd : rt;
+	assign write_register = (opcode == `JAL_OP) ? 2 : (RegDst == 1) ? rd : rt;
 	assign func = instruction[5:0];
 	assign imm = instruction[7:0];
 	assign target_address = instruction[11:0];
