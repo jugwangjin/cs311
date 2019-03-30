@@ -25,7 +25,7 @@ module ControlUnit (clk, instruction, microPC, controls, num_inst, is_halted, re
 		microPC = 0;
 		nextMicroPC = 0;
 		controls = 0;
-		num_inst = {WORD_SIZE{1}};
+		num_inst = {`WORD_SIZE{1}};
 		is_halted = 0;
 	end
 
@@ -40,7 +40,7 @@ module ControlUnit (clk, instruction, microPC, controls, num_inst, is_halted, re
 			microPC = 0;
 			nextMicroPC = 0;
 			controls = 0;
-			num_inst = {WORD_SIZE{1}};
+			num_inst = {`WORD_SIZE{1}};
 			is_halted = 0;
 		end
 		else if(!is_halted) begin
