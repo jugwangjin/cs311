@@ -74,6 +74,9 @@ module ControlUnit (clk, instruction, microPC, controls, num_inst, is_halted, re
 								controls[12:0] = 13'b0;
 								is_halted = 1'b1;
 							end
+							else if (func == `INST_FUNC_WWD) begin
+								controls[12:0] = 13'b0;
+							end
 							else begin //other R-Types
 								controls[12:5] = 8'b00000011;
 							end
