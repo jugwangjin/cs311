@@ -115,7 +115,6 @@ module datapath (readM, writeM, instruction, address, data, output_port, microPC
 		writeM = 0;
 		data_to_mem = 0;
 		instruction = 0;
-		output_port = 0;
     end
 
 	always @(posedge clk) begin
@@ -126,7 +125,6 @@ module datapath (readM, writeM, instruction, address, data, output_port, microPC
 			writeM = 0;
 			data_to_mem = 0;
 			instruction = 0;
-			output_port = 0;
 		end else if(!is_halted) begin
 			readM = 0;
 			writeM = 0;
