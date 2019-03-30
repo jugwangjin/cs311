@@ -133,6 +133,8 @@ module ControlUnit (clk, instruction, microPC, controls, num_inst, is_halted, re
 						nextMicroPC = `MEM1;
 					end else if (opcode >= 4'd0 && opcode <= 4'd3) begin // BXX
 						nextMicroPC = `IF1;
+					end else if (opcode == `JMP_OP) begin
+						nextMicroPC = `IF1;
 					end else begin
 						nextMicroPC = `WB;
 					end
