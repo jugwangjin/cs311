@@ -11,7 +11,7 @@ module datapath (readM, writeM, instruction, address, data, output_port, microPC
 	inout [`WORD_SIZE-1:0]data;
 	output [`WORD_SIZE-1:0]output_port;
 
-	input [3:0]microPC;
+	input [2:0]microPC;
 	input [12:0]controls;
 	input clk;
 	input is_halted;

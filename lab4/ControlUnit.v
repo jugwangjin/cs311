@@ -3,13 +3,13 @@
 module ControlUnit (clk, instruction, microPC, controls, num_inst, is_halted, reset_n);
 	input clk;
 	input [`WORD_SIZE-1:0]instruction;
-	output [3:0]microPC;
+	output [2:0]microPC;
 	output [12:0]controls;
 	output [`WORD_SIZE-1:0] num_inst;
 	output is_halted;
 	input reset_n;
 
-	reg [3:0]microPC;
+	reg [2:0]microPC;
 	reg [3:0]nextMicroPC;
 	reg [12:0]controls;
 	reg [`WORD_SIZE-1:0] num_inst;

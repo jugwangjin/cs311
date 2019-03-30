@@ -19,7 +19,7 @@ module cpu(clk, reset_n, readM, writeM, address, data, num_inst, output_port, is
 
 	wire [`WORD_SIZE-1:0]instruction;
 	wire [12:0]controls;
-	wire [3:0]microPC;
+	wire [2:0]microPC;
 
 	ControlUnit CONTROLUNIT_MODULE(clk, instruction, microPC, controls, num_inst, is_halted, reset_n);
 	datapath DATAPATH_MODULE (readM, writeM, instruction, address, data, output_port, microPC, controls, clk, is_halted, reset_n);																																  
