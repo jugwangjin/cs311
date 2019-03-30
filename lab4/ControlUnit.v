@@ -137,7 +137,6 @@ module ControlUnit (clk, instruction, microPC, controls, num_inst, is_halted, re
 					end
 				end
 				`ID : nextMicroPC = `EX;
-				end
 				`EX : begin
 					if (opcode ==  4'd15 && func == `INST_FUNC_WWD) begin // WWD
 						num_inst = num_inst + 1;
