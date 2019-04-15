@@ -49,48 +49,48 @@ module ControlUnit (instruction, controls);
                 endcase
                 controls[0] = 1'b0;
             end
-	  end else if (opcode == 4'd4) begin // ADI
-	    controls[11:5] = 7'b0000001;
-			controls[4:1] = `ADD;
-			controls[0] = 1'b1;
+				end else if (opcode == 4'd4) begin // ADI
+					controls[11:5] = 7'b0000001;
+					controls[4:1] = `ADD;
+					controls[0] = 1'b1;
 
-	  end else if (opcode == 4'd5) begin // ORI
-	    controls[11:5] = 7'b0000001;
-			controls[4:1] = `OR;
-			controls[0] = 1'b1;
+				end else if (opcode == 4'd5) begin // ORI
+					controls[11:5] = 7'b0000001;
+					controls[4:1] = `OR;
+					controls[0] = 1'b1;
 
-	  end else if (opcode == 4'd6) begin // LHI
-	    controls[11:5] = 7'b0010001;
-			controls[4:1] = `ZERO;
-			controls[0] = 1'b0;
-			
-	  end else if (opcode == 4'd7) begin // LWD
-	    controls[11:5] = 7'b0011001;
-			controls[4:1] = `ADD;
-			controls[0] = 1'b1;
+				end else if (opcode == 4'd6) begin // LHI
+					controls[11:5] = 7'b0010001;
+					controls[4:1] = `ZERO;
+					controls[0] = 1'b0;
+					
+				end else if (opcode == 4'd7) begin // LWD
+					controls[11:5] = 7'b0011001;
+					controls[4:1] = `ADD;
+					controls[0] = 1'b1;
 
-	  end else if (opcode == 4'd8) begin // SWD
-	    controls[11:5] = 7'b0000100;
-			controls[4:1] = `ADD;
-			controls[0] = 1'b1;
+				end else if (opcode == 4'd8) begin // SWD
+					controls[11:5] = 7'b0000100;
+					controls[4:1] = `ADD;
+					controls[0] = 1'b1;
 
-	  end else if (opcode >= 4'd0 && opcode <= 4'd3) begin // BNE BEQ BGZ BLZ
-			controls[11:5] = 7'b0100000;
-			controls[4:1] = `ADD;
-			controls[0] = 1'b1;
+				end else if (opcode >= 4'd0 && opcode <= 4'd3) begin // BNE BEQ BGZ BLZ
+					controls[11:5] = 7'b0100000;
+					controls[4:1] = `ADD;
+					controls[0] = 1'b1;
 
-	  end else if (opcode == 9) begin // JMP
-	    controls[11:5] = 7'b1000000;
-			controls[4:1] = `ZERO;
-			controls[0] = 1'b1;
+				end else if (opcode == 9) begin // JMP
+					controls[11:5] = 7'b1000000;
+					controls[4:1] = `ZERO;
+					controls[0] = 1'b1;
 
-	  end else if (opcode == 10) begin // JAL
-	    controls[11:5] = 7'b1010001;
-			controls[4:1] = `ZERO;
-			controls[0] = 1'b1;
+				end else if (opcode == 10) begin // JAL
+					controls[11:5] = 7'b1010001;
+					controls[4:1] = `ZERO;
+					controls[0] = 1'b1;
 
-	  end else begin // other case (just in case)
-			controls[11:0] = 12'd0;
-	  end
+				end else begin // other case (just in case)
+					controls[11:0] = 12'd0;
+				end
     end
 endmodule

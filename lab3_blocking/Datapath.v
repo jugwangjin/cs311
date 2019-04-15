@@ -86,7 +86,8 @@ module datapath (readM, writeM, instruction, address, data, ackOutput, inputRead
     assign ImmSignExtend = {{8{imm[7]}}, imm[7:0]};
 
     // data wire is connected to data_to_mem only when we write to memory.
-    assign data = (InstructionFetch!=1 && MemWrite==1) ? data_to_mem : `WORD_SIZE'bz;
+    // assign data = (InstructionFetch!=1 && MemWrite==1) ? data_to_mem : `WORD_SIZE'bz;
+    assign data = (writeM == 1) ? data_to_mem : `WORD_SIZE'bz;
     assign address = (InstructionFetch == 1) ? PC : ALUOutput;
 
     // connect and send signals to other modules. 

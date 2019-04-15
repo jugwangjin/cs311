@@ -1,0 +1,92 @@
+`include "opcodes.v"
+
+module control(Clk, instruction, is_halted, Reset_N, controls);
+	input Clk;
+	input Reset_N;
+	input [`WORD_SIZE-1:0] num_inst;
+
+	output is_halted;
+    reg is_halted;
+    output controls;
+    reg [9:0]controls;
+    //controls : (WB) WWD[0], RegWrite[1], MemtoReg[2] (MEM) MemWrite[3], MemRead[4], IsBranch[5] (EX) ALUSrc[6], IsALU[7], IsJumpR[8] (ID) IsJumpI[9]
+    // ALUSrc : if true, use imm value 
+    // IsALU : if true, R-type ALU instruction. (has func)
+
+	wire [3:0]opcode;
+	wire [5:0]func;
+	assign opcode = instruction[15:12];
+	assign func = instruction[5:0];
+
+    initial begin
+        controls = 10'b0;
+        is_halted = 1'b0;
+    end
+
+    always @(posedge clk) begin
+        if (!Reset_N) begin 
+            controls = 10'b0000000000;
+            is_halted = 1'b0;
+        end
+        else if (is_halted) begin
+            controls = 10'b0000000000;
+        end
+        else if (opcode == 4'd15) begin // R-Type
+            if (func[5:3] == 3'b0)  begin // ALU Ops (func[5:3] = 0 -> 0~7)
+                controls = 10'b0010000010;
+            end
+            else if (func == `INST_FUNC_WWD) begin
+                contorls = 10'b0000000001;
+            end
+            else if (func == `INST_FUNC_JPR) begin
+                controls = 10'b0100000000;
+            end
+            else if (func == `INST_FUNC_JRL) begin
+                controls = 10'b0100000010;
+            end
+            else if (func == `INST_FUNC_HLT) begin
+                controls = 10'b0000000000;
+                is_halted = 1'b1;
+            end
+            else begin // undefiend
+                controls = 10'b0000000000;
+            end
+        end
+        else if (opcode == `ADI_OP) begin
+            controls = 10'b0001000010;
+        end
+        else if (opcode == `ORI_OP) begin
+            controls = 10'b0001000010;
+        end
+        else if (opcode == `LHI_OP) begin
+            controls = 10'b0001000010;
+        end
+        else if (opcode == `LWD_OP) begin
+            controls = 10'b0001010110;
+        end
+        else if (opcode == `SWD_OP) begin
+            controls = 10'b0001001000;
+        end
+        else if (opcode == `BNE_OP) begin
+            controls = 10'b0000100000;
+        end
+        else if (opcode == `BEQ_OP) begin
+            controls = 10'b0000100000;
+        end
+        else if (opcode == `BGZ_OP) begin
+            controls = 10'b0000100000;
+        end
+        else if (opcode == `BLZ_OP) begin
+            controls = 10'b0000100000;
+        end
+        else if (opcode == `JMP_OP) begin
+            controls = 10'b1000000000;
+        end
+        else if (opcode == `JAL_OP) begin
+            controls = 10'b1000000010;
+        end
+        else begin // undefined
+            controls = 10'b0000000000;
+        end
+    end
+endmodule
