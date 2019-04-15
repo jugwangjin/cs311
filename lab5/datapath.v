@@ -101,8 +101,8 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
     wire bcond; // branch condition
     wire [`WORD_SIZE-1:0]branchPC;
     
-    assign flushIF = (bcond == 1'b1 || IDEX_controls[8] == 1'b1 || controls[9]);
-    assign flushID = (bcond == 1'b1 || IDEX_controls[8] == 1'b1) ? 1'b1 : 1'b0;
+    assign flushIF = ((IDEX_IsBubble == 1'b0 && (bcond == 1'b1 || IDEX_controls[8] == 1'b1)) || (IFID_IsBubble == 1'b0 && controls[9])) ? 1'b1 : 1'b0;
+    assign flushID = (IDEX_IsBubble == 1'b0 && (bcond == 1'b1 || IDEX_controls[8] == 1'b1)) ? 1'b1 : 1'b0;
     
 
     wire [3:0]ID_opcode;
@@ -117,7 +117,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
     wire [`WORD_SIZE-1:0]PCAdderOutput;
     wire [`WORD_SIZE-1:0]constantValue4;
     assign constantValue4 = `WORD_SIZE'd4;
-    assign nextPC = (bcond == 1'b1 && IDEX_controls[5] == 1'b1) ? branchPC : (IDEX_controls[8] == 1'b1) ? EX_ALUInput1 : (controls[9] == 1'b1) ? ID_target_address : PCAdderOutput;
+    assign nextPC = (IDEX_IsBubble == 1'b0 && bcond == 1'b1 && IDEX_controls[5] == 1'b1) ? branchPC : (IDEX_IsBubble == 1'b0 && IDEX_controls[8] == 1'b1) ? EX_ALUInput1 : (IFID_IsBubble == 1'b0 && controls[9] == 1'b1) ? ID_target_address : PCAdderOutput;
 
     wire ID_stall;
     wire ID_use_rs;
@@ -132,8 +132,8 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
     hazard HAZARD_MODULE(ID_stall, ID_use_rs, ID_rs, ID_use_rt, ID_rt, IDEX_MemRead, IDEX_rd);
     branchcondition BRANCHCONDITION_MODULE (bcond, IDEX_controls[5], IDEX_opcode, EX_ALUOutput);
 
-    assign ID_use_rs = (ID_opcode == `JMP_OP || ID_opcode == `JAL_OP) ? 1'b0 : 1'b1;
-    assign ID_use_rt = ((ID_opcode == 4'd15 && ID_func > 6'd26) || (ID_opcode > 4'd1 || ID_opcode < 4'd8) || ID_use_rs == 1'b1) ? 1'b0 : 1'b1;
+    assign ID_use_rs = (IFID_IsBubble == 1'b0) ? 1'b0 : (ID_opcode == `JMP_OP || ID_opcode == `JAL_OP) ? 1'b0 : 1'b1;
+    assign ID_use_rt = (IFID_IsBubble == 1'b0) ? 1'b0 : ((ID_opcode == 4'd15 && ID_func > 6'd26) || (ID_opcode > 4'd1 || ID_opcode < 4'd8) || ID_use_rs == 1'b1) ? 1'b0 : 1'b1;
 
     assign address1 = PC;
     assign address2 = EXMEM_ALUOutput;
@@ -254,6 +254,9 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
                 end
                 IFID_PC = PC;
                 IFID_instruction = instruction;
+            end
+            else begin
+                IFID_IsBubble = 1'b1;
             end
         end
 
