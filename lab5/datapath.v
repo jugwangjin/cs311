@@ -203,7 +203,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
         EXMEM_IsBubble = IDEX_IsBubble;
         EXMEM_controls = IDEX_controls[4:0];
         if (IDEX_opcode == `LHI_OP) begin
-            EXMEM_ALUOutput = {{IDEX_imm[7:0]}, {8{0}}};
+            EXMEM_ALUOutput = {{IDEX_imm[7:0]}, {8{1'b0}}};
         end
         else begin
             EXMEM_ALUOutput = EX_ALUOutput;
