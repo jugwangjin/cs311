@@ -129,7 +129,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
     forwarding FORWARDING_MODULE (EX_forwardA, EX_forwardB, IDEX_rs, IDEX_rt, EXMEM_controls[1], EXMEM_rd, MEMWB_controls[1], MEMWB_rd);
     adder branchPC_ADDER_MODULE(branchPC, IDEX_PC, IDEX_imm);
     adder PC_ADDER_MODULE(PCAdderOutput, PC, constantValue4);
-    hazard HAZARD_MODULE(ID_stall, ID_use_rs, ID_rs, ID_use_rt, ID_rt, IDEX_MemRead, IDEX_rd);
+    hazard HAZARD_MODULE(ID_stall, ID_use_rs, ID_rs, ID_use_rt, ID_rt, IDEX_controls[4], IDEX_rd);
     branchcondition BRANCHCONDITION_MODULE (bcond, IDEX_controls[5], IDEX_opcode, EX_ALUOutput);
 
     assign ID_use_rs = (IFID_IsBubble == 1'b0) ? 1'b0 : (ID_opcode == `JMP_OP || ID_opcode == `JAL_OP) ? 1'b0 : 1'b1;
