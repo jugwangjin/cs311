@@ -126,7 +126,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
     register REGISTER_MODULE(clk, ID_rs, ID_rt, MEMWB_rd, WB_WriteData, MEMWB_controls[1], ID_ReadData1, ID_ReadData2); 
     ALUcontrol ALUCONTROL_MODULE (EX_ALUOp, IDEX_controls[7], IDEX_opcode, IDEX_func);
 	ALU ALU_MODULE (EX_ALUInput1, EX_ALUInput2, EX_ALUOp, EX_ALUOutput, EX_OverflowFlag);
-    forwarding FORWARDING_MODULE (EX_forwardA, EX_forwardB, IDEX_rs, IDEX_rt, EXMEM_RegWrite, EXMEM_rd, MEMWB_RegWrite, MEMWB_rd);
+    forwarding FORWARDING_MODULE (EX_forwardA, EX_forwardB, IDEX_rs, IDEX_rt, EXMEM_controls[1], EXMEM_rd, MEMWB_controls[1], MEMWB_rd);
     adder branchPC_ADDER_MODULE(branchPC, IDEX_PC, IDEX_imm);
     adder PC_ADDER_MODULE(PCAdderOutput, PC, constantValue4);
     hazard HAZARD_MODULE(ID_stall, ID_use_rs, ID_rs, ID_use_rt, ID_rt, IDEX_MemRead, IDEX_rd);
@@ -156,6 +156,8 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
         num_inst = `WORD_SIZE'b0;
         PC = `WORD_SIZE'b0;
         is_halted = 1'b0;
+        output_port = `WORD_SIZE'b0;
+        instruction = `WORD_SIZE'b0;
         IFID_IsBubble = 1'b1;
         IDEX_IsBubble = 1'b1;
         EXMEM_IsBubble = 1'b1;
@@ -163,6 +165,27 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
         IDEX_controls = 9'b0;
         EXMEM_controls = 5'b0;
         MEMWB_controls = 3'b0;
+
+        IFID_PC = 0;
+        IFID_instruction = 0;
+        IDEX_PC = 0;
+        IDEX_controls = 0;
+        IDEX_ReadData1 = 0;
+        IDEX_ReadData2 = 0;
+        IDEX_rs = 0;
+        IDEX_rt = 0;
+        IDEX_rd = 0;
+        IDEX_opcode = 0;
+        IDEX_func = 0;
+        IDEX_IMM = 0;
+        EXMEM_controls = 0;
+        EXMEM_ALUOutput = 0;
+        EXMEM_ReadData2 = 0;
+        EXMEM_rd = 0;
+        MEMWB_controls = 0;
+        MEMWB_ALUOutput = 0;
+        MEMWB_ReadData = 0;
+        MEMWB_rd = 0;
     end
 
     always @(posedge Clk) begin
@@ -177,6 +200,27 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
             IDEX_controls = 9'b0;
             EXMEM_controls = 5'b0;
             MEMWB_controls = 3'b0;
+
+            IFID_PC = 0;
+            IFID_instruction = 0;
+            IDEX_PC = 0;
+            IDEX_controls = 0;
+            IDEX_ReadData1 = 0;
+            IDEX_ReadData2 = 0;
+            IDEX_rs = 0;
+            IDEX_rt = 0;
+            IDEX_rd = 0;
+            IDEX_opcode = 0;
+            IDEX_func = 0;
+            IDEX_IMM = 0;
+            EXMEM_controls = 0;
+            EXMEM_ALUOutput = 0;
+            EXMEM_ReadData2 = 0;
+            EXMEM_rd = 0;
+            MEMWB_controls = 0;
+            MEMWB_ALUOutput = 0;
+            MEMWB_ReadData = 0;
+            MEMWB_rd = 0;
         end
         else if (!is_halted) begin
             instruction = data1;
