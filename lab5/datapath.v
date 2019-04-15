@@ -101,7 +101,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
     wire bcond; // branch condition
     wire [`WORD_SIZE-1:0]branchPC;
     
-    assign flushIF = (bcond == 1'b1 || IDEX_controls[8] == 1'b1 || IDEX_controls[9]);
+    assign flushIF = (bcond == 1'b1 || IDEX_controls[8] == 1'b1 || controls[9]);
     assign flushID = (bcond == 1'b1 || IDEX_controls[8] == 1'b1) ? 1'b1 : 1'b0;
     
 
