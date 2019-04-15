@@ -3,8 +3,7 @@
 module control(Clk, instruction, is_halted, Reset_N, controls);
 	input Clk;
 	input Reset_N;
-	input [`WORD_SIZE-1:0] num_inst;
-
+    input [`WORD_SIZE-1:0] instruction;
 	output is_halted;
     reg is_halted;
     output controls;
@@ -12,7 +11,7 @@ module control(Clk, instruction, is_halted, Reset_N, controls);
     //controls : (WB) WWD[0], RegWrite[1], MemtoReg[2] (MEM) MemWrite[3], MemRead[4], IsBranch[5] (EX) ALUSrc[6], IsALU[7], IsJumpR[8] (ID) IsJumpI[9]
     // ALUSrc : if true, use imm value 
     // IsALU : if true, R-type ALU instruction. (has func)
-
+    wire [`WORD_SIZE-1:0]instruction;
 	wire [3:0]opcode;
 	wire [5:0]func;
 	assign opcode = instruction[15:12];
@@ -23,7 +22,7 @@ module control(Clk, instruction, is_halted, Reset_N, controls);
         is_halted = 1'b0;
     end
 
-    always @(posedge clk) begin
+    always @(posedge Clk) begin
         if (!Reset_N) begin 
             controls = 10'b0000000000;
             is_halted = 1'b0;
@@ -36,7 +35,7 @@ module control(Clk, instruction, is_halted, Reset_N, controls);
                 controls = 10'b0010000010;
             end
             else if (func == `INST_FUNC_WWD) begin
-                contorls = 10'b0000000001;
+                controls = 10'b0000000001;
             end
             else if (func == `INST_FUNC_JPR) begin
                 controls = 10'b0100000000;
