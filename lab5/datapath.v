@@ -177,7 +177,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
         IDEX_rd = 0;
         IDEX_opcode = 0;
         IDEX_func = 0;
-        IDEX_IMM = 0;
+        IDEX_imm = 0;
         EXMEM_controls = 0;
         EXMEM_ALUOutput = 0;
         EXMEM_ReadData2 = 0;
