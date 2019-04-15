@@ -108,11 +108,19 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
     wire [`WORD_SIZE-1:0]PCAdderOutput;
     wire [`WORD_SIZE-1:0]constantValue4;
     assign constantValue4 = `WORD_SIZE'd4;
-    assign nextPC = (bcond == 1'b1 && IDEX_controls[5] == 1'b1) ? branchPC : (IDEX_controls[8] == 1'b1) ? EX_ALUInput1 : (controls[9] == 1'b1) : ID_target_address : PCAdderOutput;
+    assign nextPC = (bcond == 1'b1 && IDEX_controls[5] == 1'b1) ? branchPC : (IDEX_controls[8] == 1'b1) ? EX_ALUInput1 : (controls[9] == 1'b1) ? ID_target_address : PCAdderOutput;
 
     wire ID_stall;
     wire ID_use_rs;
     wire ID_use_rt;
+
+    wire [3:0]ID_opcode;
+	wire [1:0]ID_rs;
+	wire [1:0]ID_rt;
+    wire [1:0]ID_rd;
+	wire [5:0]ID_func;
+	wire [7:0]ID_imm;
+	wire [11:0]ID_target_address;
 
     register REGISTER_MODULE(clk, ID_rs, ID_rt, MEMWB_rd, WB_WriteData, MEMWB_controls[1], ID_ReadData1, ID_ReadData2); 
     ALUcontrol ALUCONTROL_MODULE (EX_ALUOp, IDEX_controls[7], IDEX_opcode, IDEX_func);
@@ -134,13 +142,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
     assign writeM2 = EXMEM_controls[3];
     assign readM1 = !is_halted;
 
-    wire [3:0]ID_opcode;
-	wire [1:0]ID_rs;
-	wire [1:0]ID_rt;
-    wire [1:0]ID_rd;
-	wire [5:0]ID_func;
-	wire [7:0]ID_imm;
-	wire [11:0]ID_target_address;
+
     assign ID_opcode = IFID_instruction[15:12];
     assign ID_rs = IFID_instruction[11:10];
     assign ID_rt = IFID_instruction[9:8];
@@ -164,9 +166,16 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
 
     always @(posedge Clk) begin
         if(!Reset_N) begin
-            num_inst = 0;
-            PC = 0;
-            is_halted = 0;
+            num_inst = `WORD_SIZE'b0;
+            PC = `WORD_SIZE'b0;
+            is_halted = 1'b0;
+            IFID_IsBubble = 1'b1;
+            IDEX_IsBubble = 1'b1;
+            EXMEM_IsBubble = 1'b1;
+            MEMWB_IsBubble = 1'b1;
+            IDEX_controls = 9'b0;
+            EXMEM_controls = 5'b0;
+            MEMWB_controls = 3'b0;
         end
         else if (!is_halted) begin
             instruction = data1;
@@ -177,7 +186,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
         // Check if the instruction in WB stage is bubble or not
         if(MEMWB_IsBubble == 1'b0) begin
             num_inst = num_inst + `WORD_SIZE'd1;
-            if (MEMWB_controls[0] == 1'1b) begin
+            if (MEMWB_controls[0] == 1'b1) begin
                 output_port = MEMWB_ALUOutput;
             end
         end
