@@ -115,8 +115,8 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
 
     wire [`WORD_SIZE-1:0]nextPC;
     wire [`WORD_SIZE-1:0]PCAdderOutput;
-    wire [`WORD_SIZE-1:0]constantValue4;
-    assign constantValue4 = `WORD_SIZE'd4;
+    wire [`WORD_SIZE-1:0]constantValue1;
+    assign constantValue4 = `WORD_SIZE'd1;
     assign nextPC = (IDEX_IsBubble == 1'b0 && bcond == 1'b1 && IDEX_controls[5] == 1'b1) ? branchPC : (IDEX_IsBubble == 1'b0 && IDEX_controls[8] == 1'b1) ? EX_ALUInput1 : (IFID_IsBubble == 1'b0 && controls[9] == 1'b1) ? ID_target_address : PCAdderOutput;
 
     wire ID_stall;
@@ -128,7 +128,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
 	ALU ALU_MODULE (EX_ALUInput1, EX_ALUInput2, EX_ALUOp, EX_ALUOutput, EX_OverflowFlag);
     forwarding FORWARDING_MODULE (EX_forwardA, EX_forwardB, IDEX_rs, IDEX_rt, EXMEM_controls[1], EXMEM_rd, MEMWB_controls[1], MEMWB_rd);
     adder branchPC_ADDER_MODULE(branchPC, IDEX_PC, IDEX_imm);
-    adder PC_ADDER_MODULE(PCAdderOutput, PC, constantValue4);
+    adder PC_ADDER_MODULE(PCAdderOutput, PC, constantValue1);
     hazard HAZARD_MODULE(ID_stall, ID_use_rs, ID_rs, ID_use_rt, ID_rt, IDEX_controls[4], IDEX_rd);
     branchcondition BRANCHCONDITION_MODULE (bcond, IDEX_controls[5], IDEX_opcode, EX_ALUOutput);
 
