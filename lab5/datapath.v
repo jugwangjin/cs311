@@ -104,6 +104,15 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
     assign flushIF = (bcond == 1'b1 || IDEX_controls[8] == 1'b1 || IDEX_controls[9]);
     assign flushID = (bcond == 1'b1 || IDEX_controls[8] == 1'b1) ? 1'b1 : 1'b0;
     
+
+    wire [3:0]ID_opcode;
+	wire [1:0]ID_rs;
+	wire [1:0]ID_rt;
+    wire [1:0]ID_rd;
+	wire [5:0]ID_func;
+	wire [7:0]ID_imm;
+	wire [11:0]ID_target_address;
+
     wire [`WORD_SIZE-1:0]nextPC;
     wire [`WORD_SIZE-1:0]PCAdderOutput;
     wire [`WORD_SIZE-1:0]constantValue4;
@@ -113,14 +122,6 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
     wire ID_stall;
     wire ID_use_rs;
     wire ID_use_rt;
-
-    wire [3:0]ID_opcode;
-	wire [1:0]ID_rs;
-	wire [1:0]ID_rt;
-    wire [1:0]ID_rd;
-	wire [5:0]ID_func;
-	wire [7:0]ID_imm;
-	wire [11:0]ID_target_address;
 
     register REGISTER_MODULE(clk, ID_rs, ID_rt, MEMWB_rd, WB_WriteData, MEMWB_controls[1], ID_ReadData1, ID_ReadData2); 
     ALUcontrol ALUCONTROL_MODULE (EX_ALUOp, IDEX_controls[7], IDEX_opcode, IDEX_func);
@@ -202,7 +203,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
         EXMEM_IsBubble = IDEX_IsBubble;
         EXMEM_controls = IDEX_controls[4:0];
         if (IDEX_opcode == `LHI_OP) begin
-            EXMEM_ALUOutput = {{IDEX_imm[7:0]}, 8{0}};
+            EXMEM_ALUOutput = {{IDEX_imm[7:0]}, {8{0}}};
         end
         else begin
             EXMEM_ALUOutput = EX_ALUOutput;
