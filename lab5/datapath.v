@@ -131,7 +131,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
 
     
 
-    register REGISTER_MODULE(Clk, ID_rs, ID_rt, MEMWB_rd, WB_WriteData, MEMWB_controls[1], ID_ReadData1, ID_ReadData2); 
+    register REGISTER_MODULE(Clk, RegUpdate, ID_rs, ID_rt, MEMWB_rd, WB_WriteData, MEMWB_controls[1], ID_ReadData1, ID_ReadData2); 
     ALUcontrol ALUCONTROL_MODULE (EX_ALUOp, IDEX_controls[7], IDEX_opcode, IDEX_func);
 	ALU ALU_MODULE (EX_ALUInput1, EX_ALUInput2, EX_ALUOp, EX_ALUOutput, EX_OverflowFlag);
     forwarding FORWARDING_MODULE (EX_forwardA, EX_forwardB, IDEX_rs, IDEX_rt, EXMEM_controls[1], EXMEM_rd, MEMWB_controls[1], MEMWB_rd);
@@ -199,7 +199,8 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
         MEMWB_rd = 0;
         RegUpdate = 0;
     end
-    always @(negedge Clk) begin
+
+    always @(posedge Clk) begin
         if(!Reset_N) begin
             num_inst = `WORD_SIZE'b0;
             PC = `WORD_SIZE'b0;
@@ -232,89 +233,91 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
             MEMWB_rd = 0;
             RegUpdate = 0;
         end
+    end
+
+
+    always @(negedge Clk) begin
+        instruction = data1;
+        // IF PC update
+        PC = nextPC;
+
+        // Check if the instruction in WB stage is bubble or not
+        if(MEMWB_IsBubble == 1'b0) begin
+            num_inst = num_inst + constantValue1;
+            if (MEMWB_controls[0] == 1'b1) begin
+                output_port = MEMWB_ALUOutput;
+            end
+        end
+        RegUpdate = 1;
+
+        RegUpdate = 0;
+
+        // MEMWB Latch
+        MEMWB_IsBubble = EXMEM_IsBubble;
+        MEMWB_controls = EXMEM_controls[2:0];
+        MEMWB_ALUOutput = EXMEM_ALUOutput;
+        MEMWB_ReadData = data2;
+        MEMWB_rd = EXMEM_rd;
+
+        // EXMEM Latch
+        EXMEM_IsBubble = IDEX_IsBubble;
+        EXMEM_controls = IDEX_controls[4:0];
+        if (IDEX_opcode == `LHI_OP) begin
+            EXMEM_ALUOutput = {{IDEX_imm[7:0]}, {8{1'b0}}};
+        end
         else begin
-            instruction = data1;
-            // IF PC update
-            PC = nextPC;
+            EXMEM_ALUOutput = EX_ALUOutput;
+        end
+        EXMEM_ReadData2 = EX_forwardedReadData2;
+        EXMEM_rd = IDEX_rd;
 
-            // Check if the instruction in WB stage is bubble or not
-            if(MEMWB_IsBubble == 1'b0) begin
-                num_inst = num_inst + constantValue1;
-                if (MEMWB_controls[0] == 1'b1) begin
-                    output_port = MEMWB_ALUOutput;
-                end
-            end
-            RegUpdate = 1;
-
-            RegUpdate = 0;
-
-            // MEMWB Latch
-            MEMWB_IsBubble = EXMEM_IsBubble;
-            MEMWB_controls = EXMEM_controls[2:0];
-            MEMWB_ALUOutput = EXMEM_ALUOutput;
-            MEMWB_ReadData = data2;
-            MEMWB_rd = EXMEM_rd;
-
-            // EXMEM Latch
-            EXMEM_IsBubble = IDEX_IsBubble;
-            EXMEM_controls = IDEX_controls[4:0];
-            if (IDEX_opcode == `LHI_OP) begin
-                EXMEM_ALUOutput = {{IDEX_imm[7:0]}, {8{1'b0}}};
-            end
-            else begin
-                EXMEM_ALUOutput = EX_ALUOutput;
-            end
-            EXMEM_ReadData2 = EX_forwardedReadData2;
-            EXMEM_rd = IDEX_rd;
-
-            // IDEX Latch
-            if (ID_stall == 1'b0) begin
-                if(flushID) begin
-                    IDEX_IsBubble = 1'b1;
-                end
-                else begin
-                    IDEX_IsBubble = IFID_IsBubble;
-                end
-                if(IDEX_IsBubble == 1'b1) begin
-                    IDEX_controls = 10'b0;
-                end
-                else begin
-                    IDEX_controls = controls[9:0];
-                end
-                IDEX_PC = IFID_PC;
-                IDEX_ReadData1 = ID_ReadData1;
-                IDEX_ReadData2 = ID_ReadData2;
-                IDEX_rs = ID_rs;
-                IDEX_rt = ID_rt;
-                IDEX_rd = ID_rd;
-                IDEX_opcode = ID_opcode;
-                IDEX_func = ID_func;
-                IDEX_imm = {{8{ID_imm[7]}}, ID_imm[7:0]};
-            end
-            else begin
+        // IDEX Latch
+        if (ID_stall == 1'b0) begin
+            if(flushID) begin
                 IDEX_IsBubble = 1'b1;
+            end
+            else begin
+                IDEX_IsBubble = IFID_IsBubble;
+            end
+            if(IDEX_IsBubble == 1'b1) begin
                 IDEX_controls = 10'b0;
             end
-
-            // IFID Latch
-            if (is_halted) begin
-                IFID_IsBubble = 1'b1;
-            end
             else begin
-                if (ID_stall == 1'b0) begin
-                    if(flushIF) begin
+                IDEX_controls = controls[9:0];
+            end
+            IDEX_PC = IFID_PC;
+            IDEX_ReadData1 = ID_ReadData1;
+            IDEX_ReadData2 = ID_ReadData2;
+            IDEX_rs = ID_rs;
+            IDEX_rt = ID_rt;
+            IDEX_rd = ID_rd;
+            IDEX_opcode = ID_opcode;
+            IDEX_func = ID_func;
+            IDEX_imm = {{8{ID_imm[7]}}, ID_imm[7:0]};
+        end
+        else begin
+            IDEX_IsBubble = 1'b1;
+            IDEX_controls = 10'b0;
+        end
 
-                        IFID_IsBubble = 1'b1;
-                    end
-                    else begin
-                        IFID_IsBubble =1'b0;
-                    end
-                    IFID_PC = PC;
-                    IFID_instruction = instruction_no_x;
-                end
-                else begin
+        // IFID Latch
+        if (is_halted) begin
+            IFID_IsBubble = 1'b1;
+        end
+        else begin
+            if (ID_stall == 1'b0) begin
+                if(flushIF) begin
+
                     IFID_IsBubble = 1'b1;
                 end
+                else begin
+                    IFID_IsBubble =1'b0;
+                end
+                IFID_PC = PC;
+                IFID_instruction = instruction_no_x;
+            end
+            else begin
+                IFID_IsBubble = 1'b1;
             end
         end
     end
