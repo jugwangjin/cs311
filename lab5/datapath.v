@@ -121,6 +121,8 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
     wire ID_use_rs;
     wire ID_use_rt;
 
+    
+
     register REGISTER_MODULE(Clk, ID_rs, ID_rt, MEMWB_rd, WB_WriteData, MEMWB_controls[1], ID_ReadData1, ID_ReadData2); 
     ALUcontrol ALUCONTROL_MODULE (EX_ALUOp, IDEX_controls[7], IDEX_opcode, IDEX_func);
 	ALU ALU_MODULE (EX_ALUInput1, EX_ALUInput2, EX_ALUOp, EX_ALUOutput, EX_OverflowFlag);
@@ -155,6 +157,8 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
     assign ID_imm = IFID_instruction[7:0];
     assign ID_target_address = IFID_instruction[11:0];
 
+    reg RegUpdate;
+
     initial begin
         num_inst = `WORD_SIZE'b0;
         PC = `WORD_SIZE'b0;
@@ -187,6 +191,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
         MEMWB_ALUOutput = 0;
         MEMWB_ReadData = 0;
         MEMWB_rd = 0;
+        RegUpdate = 0;
     end
 
     always @(posedge Clk) begin
@@ -219,6 +224,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
             MEMWB_ALUOutput = 0;
             MEMWB_ReadData = 0;
             MEMWB_rd = 0;
+            RegUpdate = 0;
         end
         else if (!is_halted) begin
             instruction = data1;
@@ -233,6 +239,9 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
                 output_port = MEMWB_ALUOutput;
             end
         end
+        RegUpdate = 1;
+
+        RegUpdate = 0;
 
         // MEMWB Latch
         MEMWB_IsBubble = EXMEM_IsBubble;
