@@ -244,7 +244,6 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
                 end
             end
 
-            IFID_instruction = instruction;
             instruction = data1;
 
             IDEX_PC = IFID_PC;
@@ -314,11 +313,9 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
                         IFID_IsBubble = 1'b1;
                     end
                     else begin
+                        IFID_instruction = instruction;
                         IFID_IsBubble =1'b0;
                     end
-                end
-                else begin
-                    IFID_IsBubble = 1'b1;
                 end
             end
         end
