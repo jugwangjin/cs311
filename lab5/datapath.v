@@ -166,13 +166,10 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
     wire [`WORD_SIZE-1:0]instruction_no_x;
     assign instruction_no_x = (^instruction===1'bx) ? `WORD_SIZE'b0 : instruction;
 
-    reg is_reseted;
-
     initial begin
         num_inst = `WORD_SIZE'b0;
         PC = `WORD_SIZE'b0;
         is_halted = 1'b0;
-        is_reseted = 1'b0;
         instruction = `WORD_SIZE'b0;
         output_port = `WORD_SIZE'b0;
         instruction = `WORD_SIZE'b0;
@@ -209,7 +206,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
         if (is_halted) begin
             output_port = 0;
         end
-        else if(!is_reseted) begin
+        else if(!Reset_N) begin
             num_inst = `WORD_SIZE'b0;
             PC = `WORD_SIZE'b0;
             is_halted = 1'b0;
