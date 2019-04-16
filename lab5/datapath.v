@@ -121,7 +121,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
     wire ID_use_rs;
     wire ID_use_rt;
 
-    register REGISTER_MODULE(clk, ID_rs, ID_rt, MEMWB_rd, WB_WriteData, MEMWB_controls[1], ID_ReadData1, ID_ReadData2); 
+    register REGISTER_MODULE(Clk, ID_rs, ID_rt, MEMWB_rd, WB_WriteData, MEMWB_controls[1], ID_ReadData1, ID_ReadData2); 
     ALUcontrol ALUCONTROL_MODULE (EX_ALUOp, IDEX_controls[7], IDEX_opcode, IDEX_func);
 	ALU ALU_MODULE (EX_ALUInput1, EX_ALUInput2, EX_ALUOp, EX_ALUOutput, EX_OverflowFlag);
     forwarding FORWARDING_MODULE (EX_forwardA, EX_forwardB, IDEX_rs, IDEX_rt, EXMEM_controls[1], EXMEM_rd, MEMWB_controls[1], MEMWB_rd);
@@ -140,7 +140,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
     assign readM2 = EXMEM_controls[4];
     assign writeM2 = EXMEM_controls[3];
     assign readM1 = !is_halted;
-    
+
     assign EX_forwardedReadData1 = (EX_forwardA == 2'b10) ? WB_WriteData : (EX_forwardA == 2'b01) ? EXMEM_ALUOutput : IDEX_ReadData1;
     assign EX_ALUInput1 = (IDEX_controls[1] == 1'b1 && (IDEX_controls[8] == 1'b1 || IDEX_controls[9] == 1'b1)) ? PC : EX_forwardedReadData1;
     assign EX_forwardedReadData2 = (EX_forwardB == 2'b10) ? WB_WriteData : (EX_forwardB == 2'b01) ? EXMEM_ALUOutput : IDEX_ReadData2;

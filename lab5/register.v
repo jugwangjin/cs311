@@ -1,6 +1,6 @@
 `include "opcodes.v"
-module register(clk, ReadRegister1, ReadRegister2, WriteRegister, WriteData, RegWrite, ReadData1, ReadData2); 
-    input clk;
+module register(Clk, ReadRegister1, ReadRegister2, WriteRegister, WriteData, RegWrite, ReadData1, ReadData2); 
+    input Clk;
     input [1:0]ReadRegister1;
     input [1:0]ReadRegister2;
     input [1:0]WriteRegister;
@@ -21,7 +21,7 @@ module register(clk, ReadRegister1, ReadRegister2, WriteRegister, WriteData, Reg
 		end
     end
 
-    always @(negedge clk) begin
+    always @(negedge Clk) begin
         if (RegWrite) begin
             registers[WriteRegister] = WriteData;
         end
