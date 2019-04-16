@@ -165,6 +165,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
         num_inst = `WORD_SIZE'b0;
         PC = `WORD_SIZE'b0;
         is_halted = 1'b0;
+        instruction = `WORD_SIZE'b0;
         output_port = `WORD_SIZE'b0;
         instruction = `WORD_SIZE'b0;
         IFID_IsBubble = 1'b1;
@@ -200,6 +201,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
             num_inst = `WORD_SIZE'b0;
             PC = `WORD_SIZE'b0;
             is_halted = 1'b0;
+            instruction = `WORD_SIZE'b0;
             IFID_IsBubble = 1'b1;
             IDEX_IsBubble = 1'b1;
             EXMEM_IsBubble = 1'b1;
