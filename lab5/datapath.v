@@ -118,7 +118,14 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
     wire ID_stall;
     wire ID_use_rs;
     wire ID_use_rt;
-
+    
+    assign ID_opcode = IFID_instruction[15:12];
+    assign ID_rs = IFID_instruction[11:10];
+    assign ID_rt = IFID_instruction[9:8];
+    assign ID_rd = ((controls[9] || controls[8]) && controls[1]) ? 2'b10 : (IDEX_opcode == `LHI_OP) ? ID_rt : IFID_instruction[7:6];
+    assign ID_func = IFID_instruction[5:0];
+    assign ID_imm = IFID_instruction[7:0];
+    assign ID_target_address = IFID_instruction[11:0];
     assign constantValue1 = `WORD_SIZE'd1;
     assign nextPC = (ID_stall == 1'b1) ? PC : (IDEX_IsBubble == 1'b0 && bcond == 1'b1 && IDEX_controls[5] == 1'b1) ? branchPC : (IDEX_IsBubble == 1'b0 && IDEX_controls[8] == 1'b1) ? EX_forwardedReadData1 : (IFID_IsBubble == 1'b0 && controls[9] == 1'b1) ? {{PC[15:12]}, {ID_target_address[11:0]}} : PCAdderOutput;
 
@@ -151,13 +158,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
     assign EX_ALUInput2 = (IDEX_controls[1] == 1'b1 && (IDEX_controls[8] == 1'b1 || IDEX_controls[9] == 1'b1)) ? constantValue1 : ((IDEX_opcode == 4'd15 && IDEX_func == `INST_FUNC_WWD) || IDEX_opcode == 4'd2 || IDEX_opcode == 4'd3) ? `WORD_SIZE'b0 : (IDEX_controls[6]) ? IDEX_imm : EX_forwardedReadData2;
 
 
-    assign ID_opcode = IFID_instruction[15:12];
-    assign ID_rs = IFID_instruction[11:10];
-    assign ID_rt = IFID_instruction[9:8];
-    assign ID_rd = ((controls[9] || controls[8]) && controls[1]) ? 2'b10 : (IDEX_opcode == `LHI_OP) ? ID_rt : IFID_instruction[7:6];
-    assign ID_func = IFID_instruction[5:0];
-    assign ID_imm = IFID_instruction[7:0];
-    assign ID_target_address = IFID_instruction[11:0];
+
 
     reg RegUpdate;
 
