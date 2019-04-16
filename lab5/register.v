@@ -22,7 +22,7 @@ module register(Clk, RegUpdate, ReadRegister1, ReadRegister2, WriteRegister, Wri
 		end
     end
 
-    always @(posedge RegUpdate) begin
+    always @(negedge Clk) begin
     
         if (RegWrite) begin
             registers[WriteRegister] = WriteData;

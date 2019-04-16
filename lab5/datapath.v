@@ -163,11 +163,6 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
     assign EX_ALUInput2 = (IDEX_controls[0] == 1'b1) ? constantValue0 : (IDEX_controls[1] == 1'b1 && (IDEX_controls[8] == 1'b1 || IDEX_controls[9] == 1'b1)) ? constantValue1 : ((IDEX_opcode == 4'd15 && IDEX_func == `INST_FUNC_WWD) || IDEX_opcode == 4'd2 || IDEX_opcode == 4'd3) ? `WORD_SIZE'b0 : (IDEX_controls[6]) ? IDEX_imm : EX_forwardedReadData2;
 
 
-
-
-    wire [`WORD_SIZE-1:0]instruction_no_x;
-    assign instruction_no_x = (^instruction===1'bx) ? `WORD_SIZE'b0 : instruction;
-
     initial begin
         num_inst = `WORD_SIZE'b0;
         PC = `WORD_SIZE'b0;
@@ -204,11 +199,13 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
         RegUpdate = 0;
     end
     always @(negedge Clk) begin
-        // Check if the instruction in WB stage is bubble or not
-        if(MEMWB_IsBubble == 1'b0) begin
-            num_inst = num_inst + constantValue1;
-            if (MEMWB_controls[0] == 1'b1) begin
-                output_port = MEMWB_ALUOutput;
+        if(Reset_N && !is_halted) begin
+            // Check if the instruction in WB stage is bubble or not
+            if(MEMWB_IsBubble == 1'b0) begin
+                num_inst = num_inst + constantValue1;
+                if (MEMWB_controls[0] == 1'b1) begin
+                    output_port = MEMWB_ALUOutput;
+                end
             end
         end
     end
@@ -250,6 +247,10 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
         end
         else begin
             instruction = data1;
+
+            IFID_PC = PC;
+            IFID_instruction = instruction;
+
             // IF PC update
             PC = nextPC;
 
@@ -318,8 +319,6 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
                     else begin
                         IFID_IsBubble =1'b0;
                     end
-                    IFID_PC = PC;
-                    IFID_instruction = instruction_no_x;
                 end
                 else begin
                     IFID_IsBubble = 1'b1;
