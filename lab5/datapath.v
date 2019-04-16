@@ -238,14 +238,12 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
             MEMWB_rd = 0;
             RegUpdate = 0;
         end
-        else begin
-            instruction = instruction_no_x;
-        end
     end
 
 
     always @(negedge Clk) begin
         if(is_reseted && !is_halted) begin
+            instruction = instruction_no_x;
             // IF PC update
             PC = nextPC;
 
@@ -322,7 +320,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
                         IFID_IsBubble =1'b0;
                     end
                     IFID_PC = PC;
-                    IFID_instruction = instruction_no_x;
+                    IFID_instruction = instruction;
                 end
                 else begin
                     IFID_IsBubble = 1'b1;
