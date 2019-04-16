@@ -27,8 +27,8 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
 	inout [`WORD_SIZE-1:0] data2;
 	wire [`WORD_SIZE-1:0] data2;
 
-    input [9:0]controls;
-    wire [9:0]controls;
+    input [10:0]controls;
+    wire [10:0]controls;
 
     output is_halted;
 	reg is_halted;
@@ -44,8 +44,9 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
 
     reg [`WORD_SIZE-1:0]PC;
 
-    //controls : (WB) WWD[0], RegWrite[1], MemtoReg[2] (MEM) MemWrite[3], MemRead[4] (EX) IsBranch[5], ALUSrc[6], IsALU[7], IsJumpR[8] (ID) IsJumpI[9]
-
+//점프에서 PC 저장하는거 안했음!! 
+//PC + 1로 바꾼거 테스트해야됨!
+    //controls : (WB) WWD[0], RegWrite[1], MemtoReg[2] (MEM) MemWrite[3], MemRead[4] (EX) IsBranch[5], ALUSrc[6], IsALU[7], IsJumpR[8], IsJumpI[9] (ID) RegDst[10]
     // IFID_* means latch values between IF and ID stage.
     // same as IDEX_*, EXMEM_*, MEMWB_*
     reg [`WORD_SIZE-1:0]IFID_PC;
@@ -53,7 +54,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
     reg IFID_IsBubble;
 
     reg [`WORD_SIZE-1:0]IDEX_PC;
-    reg [8:0]IDEX_controls;
+    reg [9:0]IDEX_controls;
     reg [`WORD_SIZE-1:0]IDEX_ReadData1;
     reg [`WORD_SIZE-1:0]IDEX_ReadData2;
     reg [1:0]IDEX_rs;
@@ -76,7 +77,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
     reg [1:0]MEMWB_rd;
     reg MEMWB_IsBubble;
 
-
+    wire [`WORD_SIZE-1:0]EX_forwardedReadData1;
     wire [`WORD_SIZE-1:0]EX_ALUInput1;
     wire [`WORD_SIZE-1:0]EX_forwardedReadData2;
     wire [`WORD_SIZE-1:0]EX_ALUInput2;
@@ -92,9 +93,10 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
     wire [1:0] EX_forwardA;
     wire [1:0] EX_forwardB;
 
-    assign EX_ALUInput1 = (EX_forwardA == 2'b10) ? WB_WriteData : (EX_forwardA == 2'b01) ? EXMEM_ALUOutput : IDEX_ReadData1;
+    assign EX_forwardedReadData1 = (EX_forwardA == 2'b10) ? WB_WriteData : (EX_forwardA == 2'b01) ? EXMEM_ALUOutput : IDEX_ReadData1;
+    assign EX_ALUInput1 = (IDEX_controls[1] == 1'b1 && (IDEX_controls[8] == 1'b1 || IDEX_controls[9] == 1'b1)) ? PC : EX_forwardedReadData1;
     assign EX_forwardedReadData2 = (EX_forwardB == 2'b10) ? WB_WriteData : (EX_forwardB == 2'b01) ? EXMEM_ALUOutput : IDEX_ReadData2;
-    assign EX_ALUInput2 = ((IDEX_opcode == 4'd15 && IDEX_func == `INST_FUNC_WWD) || IDEX_opcode == 4'd2 || IDEX_opcode == 4'd3) ? `WORD_SIZE'b0 : (IDEX_controls[6]) ? IDEX_imm : EX_forwardedReadData2;
+    assign EX_ALUInput2 = (IDEX_controls[1] == 1'b1 && (IDEX_controls[8] == 1'b1 || IDEX_controls[9] == 1'b1)) ? constantValue1 : ((IDEX_opcode == 4'd15 && IDEX_func == `INST_FUNC_WWD) || IDEX_opcode == 4'd2 || IDEX_opcode == 4'd3) ? `WORD_SIZE'b0 : (IDEX_controls[6]) ? IDEX_imm : EX_forwardedReadData2;
 
     wire flushIF;
     wire flushID;
@@ -116,8 +118,8 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
     wire [`WORD_SIZE-1:0]nextPC;
     wire [`WORD_SIZE-1:0]PCAdderOutput;
     wire [`WORD_SIZE-1:0]constantValue1;
-    assign constantValue4 = `WORD_SIZE'd1;
-    assign nextPC = (IDEX_IsBubble == 1'b0 && bcond == 1'b1 && IDEX_controls[5] == 1'b1) ? branchPC : (IDEX_IsBubble == 1'b0 && IDEX_controls[8] == 1'b1) ? EX_ALUInput1 : (IFID_IsBubble == 1'b0 && controls[9] == 1'b1) ? ID_target_address : PCAdderOutput;
+    assign constantValue1 = `WORD_SIZE'd1;
+    assign nextPC = (IDEX_IsBubble == 1'b0 && bcond == 1'b1 && IDEX_controls[5] == 1'b1) ? branchPC : (IDEX_IsBubble == 1'b0 && IDEX_controls[8] == 1'b1) ? EX_ALUInput1 : (IFID_IsBubble == 1'b0 && controls[9] == 1'b1) ? {{PC[15:12]}, {ID_target_address[11:0]}} : PCAdderOutput;
 
     wire ID_stall;
     wire ID_use_rs;
@@ -162,14 +164,14 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
         IDEX_IsBubble = 1'b1;
         EXMEM_IsBubble = 1'b1;
         MEMWB_IsBubble = 1'b1;
-        IDEX_controls = 9'b0;
+        IDEX_controls = 10'b0;
         EXMEM_controls = 5'b0;
         MEMWB_controls = 3'b0;
 
+        //not important down here. just check that is not x
         IFID_PC = 0;
         IFID_instruction = 0;
         IDEX_PC = 0;
-        IDEX_controls = 0;
         IDEX_ReadData1 = 0;
         IDEX_ReadData2 = 0;
         IDEX_rs = 0;
@@ -178,11 +180,9 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
         IDEX_opcode = 0;
         IDEX_func = 0;
         IDEX_imm = 0;
-        EXMEM_controls = 0;
         EXMEM_ALUOutput = 0;
         EXMEM_ReadData2 = 0;
         EXMEM_rd = 0;
-        MEMWB_controls = 0;
         MEMWB_ALUOutput = 0;
         MEMWB_ReadData = 0;
         MEMWB_rd = 0;
@@ -197,14 +197,13 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
             IDEX_IsBubble = 1'b1;
             EXMEM_IsBubble = 1'b1;
             MEMWB_IsBubble = 1'b1;
-            IDEX_controls = 9'b0;
+            IDEX_controls = 10'b0;
             EXMEM_controls = 5'b0;
             MEMWB_controls = 3'b0;
 
             IFID_PC = 0;
             IFID_instruction = 0;
             IDEX_PC = 0;
-            IDEX_controls = 0;
             IDEX_ReadData1 = 0;
             IDEX_ReadData2 = 0;
             IDEX_rs = 0;
@@ -213,11 +212,9 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
             IDEX_opcode = 0;
             IDEX_func = 0;
             IDEX_imm = 0;
-            EXMEM_controls = 0;
             EXMEM_ALUOutput = 0;
             EXMEM_ReadData2 = 0;
             EXMEM_rd = 0;
-            MEMWB_controls = 0;
             MEMWB_ALUOutput = 0;
             MEMWB_ReadData = 0;
             MEMWB_rd = 0;
@@ -264,24 +261,32 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
                 IDEX_IsBubble = IFID_IsBubble;
             end
             if(IDEX_IsBubble == 1'b1) begin
-                IDEX_controls = 9'b0;
+                IDEX_controls = 10'b0;
             end
             else begin
-                IDEX_controls = controls[8:0];
+                IDEX_controls = controls[9:0];
             end
             IDEX_PC = IFID_PC;
             IDEX_ReadData1 = ID_ReadData1;
             IDEX_ReadData2 = ID_ReadData2;
             IDEX_rs = ID_rs;
             IDEX_rt = ID_rt;
-            IDEX_rd = ID_rd;
+            if (controls[10]==1'b1) begin
+                IDEX_rd = ID_rd;
+            else
+            else if (controls[1] == 1'b1 && (controls[8] == 1'b1 || controls[9] == 1'b1)) begin
+                IDEX_rd = 2'b10;
+            end
+            begin
+                IDEX_rd = ID_rt;
+            end
             IDEX_opcode = ID_opcode;
             IDEX_func = ID_func;
             IDEX_imm = {{8{ID_imm[7]}}, ID_imm[7:0]};
         end
         else begin
             IDEX_IsBubble = 1'b1;
-            IDEX_controls = 9'b0;
+            IDEX_controls = 10'b0;
         end
 
         // IFID Latch
