@@ -9,7 +9,7 @@ module ALUcontrol(ALUFuncCode, IsALU, opcode, func);
     reg [3:0]ALUFuncCode;
     
     initial begin
-        ALUFuncCode = 4'b0000;
+        ALUFuncCode = `ZERO;
     end
 
     always @(IsALU or opcode or func) begin
@@ -23,9 +23,11 @@ module ALUcontrol(ALUFuncCode, IsALU, opcode, func);
                 `INST_FUNC_TCP : ALUFuncCode = `TCP;
                 `INST_FUNC_SHL : ALUFuncCode = `ALS;
                 `INST_FUNC_SHR : ALUFuncCode = `ARS;
-                `INST_FUNC_WWD : ALUFuncCode = `ADD;
                 default : ALUFuncCode = `ZERO;
             endcase
+        end
+        else if (opcode == `WWD_OP && func == `INST_FUNC_WWD) begin
+            ALUFuncCode = `ADD;
         end
         else begin
             if (opcode == `ADI_OP) begin

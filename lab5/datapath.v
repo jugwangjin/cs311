@@ -124,7 +124,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
     assign ID_opcode = IFID_instruction[15:12];
     assign ID_rs = IFID_instruction[11:10];
     assign ID_rt = IFID_instruction[9:8];
-    assign ID_rd = ((controls[9] || controls[8]) && controls[1]) ? 2'b10 : (IDEX_opcode == `LHI_OP) ? ID_rt : IFID_instruction[7:6];
+    assign ID_rd = ((controls[9] || controls[8]) && controls[1]) ? 2'b10 : (controls[10]) ? IFID_instruction[7:6] : ID_rt;
     assign ID_func = IFID_instruction[5:0];
     assign ID_imm = IFID_instruction[7:0];
     assign ID_target_address = IFID_instruction[11:0];
@@ -198,17 +198,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
         MEMWB_rd = 0;
         RegUpdate = 0;
     end
-    always @(negedge Clk) begin
-        if(Reset_N && !is_halted) begin
-            // Check if the instruction in WB stage is bubble or not
-            if(MEMWB_IsBubble == 1'b0) begin
-                num_inst = num_inst + constantValue1;
-                if (MEMWB_controls[0] == 1'b1) begin
-                    output_port = MEMWB_ALUOutput;
-                end
-            end
-        end
-    end
+
     always @(posedge Clk) begin
         if (is_halted) begin
             output_port = 0;
@@ -246,6 +236,14 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
             RegUpdate = 0;
         end
         else begin
+            // Check if the instruction in WB stage is bubble or not
+            if(MEMWB_IsBubble == 1'b0) begin
+                num_inst = num_inst + constantValue1;
+                if (MEMWB_controls[0] == 1'b1) begin
+                    output_port = MEMWB_ALUOutput;
+                end
+            end
+
             instruction = data1;
 
             IFID_PC = PC;
@@ -313,7 +311,6 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
             else begin
                 if (ID_stall == 1'b0) begin
                     if(flushIF) begin
-
                         IFID_IsBubble = 1'b1;
                     end
                     else begin

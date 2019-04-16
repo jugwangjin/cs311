@@ -23,7 +23,7 @@ module forwarding (forwardA, forwardB, IDEX_rs1, IDEX_rs2, EXMEM_RegWrite, EXMEM
     wire MEMWB_RegWrite;
     wire [1:0]MEMWB_rd;
 
-    assign forwardA = (IDEX_rs1 == EXMEM_rd) ? 2'b01 : (IDEX_rs1 == MEMWB_rd) ? 2'b10 : 2'b00;
-    assign forwardB = (IDEX_rs2 == EXMEM_rd) ? 2'b01 : (IDEX_rs2 == MEMWB_rd) ? 2'b10 : 2'b00;
+    assign forwardA = (EXMEM_RegWrite == 1'b1 && (IDEX_rs1 == EXMEM_rd)) ? 2'b01 : (MEMWB_RegWrite == 1'b1 && (IDEX_rs1 == MEMWB_rd)) ? 2'b10 : 2'b00;
+    assign forwardB = (EXMEM_RegWrite == 1'b1 && (IDEX_rs2 == EXMEM_rd)) ? 2'b01 : (MEMWB_RegWrite == 1'b1 && (IDEX_rs2 == MEMWB_rd)) ? 2'b10 : 2'b00;
 
 endmodule
