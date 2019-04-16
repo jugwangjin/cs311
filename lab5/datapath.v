@@ -164,7 +164,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
 
 
     wire [`WORD_SIZE-1:0]instruction_no_x;
-    assign instruction_no_x = (^data1===1'bx) ? `WORD_SIZE'b0 : data1;
+    assign instruction_no_x = (^instruction===1'bx) ? `WORD_SIZE'b0 : instruction;
 
     reg is_reseted;
 
@@ -172,6 +172,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
         num_inst = `WORD_SIZE'b0;
         PC = `WORD_SIZE'b0;
         is_halted = 1'b0;
+        is_reseted = 1'b0;
         instruction = `WORD_SIZE'b0;
         output_port = `WORD_SIZE'b0;
         instruction = `WORD_SIZE'b0;
@@ -205,8 +206,10 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
     end
 
     always @(posedge Clk) begin
-        is_reseted = Reset_N;
-        if(!is_reseted) begin
+        if (is_halted) begin
+            output_port = 0;
+        end
+        else if(!is_reseted) begin
             num_inst = `WORD_SIZE'b0;
             PC = `WORD_SIZE'b0;
             is_halted = 1'b0;
@@ -238,12 +241,8 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
             MEMWB_rd = 0;
             RegUpdate = 0;
         end
-    end
-
-
-    always @(negedge Clk) begin
-        if(is_reseted && !is_halted) begin
-            instruction = instruction_no_x;
+        else begin
+            instruction = data1;
             // IF PC update
             PC = nextPC;
 
@@ -320,7 +319,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
                         IFID_IsBubble =1'b0;
                     end
                     IFID_PC = PC;
-                    IFID_instruction = instruction;
+                    IFID_instruction = instruction_no_x;
                 end
                 else begin
                     IFID_IsBubble = 1'b1;
