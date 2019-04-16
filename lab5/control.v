@@ -76,12 +76,6 @@ module control(Clk, instruction, is_halted, Reset_N, controls);
         else if (opcode == `BLZ_OP) begin
             controls = 11'b00000100000;
         end
-        else if (opcode == `JMP_OP) begin
-            controls = 11'b01000000000;
-        end
-        else if (opcode == `JAL_OP) begin
-            controls = 11'b01000000010;
-        end
         else begin // undefined
             controls = 11'b00000000000;
         end

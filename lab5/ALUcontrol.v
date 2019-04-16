@@ -54,6 +54,12 @@ module ALUcontrol(ALUFuncCode, IsALU, opcode, func);
             else if (opcode == `BLZ_OP) begin
                 ALUFuncCode = `ADD;
             end
+            else if (opcode == `JAL_OP) begin
+                ALUFuncCode = `ADD;
+            end
+            else if (opcode == `JMP_OP) begin
+                ALUFuncCode == `ADD;
+            end
             else begin
                 ALUFuncCode = `ZERO;
             end
