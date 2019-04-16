@@ -244,6 +244,10 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
                 end
             end
 
+            if(flushID == 1'b0 && IFID_IsBubble == 1'b0 && ID_opcode == `HLT_OP && ID_func == `INST_FUNC_HLT) begin
+                is_halted = 1'b1;
+            end
+
             instruction = data1;
 
             IDEX_PC = IFID_PC;
@@ -303,9 +307,6 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
                 IDEX_controls = 10'b0;
             end
 
-            if(ID_opcode == `HLT_OP && ID_func == `INST_FUNC_HLT) begin
-                is_halted = 1'b1;
-            end
 
             // IFID Latch
             if (is_halted) begin

@@ -4,8 +4,7 @@ module control(Clk, instruction, is_halted, Reset_N, controls);
 	input Clk;
 	input Reset_N;
     input [`WORD_SIZE-1:0] instruction;
-	output is_halted;
-    reg is_halted;
+	input is_halted;
     output controls;
     reg [10:0]controls;
     //controls : (WB) WWD[0], RegWrite[1], MemtoReg[2] (MEM) MemWrite[3], MemRead[4], IsBranch[5] (EX) ALUSrc[6], IsALU[7], IsJumpR[8], IsJumpI[9] (ID) RegDst[10]
@@ -21,13 +20,11 @@ module control(Clk, instruction, is_halted, Reset_N, controls);
 
     initial begin
         controls = 10'b0;
-        is_halted = 1'b0;
     end
 
     always @(negedge Clk) begin
         if (!Reset_N) begin 
             controls = 11'b00000000000;
-            is_halted = 1'b0;
         end
         else if (is_halted) begin
             controls = 11'b00000000000;
@@ -47,7 +44,6 @@ module control(Clk, instruction, is_halted, Reset_N, controls);
             end
             else if (func == `INST_FUNC_HLT) begin
                 controls = 11'b00000000000;
-                is_halted = 1'b1;
             end
             else begin // undefiend
                 controls = 11'b00000000000;

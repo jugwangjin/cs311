@@ -48,6 +48,12 @@ module ALUcontrol(ALUFuncCode, IsALU, opcode, func);
             else if (opcode == `BEQ_OP) begin
                 ALUFuncCode = `SUB;
             end
+            else if (opcode == `BGZ_OP) begin
+                ALUFuncCode = `ADD;
+            end
+            else if (opcode == `BLZ_OP) begin
+                ALUFuncCode = `ADD;
+            end
             else begin
                 ALUFuncCode = `ZERO;
             end
