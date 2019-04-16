@@ -315,6 +315,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
             end
         end
 
+        instruction = data1;
         // IF PC update
         PC = nextPC;
     end
