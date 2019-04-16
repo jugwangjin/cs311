@@ -99,8 +99,8 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
     wire bcond; // branch condition
     wire [`WORD_SIZE-1:0]branchPC;
     
-    assign flushIF = ((IDEX_IsBubble == 1'b0 && (bcond == 1'b1 || IDEX_controls[8] == 1'b1)) || (IFID_IsBubble == 1'b0 && controls[9])) ? 1'b1 : 1'b0;
-    assign flushID = (IDEX_IsBubble == 1'b0 && (bcond == 1'b1 || IDEX_controls[8] == 1'b1)) ? 1'b1 : 1'b0;
+    assign flushIF = ((IDEX_IsBubble == 1'b0 && ((bcond == 1'b1 || IDEX_controls[5] == 1'b1)) || IDEX_controls[8]) || (IFID_IsBubble == 1'b0 && controls[9])) ? 1'b1 : 1'b0;
+    assign flushID = (IDEX_IsBubble == 1'b0 && ((bcond == 1'b1 || IDEX_controls[5] == 1'b1)) || IDEX_controls[8]) ? 1'b1 : 1'b0;
     
 
     wire [3:0]ID_opcode;
@@ -115,7 +115,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
     wire [`WORD_SIZE-1:0]PCAdderOutput;
     wire [`WORD_SIZE-1:0]constantValue1;
     assign constantValue1 = `WORD_SIZE'd1;
-    assign nextPC = (IDEX_IsBubble == 1'b0 && bcond == 1'b1 && IDEX_controls[5] == 1'b1) ? branchPC : (IDEX_IsBubble == 1'b0 && IDEX_controls[8] == 1'b1) ? EX_ALUInput1 : (IFID_IsBubble == 1'b0 && controls[9] == 1'b1) ? {{PC[15:12]}, {ID_target_address[11:0]}} : PCAdderOutput;
+    assign nextPC = (ID_stall == 1'b1) ? PC : (IDEX_IsBubble == 1'b0 && bcond == 1'b1 && IDEX_controls[5] == 1'b1) ? branchPC : (IDEX_IsBubble == 1'b0 && IDEX_controls[8] == 1'b1) ? EX_forwardedReadData1 : (IFID_IsBubble == 1'b0 && controls[9] == 1'b1) ? {{PC[15:12]}, {ID_target_address[11:0]}} : PCAdderOutput;
 
     wire ID_stall;
     wire ID_use_rs;
@@ -233,8 +233,9 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
 
     always @(negedge Clk) begin
         // Check if the instruction in WB stage is bubble or not
+        
         if(MEMWB_IsBubble == 1'b0) begin
-            num_inst = num_inst + `WORD_SIZE'd1;
+            num_inst = num_inst + constantValue1;
             if (MEMWB_controls[0] == 1'b1) begin
                 output_port = MEMWB_ALUOutput;
             end
@@ -281,15 +282,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
             IDEX_ReadData2 = ID_ReadData2;
             IDEX_rs = ID_rs;
             IDEX_rt = ID_rt;
-            if (controls[10]==1'b1) begin
-                IDEX_rd = ID_rd;
-            end
-            else if (controls[1] == 1'b1 && (controls[8] == 1'b1 || controls[9] == 1'b1)) begin
-                IDEX_rd = 2'b10;
-            end
-            begin
-                IDEX_rd = ID_rt;
-            end
+            IDEX_rd = ID_rd;
             IDEX_opcode = ID_opcode;
             IDEX_func = ID_func;
             IDEX_imm = {{8{ID_imm[7]}}, ID_imm[7:0]};
@@ -320,9 +313,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
         end
 
         // IF PC update
-        if(ID_stall == 1'b0) begin
-            PC = nextPC;
-        end
+        PC = nextPC;
     end
 
 endmodule
