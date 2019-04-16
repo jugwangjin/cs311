@@ -98,8 +98,10 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
     wire bcond; // branch condition
     wire [`WORD_SIZE-1:0]branchPC;
     
-    assign flushIF = ((IDEX_IsBubble == 1'b0 && ((bcond == 1'b1 && IDEX_controls[5] == 1'b1) || IDEX_controls[8])) || (IFID_IsBubble == 1'b0 && controls[9])) ? 1'b1 : 1'b0;
-    assign flushID = (IDEX_IsBubble == 1'b0 && ((bcond == 1'b1 && IDEX_controls[5] == 1'b1) || IDEX_controls[8])) ? 1'b1 : 1'b0;
+    // assign flushIF = ((IDEX_IsBubble == 1'b0 && ((bcond == 1'b1 && IDEX_controls[5] == 1'b1) || IDEX_controls[8])) || (IFID_IsBubble == 1'b0 && controls[9])) ? 1'b1 : 1'b0;
+    assign flushIF = (IDEX_IsBubble == 1'b0) ? ((bcond == 1'b1 && IDEX_controls[5] == 1'b1) || IDEX_controls[8]) : ((IFID_IsBubble == 1'b0) ? controls[9] : 1'b0);
+    // assign flushID = (IDEX_IsBubble == 1'b0 && ((bcond == 1'b1 && IDEX_controls[5] == 1'b1) || IDEX_controls[8])) ? 1'b1 : 1'b0;
+    assign flushID = (IDEX_IsBubble == 1'b0) ? ((bcond == 1'b1 && IDEX_controls[5] == 1'b1) || IDEX_controls[8]) : 1'b0;
     
 
     wire [3:0]ID_opcode;
@@ -126,7 +128,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
     assign ID_imm = IFID_instruction[7:0];
     assign ID_target_address = IFID_instruction[11:0];
     assign constantValue1 = `WORD_SIZE'd1;
-    assign nextPC = (ID_stall == 1'b1 || IFID_IsBubble == 1'b1) ? PC : (IDEX_IsBubble == 1'b0 && bcond == 1'b1 && IDEX_controls[5] == 1'b1) ? branchPC : (IDEX_IsBubble == 1'b0 && IDEX_controls[8] == 1'b1) ? EX_forwardedReadData1 : (IFID_IsBubble == 1'b0 && controls[9] == 1'b1) ? {{PC[15:12]}, {ID_target_address[11:0]}} : PCAdderOutput;
+    assign nextPC = (ID_stall == 1'b1) ? PC : (IDEX_IsBubble == 1'b0 && bcond == 1'b1 && IDEX_controls[5] == 1'b1) ? branchPC : (IDEX_IsBubble == 1'b0 && IDEX_controls[8] == 1'b1) ? EX_forwardedReadData1 : (IFID_IsBubble == 1'b0 && controls[9] == 1'b1) ? {{PC[15:12]}, {ID_target_address[11:0]}} : PCAdderOutput;
 
 
 
@@ -170,7 +172,6 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
         num_inst = `WORD_SIZE'b0;
         PC = `WORD_SIZE'b0;
         is_halted = 1'b0;
-        is_reseted = 1'b1;
         instruction = `WORD_SIZE'b0;
         output_port = `WORD_SIZE'b0;
         instruction = `WORD_SIZE'b0;
@@ -209,7 +210,6 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
             num_inst = `WORD_SIZE'b0;
             PC = `WORD_SIZE'b0;
             is_halted = 1'b0;
-            is_reseted = 1'b1;
             instruction = `WORD_SIZE'b0;
             IFID_IsBubble = 1'b1;
             IDEX_IsBubble = 1'b1;
@@ -242,7 +242,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
 
 
     always @(negedge Clk) begin
-        if(is_reseted) begin
+        if(is_reseted && !is_halted) begin
             instruction = data1;
             // IF PC update
             PC = nextPC;
