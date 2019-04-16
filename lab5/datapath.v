@@ -5,7 +5,7 @@
 `include "forwarding.v"
 `include "adder.v"
 
-module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address2, data2, controls, is_halted, instruction, num_inst, output_port);
+module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address2, data2, controls, is_halted, IFID_instruction, num_inst, output_port);
 	input Clk;
 	wire Clk;
 	input Reset_N;
@@ -33,7 +33,9 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
     output is_halted;
 	reg is_halted;
     
-    output [`WORD_SIZE-1:0]instruction;
+    output [`WORD_SIZE-1:0]IFID_instruction;
+    reg [`WORD_SIZE-1:0]IFID_instruction;
+
 	reg [`WORD_SIZE-1:0]instruction;
 
 	output [`WORD_SIZE-1:0] num_inst;
@@ -44,13 +46,10 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
 
     reg [`WORD_SIZE-1:0]PC;
 
-//점프에서 PC 저장하는거 안했음!! 
-//PC + 1로 바꾼거 테스트해야됨!
     //controls : (WB) WWD[0], RegWrite[1], MemtoReg[2] (MEM) MemWrite[3], MemRead[4] (EX) IsBranch[5], ALUSrc[6], IsALU[7], IsJumpR[8], IsJumpI[9] (ID) RegDst[10]
     // IFID_* means latch values between IF and ID stage.
     // same as IDEX_*, EXMEM_*, MEMWB_*
     reg [`WORD_SIZE-1:0]IFID_PC;
-    reg [`WORD_SIZE-1:0]IFID_instruction;
     reg IFID_IsBubble;
 
     reg [`WORD_SIZE-1:0]IDEX_PC;

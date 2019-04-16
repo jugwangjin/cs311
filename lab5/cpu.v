@@ -31,7 +31,7 @@ module cpu(Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address2, dat
 	wire is_halted;
 
 	wire [`WORD_SIZE-1:0]instruction;
-	wire [9:0]controls;
+	wire [10:0]controls;
 
 	// TODO : Implement your pipelined CPU!
 	control CONTROL_MODULE(Clk, instruction, is_halted, Reset_N, controls);
