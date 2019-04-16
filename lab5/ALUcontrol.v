@@ -23,6 +23,7 @@ module ALUcontrol(ALUFuncCode, IsALU, opcode, func);
                 `INST_FUNC_TCP : ALUFuncCode = `TCP;
                 `INST_FUNC_SHL : ALUFuncCode = `ALS;
                 `INST_FUNC_SHR : ALUFuncCode = `ARS;
+                `INST_FUNC_JRL : ALUFuncCode = `ADD;
                 default : ALUFuncCode = `ZERO;
             endcase
         end
@@ -56,9 +57,6 @@ module ALUcontrol(ALUFuncCode, IsALU, opcode, func);
             end
             else if (opcode == `JAL_OP) begin
                 ALUFuncCode = `ADD;
-            end
-            else if (opcode == `JMP_OP) begin
-                ALUFuncCode == `ADD;
             end
             else begin
                 ALUFuncCode = `ZERO;
