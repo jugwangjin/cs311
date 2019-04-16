@@ -114,12 +114,14 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
     wire [`WORD_SIZE-1:0]nextPC;
     wire [`WORD_SIZE-1:0]PCAdderOutput;
     wire [`WORD_SIZE-1:0]constantValue1;
-    assign constantValue1 = `WORD_SIZE'd1;
-    assign nextPC = (ID_stall == 1'b1) ? PC : (IDEX_IsBubble == 1'b0 && bcond == 1'b1 && IDEX_controls[5] == 1'b1) ? branchPC : (IDEX_IsBubble == 1'b0 && IDEX_controls[8] == 1'b1) ? EX_forwardedReadData1 : (IFID_IsBubble == 1'b0 && controls[9] == 1'b1) ? {{PC[15:12]}, {ID_target_address[11:0]}} : PCAdderOutput;
 
     wire ID_stall;
     wire ID_use_rs;
     wire ID_use_rt;
+    
+    assign constantValue1 = `WORD_SIZE'd1;
+    assign nextPC = (ID_stall == 1'b1) ? PC : (IDEX_IsBubble == 1'b0 && bcond == 1'b1 && IDEX_controls[5] == 1'b1) ? branchPC : (IDEX_IsBubble == 1'b0 && IDEX_controls[8] == 1'b1) ? EX_forwardedReadData1 : (IFID_IsBubble == 1'b0 && controls[9] == 1'b1) ? {{PC[15:12]}, {ID_target_address[11:0]}} : PCAdderOutput;
+
 
     
 
@@ -299,6 +301,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
         else begin
             if (ID_stall == 1'b0) begin
                 if(flushIF) begin
+
                     IFID_IsBubble = 1'b1;
                 end
                 else begin
