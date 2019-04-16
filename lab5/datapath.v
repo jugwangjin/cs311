@@ -118,7 +118,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
     wire ID_stall;
     wire ID_use_rs;
     wire ID_use_rt;
-    
+
     assign ID_opcode = IFID_instruction[15:12];
     assign ID_rs = IFID_instruction[11:10];
     assign ID_rt = IFID_instruction[9:8];
@@ -229,6 +229,10 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
             RegUpdate = 0;
         end
         else begin
+            instruction = data1;
+            // IF PC update
+            PC = nextPC;
+
             // Check if the instruction in WB stage is bubble or not
             if(MEMWB_IsBubble == 1'b0) begin
                 num_inst = num_inst + constantValue1;
@@ -308,10 +312,6 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
                     IFID_IsBubble = 1'b1;
                 end
             end
-
-            instruction = data1;
-            // IF PC update
-            PC = nextPC;
         end
     end
 
