@@ -126,7 +126,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
     assign ID_imm = IFID_instruction[7:0];
     assign ID_target_address = IFID_instruction[11:0];
     assign constantValue1 = `WORD_SIZE'd1;
-    assign nextPC = (instruction == {`WORD_SIZE{x}}) ? : (ID_stall == 1'b1 || IFID_IsBubble == 1'b1) ? PC : (IDEX_IsBubble == 1'b0 && bcond == 1'b1 && IDEX_controls[5] == 1'b1) ? branchPC : (IDEX_IsBubble == 1'b0 && IDEX_controls[8] == 1'b1) ? EX_forwardedReadData1 : (IFID_IsBubble == 1'b0 && controls[9] == 1'b1) ? {{PC[15:12]}, {ID_target_address[11:0]}} : PCAdderOutput;
+    assign nextPC = (instruction == {`WORD_SIZE{x}}) ? PCAdderOutput : (ID_stall == 1'b1 || IFID_IsBubble == 1'b1) ? PC : (IDEX_IsBubble == 1'b0 && bcond == 1'b1 && IDEX_controls[5] == 1'b1) ? branchPC : (IDEX_IsBubble == 1'b0 && IDEX_controls[8] == 1'b1) ? EX_forwardedReadData1 : (IFID_IsBubble == 1'b0 && controls[9] == 1'b1) ? {{PC[15:12]}, {ID_target_address[11:0]}} : PCAdderOutput;
 
 
     
