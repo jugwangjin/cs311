@@ -146,8 +146,8 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
     hazard HAZARD_MODULE(ID_stall, ID_use_rs, ID_rs, ID_use_rt, ID_rt, IDEX_controls[4], IDEX_rd);
     branchcondition BRANCHCONDITION_MODULE (bcond, IDEX_controls[5], IDEX_opcode, EX_ALUOutput);
 
-    assign ID_use_rs = (IFID_IsBubble == 1'b0) ? 1'b0 : (ID_opcode == `JMP_OP || ID_opcode == `JAL_OP) ? 1'b0 : 1'b1;
-    assign ID_use_rt = (IFID_IsBubble == 1'b0) ? 1'b0 : ((ID_opcode == 4'd15 && ID_func > 6'd26) || (ID_opcode > 4'd1 || ID_opcode < 4'd8) || ID_use_rs == 1'b1) ? 1'b0 : 1'b1;
+    assign ID_use_rs = (IFID_IsBubble == 1'b1) ? 1'b0 : (ID_opcode == `JMP_OP || ID_opcode == `JAL_OP) ? 1'b0 : 1'b1;
+    assign ID_use_rt = (IFID_IsBubble == 1'b1) ? 1'b0 : ((ID_opcode == 4'd15 && ID_func > 6'd26) || (ID_opcode > 4'd1 && ID_opcode != 4'd8 && ID_opcode != 4'd15) || ID_use_rs == 1'b0) ? 1'b0 : 1'b1;
 
     assign address1 = PC;
     assign address2 = EXMEM_ALUOutput;
@@ -244,10 +244,11 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
                 end
             end
 
+            IFID_instruction = instruction;
             instruction = data1;
 
+            IDEX_PC = IFID_PC;
             IFID_PC = PC;
-            IFID_instruction = instruction;
 
             // IF PC update
             PC = nextPC;
@@ -257,15 +258,13 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
             RegUpdate = 0;
 
             // MEMWB Latch
-            MEMWB_IsBubble = EXMEM_IsBubble;
-            MEMWB_controls = EXMEM_controls[2:0];
             MEMWB_ALUOutput = EXMEM_ALUOutput;
             MEMWB_ReadData = data2;
             MEMWB_rd = EXMEM_rd;
+            MEMWB_IsBubble = EXMEM_IsBubble;
+            MEMWB_controls = EXMEM_controls[2:0];
 
             // EXMEM Latch
-            EXMEM_IsBubble = IDEX_IsBubble;
-            EXMEM_controls = IDEX_controls[4:0];
             if (IDEX_opcode == `LHI_OP) begin
                 EXMEM_ALUOutput = {{IDEX_imm[7:0]}, {8{1'b0}}};
             end
@@ -274,9 +273,19 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
             end
             EXMEM_ReadData2 = EX_forwardedReadData2;
             EXMEM_rd = IDEX_rd;
+            EXMEM_IsBubble = IDEX_IsBubble;
+            EXMEM_controls = IDEX_controls[4:0];
 
             // IDEX Latch
             if (ID_stall == 1'b0) begin
+                IDEX_ReadData1 = ID_ReadData1;
+                IDEX_ReadData2 = ID_ReadData2;
+                IDEX_rs = ID_rs;
+                IDEX_rt = ID_rt;
+                IDEX_rd = ID_rd;
+                IDEX_opcode = ID_opcode;
+                IDEX_func = ID_func;
+                IDEX_imm = {{8{ID_imm[7]}}, ID_imm[7:0]};
                 if(flushID) begin
                     IDEX_IsBubble = 1'b1;
                 end
@@ -289,15 +298,6 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
                 else begin
                     IDEX_controls = controls[9:0];
                 end
-                IDEX_PC = IFID_PC;
-                IDEX_ReadData1 = ID_ReadData1;
-                IDEX_ReadData2 = ID_ReadData2;
-                IDEX_rs = ID_rs;
-                IDEX_rt = ID_rt;
-                IDEX_rd = ID_rd;
-                IDEX_opcode = ID_opcode;
-                IDEX_func = ID_func;
-                IDEX_imm = {{8{ID_imm[7]}}, ID_imm[7:0]};
             end
             else begin
                 IDEX_IsBubble = 1'b1;
