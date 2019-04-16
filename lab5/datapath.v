@@ -99,9 +99,9 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
     wire [`WORD_SIZE-1:0]branchPC;
     
     // assign flushIF = ((IDEX_IsBubble == 1'b0 && ((bcond == 1'b1 && IDEX_controls[5] == 1'b1) || IDEX_controls[8])) || (IFID_IsBubble == 1'b0 && controls[9])) ? 1'b1 : 1'b0;
-    assign flushIF = (IDEX_IsBubble == 1'b0) ? ((bcond == 1'b1 && IDEX_controls[5] == 1'b1) || IDEX_controls[8]) : ((IFID_IsBubble == 1'b0) ? controls[9] : 1'b0);
+    assign flushIF = ((IDEX_IsBubble == 1'b0) && ((bcond == 1'b1 && IDEX_controls[5] == 1'b1) || IDEX_controls[8])) || ((IFID_IsBubble == 1'b0) && controls[9] == 1'b1);
     // assign flushID = (IDEX_IsBubble == 1'b0 && ((bcond == 1'b1 && IDEX_controls[5] == 1'b1) || IDEX_controls[8])) ? 1'b1 : 1'b0;
-    assign flushID = (IDEX_IsBubble == 1'b0) ? ((bcond == 1'b1 && IDEX_controls[5] == 1'b1) || IDEX_controls[8]) : 1'b0;
+    assign flushID = (IDEX_IsBubble == 1'b0) && ((bcond == 1'b1 && IDEX_controls[5] == 1'b1) || IDEX_controls[8]);
     
 
     wire [3:0]ID_opcode;
