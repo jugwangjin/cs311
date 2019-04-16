@@ -160,7 +160,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
     assign EX_forwardedReadData1 = (EX_forwardA == 2'b10) ? WB_WriteData : (EX_forwardA == 2'b01) ? EXMEM_ALUOutput : IDEX_ReadData1;
     assign EX_ALUInput1 = (IDEX_controls[1] == 1'b1 && (IDEX_controls[8] == 1'b1 || IDEX_controls[9] == 1'b1)) ? PC : EX_forwardedReadData1;
     assign EX_forwardedReadData2 = (EX_forwardB == 2'b10) ? WB_WriteData : (EX_forwardB == 2'b01) ? EXMEM_ALUOutput : IDEX_ReadData2;
-    assign EX_ALUInput2 = (IDEX_controls[0] == 1'b1) ? constantValue0 : (IDEX_controls[1] == 1'b1 && (IDEX_controls[8] == 1'b1 || IDEX_controls[9] == 1'b1)) ? constantValue1 : ((IDEX_opcode == 4'd15 && IDEX_func == `INST_FUNC_WWD) || IDEX_opcode == 4'd2 || IDEX_opcode == 4'd3) ? `WORD_SIZE'b0 : (IDEX_controls[6]) ? IDEX_imm : EX_forwardedReadData2;
+    assign EX_ALUInput2 = (IDEX_controls[0] == 1'b1) ? constantValue0 : (IDEX_controls[1] == 1'b1 && (IDEX_controls[8] == 1'b1 || IDEX_controls[9] == 1'b1)) ? constantValue0 : ((IDEX_opcode == 4'd15 && IDEX_func == `INST_FUNC_WWD) || IDEX_opcode == 4'd2 || IDEX_opcode == 4'd3) ? `WORD_SIZE'b0 : (IDEX_controls[6]) ? IDEX_imm : EX_forwardedReadData2;
 
 
     initial begin
@@ -247,7 +247,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
             instruction = data1;
 
             IDEX_PC = IFID_PC;
-            IFID_PC = PC;
+            IFID_PC = PCAdderOutput;
 
             // IF PC update
             PC = nextPC;
@@ -306,7 +306,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
             if(ID_opcode == `HLT_OP && ID_func == `INST_FUNC_HLT) begin
                 is_halted = 1'b1;
             end
-            
+
             // IFID Latch
             if (is_halted) begin
                 IFID_IsBubble = 1'b1;
