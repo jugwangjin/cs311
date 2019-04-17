@@ -30,7 +30,7 @@ module ALUcontrol(ALUFuncCode, IsALU, opcode, func);
             ALUFuncCode = `ADD;
         end
         else if (opcode == `JRL_OP && func == `INST_FUNC_JRL) begin
-            `INST_FUNC_JRL : ALUFuncCode = `ADD;
+            ALUFuncCode = `ADD;
         end
         else begin
             if (opcode == `ADI_OP) begin
