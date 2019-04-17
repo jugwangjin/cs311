@@ -198,7 +198,6 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
         MEMWB_ALUOutput = 0;
         MEMWB_ReadData = 0;
         MEMWB_rd = 0;
-        RegUpdate = 0;
     end
 
     always @(posedge Clk) begin
@@ -237,7 +236,6 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
             MEMWB_ALUOutput = 0;
             MEMWB_ReadData = 0;
             MEMWB_rd = 0;
-            RegUpdate = 0;
         end
         else begin
             // Check if the instruction in WB stage is bubble or not
@@ -282,7 +280,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
             EXMEM_rd = IDEX_rd;
             EXMEM_IsBubble = IDEX_IsBubble;
             EXMEM_controls = IDEX_controls[4:0];
-            EXMEM_IsHLT == EXMEM_IsHLT_input;
+            EXMEM_IsHLT = EXMEM_IsHLT_input;
     
             // IDEX Latch
             if (ID_stall == 1'b0) begin
@@ -314,15 +312,13 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
 
 
             // IFID Latch
-            else begin
-                if (ID_stall == 1'b0) begin
-                    if(flushIF) begin
-                        IFID_IsBubble = 1'b1;
-                    end
-                    else begin
-                        IFID_instruction = instruction;
-                        IFID_IsBubble =1'b0;
-                    end
+            if (ID_stall == 1'b0) begin
+                if(flushIF) begin
+                    IFID_IsBubble = 1'b1;
+                end
+                else begin
+                    IFID_instruction = instruction;
+                    IFID_IsBubble =1'b0;
                 end
             end
         end
