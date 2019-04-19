@@ -30,15 +30,15 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
 
     output is_halted;
 	reg is_halted;
-    output [`WORD_SIZE-1:0]IFID_instruction;
+    output [`WORD_SIZE-1:0]IFID_instruction; // control is produced with instruction in ID stage
     reg [`WORD_SIZE-1:0]IFID_instruction;
 	output [`WORD_SIZE-1:0] num_inst;
 	reg [`WORD_SIZE-1:0] num_inst;
 	output [`WORD_SIZE-1:0] output_port;
 	reg [`WORD_SIZE-1:0] output_port;
 
-	reg [`WORD_SIZE-1:0]instruction;
-    reg [`WORD_SIZE-1:0]PC;
+	reg [`WORD_SIZE-1:0]instruction; // instruciton read from memory
+    reg [`WORD_SIZE-1:0]PC; 
 
     //controls : (WB) WWD[0], RegWrite[1], MemtoReg[2] (MEM) MemWrite[3], MemRead[4] (EX) IsBranch[5], ALUSrc[6], IsALU[7], IsJumpR[8], IsJumpI[9] (ID) RegDst[10]
     // IFID_* means latch values between IF and ID stage.
@@ -60,8 +60,10 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
     reg IDEX_IsBubble;
 
     reg [4:0]EXMEM_controls;
-    reg [`WORD_SIZE-1:0]EXMEM_ALUOutput;
-    reg [`WORD_SIZE-1:0]EXMEM_ReadData2;
+    reg [`WORD_SIZE-1:0]EXMEM_ALUOutput; // 
+    reg [`WORD_SIZE-1:0]EXMEM_ReadData2; // data from register $rt
+                                            // for instructions with data from register $rs, we can use ALUOutput. 
+                                            // because in that case, ALUInput2 = 0 and ALUOp = `ADD.
     reg [1:0]EXMEM_rd;
     reg EXMEM_IsBubble;
     reg EXMEM_IsHLT;
