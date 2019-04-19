@@ -11,10 +11,13 @@ module control(Clk, instruction, is_halted, Reset_N, controls);
     // ALUSrc : if true, use imm value 
     // IsALU : if true, R-type ALU instruction. (has func)
     // RegDst : if true, ID_rd will be IDEX_rd. else, ID_rt will be IDEX_rd
+    // IsJumpI is jump with imm value, IsJumpR is jump with register value
     // IsJumpI is used in ID Stage, but it is needed to check if this instruction is jump instruction and it writes to register (JAL)
+
     wire [`WORD_SIZE-1:0]instruction;
 	wire [3:0]opcode;
 	wire [5:0]func;
+    
 	assign opcode = instruction[15:12];
 	assign func = instruction[5:0];
 
