@@ -295,8 +295,15 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
             IDEX_controls = controls[9:0];
 
             // IFID Latch
-            IFID_instruction = instruction;
-            IFID_IsBubble = ID_stall || IF_flush;
+            if (ID_stall == 1'b0) begin
+                if(IF_flush) begin
+                    IFID_IsBubble = 1'b1;
+                end
+                else begin
+                    IFID_instruction = instruction;
+                    IFID_IsBubble = 1'b0;
+                end
+            end
         end
     end
 
