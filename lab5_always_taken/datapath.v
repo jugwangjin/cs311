@@ -149,9 +149,8 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
     forwarding FORWARDING_MODULE (EX_forwardA, EX_forwardB, IDEX_rs, IDEX_rt, EXMEM_controls[1], EXMEM_rd, MEMWB_controls[1], MEMWB_rd);
     hazard HAZARD_MODULE(ID_stall, ID_use_rs, ID_rs, ID_use_rt, ID_rt, IDEX_controls[4], IDEX_rd);
     branchcondition BRANCHCONDITION_MODULE (EX_bcond, IDEX_controls[5], IDEX_opcode, EX_ALUOutput);
-    // adder EX_additionalPC_ADDER_MODULE(EX_additionalPC, IDEX_PC, IDEX_imm);
-    adder PC_ADDER_MODULE(IF_increasePCOutput, IDEX_PC, IF_increasePCInput2);
-    adder PC_ADDER_MODULE(IF_predictorOutput, IF_increasePCOutput, IF_predictorInput2);
+    adder increasePC_MODULE(IF_increasePCOutput, IDEX_PC, IF_increasePCInput2);
+    adder predictor_MODULE(IF_predictorOutput, IF_increasePCOutput, IF_predictorInput2);
  
     initial begin
         num_inst = `WORD_SIZE'b0;
