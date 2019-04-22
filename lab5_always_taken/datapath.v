@@ -39,7 +39,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
 
 	reg [`WORD_SIZE-1:0]instruction; // instruciton read from memory
     reg [`WORD_SIZE-1:0]PC; 
-    wire [`WORD_SIZE-1:0]tmpPC;
+    reg [`WORD_SIZE-1:0]tmpPC;
 
     //controls : (WB) WWD[0], RegWrite[1], MemtoReg[2] (MEM) MemWrite[3], MemRead[4] (EX) IsBranch[5], ALUSrc[6], IsALU[7], IsJumpR[8], IsJumpI[9] (ID) RegDst[10]
     // IFID_* means latch values between IF and ID stage.
