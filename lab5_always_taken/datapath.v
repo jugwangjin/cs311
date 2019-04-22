@@ -106,7 +106,6 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
     wire [3:0] EX_ALUOp;
     wire EX_OverflowFlag;
     wire EX_bcond; // branch condition
-    wire [`WORD_SIZE-1:0]EX_branchPC; // PC when branch condition is True
 
     wire [`WORD_SIZE-1:0]WB_WriteData;
 
@@ -296,12 +295,12 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
             IDEX_controls = controls[9:0];
 
             // IFID Latch
+            IFID_instruction = instruction;
             if (ID_stall == 1'b0) begin
                 if(IF_flush) begin
                     IFID_IsBubble = 1'b1;
                 end
                 else begin
-                    IFID_instruction = instruction;
                     IFID_IsBubble = 1'b0;
                 end
             end
