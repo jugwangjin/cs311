@@ -120,9 +120,9 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
     assign IF_PCAdderInput1 = ((IDEX_IsBubble == 1'b1 || EX_bcond == 1'b0) && IDEX_controls[5] == 1'b1) ? IDEX_PC : PC;
     assign IF_PCAdderInput2 = (instruction[`WORD_SIZE-1] == 0 && instruction[`WORD_SIZE-2] == 0) ? {{8{instruction[7]}}, {instruction[7:0]}} : `WORD_SIZE'd1;
     assign IF_nextPC = (ID_stall == 1'b1) ? PC : (IDEX_IsBubble == 1'b0 && IDEX_controls[8] == 1'b1) ? EX_forwardedReadData1 : (IFID_IsBubble == 1'b0 && controls[9] == 1'b1) ? {{PC[15:12]}, {ID_target_address[11:0]}} : IF_PCAdderOutput;
-    assign IF_flush = ((IDEX_IsBubble == 1'b0) && ((EX_bcond == 1'b0 && IDEX_controls[5] == 1'b1) || IDEX_controls[8])) || ((IFID_IsBubble == 1'b0) && controls[9] == 1'b1);
+    assign IF_flush = ((IDEX_IsBubble == 1'b0) && (((IDEX_IsBubble == 1'b1 || EX_bcond == 1'b0) && IDEX_controls[5] == 1'b1) || IDEX_controls[8])) || ((IFID_IsBubble == 1'b0) && controls[9] == 1'b1);
 
-    assign ID_flush = (IDEX_IsBubble == 1'b0) && ((EX_bcond == 1'b0 && IDEX_controls[5] == 1'b1) || IDEX_controls[8]);
+    assign ID_flush = (IDEX_IsBubble == 1'b0) && (((IDEX_IsBubble == 1'b1 || EX_bcond == 1'b0) && IDEX_controls[5] == 1'b1) || IDEX_controls[8]);
 
     assign ID_opcode = IFID_instruction[15:12];
     assign ID_rs = IFID_instruction[11:10];
