@@ -39,6 +39,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
 
 	reg [`WORD_SIZE-1:0]instruction; // instruciton read from memory
     reg [`WORD_SIZE-1:0]PC; 
+    wire [`WORD_SIZE-1:0]tmpPC;
 
     //controls : (WB) WWD[0], RegWrite[1], MemtoReg[2] (MEM) MemWrite[3], MemRead[4] (EX) IsBranch[5], ALUSrc[6], IsALU[7], IsJumpR[8], IsJumpI[9] (ID) RegDst[10]
     // IFID_* means latch values between IF and ID stage.
@@ -118,7 +119,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
     assign readM1 = !is_halted;
     
     assign IF_nextPC = (ID_stall == 1'b1) ? PC : (IDEX_IsBubble == 1'b0 && IDEX_controls[8] == 1'b1) ? EX_forwardedReadData1 : (IFID_IsBubble == 1'b0 && controls[9] == 1'b1) ? {{PC[15:12]}, {ID_target_address[11:0]}} : IF_predictedPC;
-    assign IF_predictorInput2 = (IFID_IsBubble == 1'b0 && IFID_instruction[`WORD_SIZE-1] == 1'b0 && IFID_instruction[`WORD_SIZE-2] == 1'b0) ? {{8{instruction[7]}}, {instruction[7:0]}} : `WORD_SIZE'd0;
+    assign IF_predictorInput2 = (IFID_IsBubble == 1'b0 && IFID_instruction[`WORD_SIZE-1] == 1'b0 && IFID_instruction[`WORD_SIZE-2] == 1'b0) ? {{8{IFID_instruction[7]}}, {IFID_instruction[7:0]}} : `WORD_SIZE'd0;
     assign IF_PCincreamentInput1 = ((EX_bcond == 1'b0 || IDEX_IsBubble == 1'b1) && IDEX_controls[5] == 1'b1) ? IDEX_PC : PC;
     
     assign IF_flush = ((EX_bcond == 1'b0 || IDEX_IsBubble == 1'b1) && IDEX_controls[5] == 1'b1) || (IDEX_IsBubble == 1'b0 && IDEX_controls[8]) || (IFID_IsBubble == 1'b0 && controls[9] == 1'b1);
@@ -155,6 +156,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
     initial begin
         num_inst = `WORD_SIZE'b0;
         PC = `WORD_SIZE'b0;
+        tmpPC = `WORD_SIZE'b0;
         is_halted = 1'b0;
         instruction = `WORD_SIZE'b0;
         output_port = `WORD_SIZE'b0;
@@ -196,6 +198,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
         else if(!Reset_N) begin
             num_inst = `WORD_SIZE'b0;
             PC = `WORD_SIZE'b0;
+            tmpPC = `WORD_SIZE'b0;
             is_halted = 1'b0;
             instruction = `WORD_SIZE'b0;
             IFID_IsBubble = 1'b1;
@@ -246,10 +249,12 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
             // save instruction before update PC, just in case.
             instruction = data1;
 
+            // add latch to store PC value before updating IDEX_PC
+            tmpPC = IF_nextPC;
             // update PC 
             IDEX_PC = IFID_PC;
             IFID_PC = PC;
-            PC = IF_nextPC;
+            PC = tmpPC;
 
             // MEMWB Latch
             MEMWB_ALUOutput = EXMEM_ALUOutput;
