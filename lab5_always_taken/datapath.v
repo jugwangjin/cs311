@@ -75,10 +75,10 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
     reg MEMWB_IsBubble;
     reg MEMWB_IsHLT;
 
-    wire [`WORD_SIZE-1:0]IF_increasePCInput2;
-    wire [`WORD_SIZE-1:0]IF_increasePCOutput;
+    wire [`WORD_SIZE-1:0]IF_predictedPC;
+    wire [`WORD_SIZE-1:0]IF_increamentedPC;
     wire [`WORD_SIZE-1:0]IF_predictorInput2;
-    wire [`WORD_SIZE-1:0]IF_predictorOutput;
+    wire [`WORD_SIZE-1:0]IF_PCincreamentInput1;
     wire [`WORD_SIZE-1:0]IF_nextPC;
     wire IF_flush;
 
@@ -106,6 +106,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
     wire [3:0] EX_ALUOp;
     wire EX_OverflowFlag;
     wire EX_bcond; // branch condition
+    wire [`WORD_SIZE-1:0]EX_branchPC; // PC when branch condition is True
 
     wire [`WORD_SIZE-1:0]WB_WriteData;
 
@@ -116,15 +117,15 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
     assign readM2 = EXMEM_controls[4];
     assign writeM2 = EXMEM_controls[3];
     assign readM1 = !is_halted;
+    
+    assign IF_nextPC = (ID_stall == 1'b1) ? PC : (IDEX_IsBubble == 1'b0 && IDEX_controls[8] == 1'b1) ? EX_forwardedReadData1 : (IFID_IsBubble == 1'b0 && controls[9] == 1'b1) ? {{PC[15:12]}, {ID_target_address[11:0]}} : IF_predictedPC;
+    assign IF_predictorInput2 = (IFID_IsBubble == 1'b0 && instruction[`WORD_SIZE-1] == 0 && instruction[`WORD_SZIE-2] == 0) ? {{8{instruction[7]}}, {instruction[7:0]}} : 0;
+    assign IF_PCincreamentInput1 = ((EX_bcond == 1'b0 || IDEX_IsBubble == 1'b1) && IDEX_controls[5] == 1'b1) ? IDEX_PC : PC;
+    
+    assign IF_flush = ((EX_bcond == 1'b0 || IDEX_IsBubble == 1'b1) && IDEX_controls[5] == 1'b1) || (IDEX_IsBubble == 1'b0 && IDEX_controls[8]) || (IFID_IsBubble == 1'b0 && controls[9] == 1'b1);
 
-    assign IF_increasePCInput1 = ((IDEX_IsBubble == 1'b1 || EX_bcond == 1'b0) && IDEX_controls[5] == 1'b1) ? IDEX_PC : PC;
-    assign IF_increasePCInput2 = `WORD_SIZE'd1;
-    assign IF_predictorInput2 = (instruction[`WORD_SIZE-1] == 0 && instruction[`WORD_SIZE-2] == 0) ? {{8{instruction[7]}}, {instruction[7:0]}} : `WORD_SIZE'd0;
-    assign IF_nextPC = (ID_stall == 1'b1) ? PC : (IDEX_IsBubble == 1'b0 && IDEX_controls[8] == 1'b1) ? EX_forwardedReadData1 : (IFID_IsBubble == 1'b0 && controls[9] == 1'b1) ? {{PC[15:12]}, {ID_target_address[11:0]}} : ((IDEX_IsBubble == 1'b1 || EX_bcond == 1'b0) && IDEX_controls[5] == 1'b1) ? IF_increasePCOutput : IF_predictorOutput;
-    assign IF_flush = ((IDEX_IsBubble == 1'b0) && (((IDEX_IsBubble == 1'b1 || EX_bcond == 1'b0) && IDEX_controls[5] == 1'b1) || IDEX_controls[8])) || ((IFID_IsBubble == 1'b0) && controls[9] == 1'b1);
-
-    assign ID_flush = (IDEX_IsBubble == 1'b0) && (((IDEX_IsBubble == 1'b1 || EX_bcond == 1'b0) && IDEX_controls[5] == 1'b1) || IDEX_controls[8]);
-
+    assign ID_flush = ((EX_bcond == 1'b0 || IDEX_IsBubble == 1'b1) && IDEX_controls[5] == 1'b1) || (IDEX_IsBubble == 1'b0 && IDEX_controls[8]);
+   
     assign ID_opcode = IFID_instruction[15:12];
     assign ID_rs = IFID_instruction[11:10];
     assign ID_rt = IFID_instruction[9:8];
@@ -149,9 +150,9 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
     forwarding FORWARDING_MODULE (EX_forwardA, EX_forwardB, IDEX_rs, IDEX_rt, EXMEM_controls[1], EXMEM_rd, MEMWB_controls[1], MEMWB_rd);
     hazard HAZARD_MODULE(ID_stall, ID_use_rs, ID_rs, ID_use_rt, ID_rt, IDEX_controls[4], IDEX_rd);
     branchcondition BRANCHCONDITION_MODULE (EX_bcond, IDEX_controls[5], IDEX_opcode, EX_ALUOutput);
-    adder increasePC_MODULE(IF_increasePCOutput, IDEX_PC, IF_increasePCInput2);
-    adder predictor_MODULE(IF_predictorOutput, IF_increasePCOutput, IF_predictorInput2);
- 
+    adder predictor_MODULE(IF_predictedPC, IF_increamentedPC, IF_predictorInput2);
+    adder PC_increament_MODULE(IF_increamentedPC, IF_PCincreamentInput1, `WORD_SIZE'd1);
+    
     initial begin
         num_inst = `WORD_SIZE'b0;
         PC = `WORD_SIZE'b0;
@@ -288,17 +289,11 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
                 else begin
                     IDEX_IsBubble = IFID_IsBubble;
                 end
-                if(IDEX_IsBubble == 1'b1) begin
-                    IDEX_controls = 10'b0;
-                end
-                else begin
-                    IDEX_controls = controls[9:0];
-                end
             end
             else begin
                 IDEX_IsBubble = 1'b1;
-                IDEX_controls = 10'b0;
             end
+            IDEX_controls = controls[9:0];
 
             // IFID Latch
             if (ID_stall == 1'b0) begin
@@ -307,7 +302,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
                 end
                 else begin
                     IFID_instruction = instruction;
-                    IFID_IsBubble =1'b0;
+                    IFID_IsBubble = 1'b0;
                 end
             end
         end
