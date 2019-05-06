@@ -65,14 +65,14 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 
 	assign address1_tag = address1[`WORD_SIZE-1:`WORD_SIZE-`TAG_SIZE];
 	assign address1_index = address1[`WORD_SIZE-`TAG_SIZE-1:`WORD_SIZE-`TAG_SIZE-3]
-	assign i_cache_tag_hit = address1_tag == i_cache_tag[address1_index];
-	assign i_cache_hit = i_cache_tag_hit && i_cache_valid[address1_index]
+	assign i_cache_tag_hit = (address1_tag == i_cache_tag[address1_index]);
+	assign i_cache_hit = (i_cache_tag_hit && i_cache_valid[address1_index]);
 	assign i_cache_output = i_cache_data[address1_index][address1[1:0]];
 
 	assign address2_tag = address2[`WORD_SIZE-1:`WORD_SIZE-`TAG_SIZE];
 	assign address2_index = address2[`WORD_SIZE-`TAG_SIZE-1:`WORD_SIZE-`TAG_SIZE-3]
-	assign d_cache_tag_hit = address2_tag == d_cache_tag[address2_index];
-	assign d_cache_hit = d_cache_tag_hit && d_cache_valid[address2_index]
+	assign d_cache_tag_hit = (address2_tag == d_cache_tag[address2_index]);
+	assign d_cache_hit = (d_cache_tag_hit && d_cache_valid[address2_index]);
 	assign d_cache_output = d_cache_data[address2_index][address2[1:0]];
 
 	wire [`WORD_SIZE-1:0] const_bz [`LINE_SIZE];
