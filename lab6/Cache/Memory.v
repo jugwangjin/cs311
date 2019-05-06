@@ -42,14 +42,14 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 	reg [2:0]M2delay;
 
 	// I/D separated cache
-	reg [`TAG_SIZE-1:0] i_cache_tag [0:`LINE_NUMBER];
-	reg i_cache_valid [0:`LINE_NUMBER];
-	reg [`WORD_SIZE-1:0] i_cache_data [0:`LINE_NUMBER][0:`LINE_SIZE];
+	reg [`TAG_SIZE-1:0] i_cache_tag [`LINE_NUMBER:0];
+	reg i_cache_valid [`LINE_NUMBER:0];
+	reg [`WORD_SIZE-1:0] i_cache_data [`LINE_NUMBER:0][`LINE_SIZE:0];
 
-	reg [`TAG_SIZE-1:0] d_cache_tag [0:`LINE_NUMBER];
-	reg d_cache_valid [0:`LINE_NUMBER];
-	reg [`WORD_SIZE-1:0] d_cache_data [0:`LINE_NUMBER][0:`LINE_SIZE];
-	reg d_cache_dirty [0:`LINE_NUMBER];	
+	reg [`TAG_SIZE-1:0] d_cache_tag [`LINE_NUMBER:0];
+	reg d_cache_valid [`LINE_NUMBER:0];
+	reg [`WORD_SIZE-1:0] d_cache_data [`LINE_NUMBER:0][`LINE_SIZE:0];
+	reg d_cache_dirty [`LINE_NUMBER:0];	
 
 	wire [`TAG_SIZE-1:0]address1_tag;
 	wire [2:0]address1_index;
