@@ -247,21 +247,21 @@ module Memory(clk, reset_n, readM1, address1, data1, readM2, writeM2, address2, 
 			end
 		else
 			begin
-				if(M1delay == 1'b0 && M2delay == 1'b1) begin
+				if(M2delay == 1'b1) begin
 					if(readM2)outputData2 <= memory[address2];
 					if(writeM2)memory[address2] <= data2;	
-					M2delay <= 1'b0;
+					M2delay = 1'b0;
 				end
-				else begin
+				else if (M1delay == 1'b0) begin
 					if (readM2 == 1'b1 || writeM2 == 1'b1) begin
 						M2delay <= 1'b1;
 					end
 				end					
-				if(M2delay == 1'b0 && M1delay == 1'b1) begin
+				if(M1delay == 1'b1) begin
 					data1 <= (writeM2 & address1==address2)?data2:memory[address1];
 					M1delay <= 1'b0;
 				end
-				else begin
+				else if (M2delay == 1'b0) begin
 					if (readM1 == 1'b1) begin
 						M1delay <= 1'b1;
 					end
