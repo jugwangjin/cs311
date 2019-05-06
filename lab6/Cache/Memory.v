@@ -311,16 +311,16 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 				if(M2delay == 3'd5) begin
 					if(d_cache_valid[address2_index] == 1'b0 || d_cache_dirty[address2_index] == 1'b0) begin
 						for (i=0; i<`LINE_SIZE; i=i+1) begin
-							d_cache_data[address2_index][i] = memory[{{address2[`WORD_SIZE-1:2]}, {i}}];
+							d_cache_data[address2_index][i] <= memory[{{address2[`WORD_SIZE-1:2]}, {i}}];
 						end
-						d_cache_valid[address2_index] = 1'b1;
+						d_cache_valid[address2_index] <= 1'b1;
+						d_cache_tag[address2_index] <= address2_tag;
 					end	
 					else begin
 						for (i=0; i<`LINE_SIZE; i=i+1) begin
-							memory[{{d_cache_tag[address2_index]}, {address2_index}, {i}}] = d_cache_data[address2_index][i];
+							memory[{{d_cache_tag[address2_index]}, {address2_index}, {i}}] <= d_cache_data[address2_index][i];
 						end
-						d_cache_valid[address2_index] = 1'b1;
-						d_cache_dirty[address2_index] = 1'b0;
+						d_cache_dirty[address2_index] <= 1'b0;
 					end
 					M2delay <= 3'b0;
 				end
@@ -330,29 +330,32 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 							if(readM2)outputData2 <= d_cache_output;
 							if(writeM2) begin
 								d_cache_data[address2_index][address2[1:0]] <= data2;
-								d_cache_dirty[address2_index] = 1'b1;
+								d_cache_dirty[address2_index] <= 1'b1;
 							end
 						end
 						else begin
-							M2delay = M2delay + 3'b001;
+							M2delay <= M2delay + 3'b001;
 						end
 					end
 				end		
 
 				if(M1delay == 3'd5) begin
 					for (i=0; i<`LINE_SIZE; i=i+1) begin
-						i_cache_data[address1_index][i] = memory[{{address1[`WORD_SIZE-1:2]}, {i}}];
+						i_cache_data[address1_index][i] <= memory[{{address1[`WORD_SIZE-1:2]}, {i}}];
 					end
-					i_cache_valid[address1_index] = 1'b1;
+					i_cache_valid[address1_index] <= 1'b1;
+					i_cache_tag[address1_index] <= address1_tag;
 					M1delay <= 3'b0;
 				end
 				else begin
 					if(readM1 == 1'b1) begin
 						if(i_cache_hit == 1'b1) begin
-							if(readM1)data1 <= i_cache_output;
+							if(readM1) begin 
+								data1 <= i_cache_output;
+							end
 						end
 						else begin
-							M1delay = M1delay + 3'b001;
+							M1delay <= M1delay + 3'b001;
 						end
 					end
 				end							  
