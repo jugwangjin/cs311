@@ -350,9 +350,7 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 				else begin
 					if(readM1 == 1'b1) begin
 						if(i_cache_hit == 1'b1) begin
-							if(readM1) begin 
-								data1 <= i_cache_output;
-							end
+							data1 <= i_cache_output;
 						end
 						else begin
 							M1delay <= M1delay + 3'b001;
