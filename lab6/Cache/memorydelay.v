@@ -32,7 +32,7 @@ module memorydelay(IF_stall, ID_stall, M1busy, readM1, IDEX_IsBubble, IDEX_IsBra
     wire EXMEM_IsBubble;
 
     assign MEM_stall = (EXMEM_IsBubble == 1'b0) && ((MemRead == 1'b1 || MemWrite==1'b1) && M2busy == 1'b1);
-    assign IF_stall = ((M1busy == 1'b1) && (readM1==1'b1||(IFID_IsJumpI==1'b1 && (IFID_IsBubble==1'b0)));
+    assign IF_stall = (M1busy == 1'b1) && (readM1==1'b1 || (IFID_IsJumpI==1'b1 && IFID_IsBubble == 1'b0));
     assign ID_stall = (M1busy == 1'b1) && (IDEX_IsBubble==1'b0) && (IDEX_IsBranch ==1'b1 || IDEX_IsJumpR==1'b1);
 
 endmodule
