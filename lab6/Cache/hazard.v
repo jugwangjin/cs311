@@ -1,15 +1,9 @@
 `include "opcodes.v"
 
-module hazard(stall, IF_stall, IDEX_IsBubble, IDEX_IsJumpR, use_rs, rs, use_rt, rt, IDEX_MemRead, IDEX_rd);
+module hazard(stall, use_rs, rs, use_rt, rt, IDEX_MemRead, IDEX_rd);
     output stall;
     wire stall;
 
-    input IF_stall;
-    wire IF_stall;
-    input IDEX_IsBubble;
-    wire IDEX_IsBubble;
-    input IDEX_IsJumpR;
-    wire IDEX_IsJumpR;
     input use_rs;
     input [1:0]rs;
     input use_rt;
@@ -28,6 +22,6 @@ module hazard(stall, IF_stall, IDEX_IsBubble, IDEX_IsJumpR, use_rs, rs, use_rt, 
     assign rsstall = (rs == IDEX_rd) && use_rs == 1'b1;
     assign rtstall = (rt == IDEX_rd) && use_rt == 1'b1;
 
-    assign stall = (((rsstall == 1'b1 || rtstall == 1'b1) && IDEX_MemRead == 1'b1) || (IF_stall == 1'b1 && IDEX_IsBubble == 1'b0 && IDEX_IsJumpR == 1'b1)) ? 1'b1 : 1'b0;
+    assign stall = ((rsstall == 1'b1 || rtstall == 1'b1) && IDEX_MemRead == 1'b1) ? 1'b1 : 1'b0;
 
 endmodule
