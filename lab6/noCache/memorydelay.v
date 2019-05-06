@@ -6,12 +6,10 @@ module memorydelay(IF_stall, Mbusy, readM1, MEM_stall, MemWrite, MemRead, EXMEM_
     output IF_stall;
     wire IF_stall;
 
-    input M1busy;
-    wire M1busy;
+    input Mbusy;
+    wire Mbusy;
     input readM1;
     wire readM1;
-    input M2busy;
-    wire M2busy;
     input MemWrite;
     wire MemWrite;
     input MemRead;
