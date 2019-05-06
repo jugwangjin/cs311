@@ -4,8 +4,9 @@
 `define WORD_SIZE 16	//	instead of 2^16 words to reduce memory
 			//	requirements in the Active-HDL simulator 
 
+`define LINE_NUMBER 8
 `define LINE_SIZE 4
-`define TAG_SIZE 14
+`define TAG_SIZE 11
 
 module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, address2, data2, M2busy);
 	input clk;
@@ -40,7 +41,39 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 	reg [2:0]M1delay;
 	reg [2:0]M2delay;
 
+	// I/D separated cache
+	reg [`TAG_SIZE-1:0] i_cache_tag [0:`LINE_NUMBER];
+	reg i_cache_valid [0:`LINE_NUMBER];
+	reg [`WORD_SIZE-1:0] i_cache_data [0:`LINE_NUMBER][0:`LINE_SIZE];
 
+	reg [`TAG_SIZE-1:0] d_cache_tag [0:`LINE_NUMBER];
+	reg d_cache_valid [0:`LINE_NUMBER];
+	reg [`WORD_SIZE-1:0] d_cache_data [0:`LINE_NUMBER][0:`LINE_SIZE];
+	reg d_cache_dirty [0:`LINE_NUMBER];	
+
+	wire [`TAG_SIZE-1:0]address1_tag;
+	wire [2:0]address1_index;
+	wire i_cache_hit;
+	wire i_cache_tag_hit;
+	wire i_cache_output;
+
+	wire [`TAG_SIZE-1:0]address2_tag;
+	wire [2:0]address2_index;
+	wire d_cache_hit;
+	wire d_cache_tag_hit;
+	wire d_cache_output;
+
+	assign address1_tag = address1[`WORD_SIZE-1:`WORD_SIZE-`TAG_SIZE];
+	assign address1_index = address1[`WORD_SIZE-`TAG_SIZE-1:`WORD_SIZE-`TAG_SIZE-3]
+	assign i_cache_tag_hit = address1_tag == i_cache_tag[address1_index];
+	assign i_cache_hit = i_cache_tag_hit && i_cache_valid[address1_index]
+	assign i_cache_output = i_cache_data[address1_index][address1[1:0]];
+
+	assign address2_tag = address2[`WORD_SIZE-1:`WORD_SIZE-`TAG_SIZE];
+	assign address2_index = address2[`WORD_SIZE-`TAG_SIZE-1:`WORD_SIZE-`TAG_SIZE-3]
+	assign d_cache_tag_hit = address2_tag == d_cache_tag[address2_index];
+	assign d_cache_hit = d_cache_tag_hit && d_cache_valid[address2_index]
+	assign d_cache_output = d_cache_data[address2_index][address2[1:0]];
 
 	wire [`WORD_SIZE-1:0] const_bz [`LINE_SIZE];
 	assign const_bz[0] = `WORD_SIZE'bz;
@@ -57,9 +90,24 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 	always@(posedge clk)
 		if(!reset_n)
 			begin
-				// init delays
+				// init delays and cache
 				M1delay = 3'b0;
 				M2delay = 3'b0;
+				for(i=0; i<`LINE_NUMBER; i=i+1) begin
+					i_cache_tag[i] = `TAG_SIZE'b0;
+					i_cache_valid = 1'b0;
+					i_cache_data[i][0] = `WORD_SIZE'b0;
+					i_cache_data[i][1] = `WORD_SIZE'b0;
+					i_cache_data[i][2] = `WORD_SIZE'b0;
+					i_cache_data[i][3] = `WORD_SIZE'b0;
+					d_cache_tag[i] = `TAG_SIZE'b0;
+					d_cache_valid = 1'b0;
+					d_cache_dirty = 1'b0;
+					d_cache_data[i][0] = `WORD_SIZE'b0;
+					d_cache_data[i][1] = `WORD_SIZE'b0;
+					d_cache_data[i][2] = `WORD_SIZE'b0;
+					d_cache_data[i][3] = `WORD_SIZE'b0;
+				end
 			
 				memory[16'h0] <= 16'h9023;
 				memory[16'h1] <= 16'h1;
@@ -262,27 +310,52 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 				memory[16'hc6] <= 16'hf01d;
 			end
 		else
+			// this memory has 2 ports
+			// one port is for I memory read, the other port is for D memory read/write
+			// so the port for D memory read/write does not do the read/write in parallel.
 			begin
 				if(M2delay == 3'd5) begin
-					for (i=0; i<`LINE_SIZE; i=i+1) begin
-						if(readM2)outputData2[i] <= memory[{{address2}, {i}}];
-						if(writeM2)memory[{{address2},{i}}] <= data2[i];
+					if(d_cache_valid == 1'b0 || d_cache_dirty == 1'b0) begin
+						for (i=0; i<`LINE_SIZE; i=i+1) begin
+							d_cache_data[address2_index][i] = memory[{{address2[`WORD_SIZE-1:2]}, {i}}];
+						end
+						d_cache_valid[address2_index] = 1'b1;
 					end	
+					else begin
+						for (i=0; i<`LINE_SIZE; i=i+1) begin
+							memory[{{d_cache_tag}, {address2_index}, {i}}] = d_cache_data[address2_index][i];
+						end
+						d_cache_valid[address2_index] = 1'b1;
+						d_cache_dirty[address2_index] = 1'b0;
+					end
 					M2delay <= 3'b0;
 				end
 				else begin
 					if (readM2 == 1'b1 || writeM2 == 1'b1) begin
-						M2delay = M2delay + 3'b001;
+						if(d_cache_hit == 1'b1) begin
+							if(readM2)outputData2 <= d_cache_output;
+							if(writeM2) begin
+								d_cache_data[address2_index][address2[1:0]] <= data2;
+								d_cache_dirty[address2_index] = 1'b1;
+							end
+						end
+						else begin
+							M2delay = M2delay + 3'b001;
+						end
 					end
 				end		
 				if(M1delay == 3'd5) begin
 					for (i=0; i<`LINE_SIZE; i=i+1) begin
-						data1[i] <= (writeM2 & address1==address2)?data2[i]:memory[{{address1}, {i}}];
+						i_cache_data[address1_index][i] = memory[{{address1[`WORD_SIZE-1:2]}, {i}}];
 					end
+					i_cache_valid[address1_index] = 1'b1;
 					M1delay <= 3'b0;
 				end
 				else begin
-					if (readM1 == 1'b1) begin
+					if(i_cache_hit == 1'b1) begin
+						if(readM1)data1 <= i_cache_output;
+					end
+					else begin
 						M1delay = M1delay + 3'b001;
 					end
 				end							  
