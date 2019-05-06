@@ -66,13 +66,13 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 	assign address1_tag = address1[`WORD_SIZE-1:`WORD_SIZE-`TAG_SIZE];
 	assign address1_index = address1[`WORD_SIZE-`TAG_SIZE-1:`WORD_SIZE-`TAG_SIZE-3];
 	assign i_cache_tag_hit = (address1_tag == i_cache_tag[address1_index]);
-	assign i_cache_hit = (i_cache_tag_hit && i_cache_valid[address1_index]);
+	assign i_cache_hit = (!M1busy && i_cache_tag_hit && i_cache_valid[address1_index]);
 	assign i_cache_output = i_cache_data[address1_index][address1[1:0]];
 
 	assign address2_tag = address2[`WORD_SIZE-1:`WORD_SIZE-`TAG_SIZE];
 	assign address2_index = address2[`WORD_SIZE-`TAG_SIZE-1:`WORD_SIZE-`TAG_SIZE-3];
 	assign d_cache_tag_hit = (address2_tag == d_cache_tag[address2_index]);
-	assign d_cache_hit = (d_cache_tag_hit && d_cache_valid[address2_index]);
+	assign d_cache_hit = (!M2busy && d_cache_tag_hit && d_cache_valid[address2_index]);
 	assign d_cache_output = d_cache_data[address2_index][address2[1:0]];
 	
 	assign data2 = readM2?outputData2:`WORD_SIZE'bz;
@@ -308,6 +308,19 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 			// one port is for I memory read, the other port is for D memory read/write
 			// so the port for D memory read/write does not do the read/write in parallel.
 			begin
+				if (readM2 == 1'b1 || writeM2 == 1'b1) begin
+					if(d_cache_hit == 1'b1) begin
+						if(readM2)outputData2 <= d_cache_output;
+						if(writeM2) begin
+							d_cache_data[address2_index][address2[1:0]] <= data2;
+							d_cache_dirty[address2_index] <= 1'b1;
+						end
+					end
+					else begin
+						M2delay <= M2delay + 3'b001;
+					end
+				end
+
 				if(M2delay >= 3'd5) begin
 					if(d_cache_valid[address2_index] == 1'b0 || d_cache_dirty[address2_index] == 1'b0) begin
 						for (i=0; i<`LINE_SIZE; i=i+1) begin
@@ -325,18 +338,14 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 					M2delay <= 3'b0;
 				end
 
-				if (readM2 == 1'b1 || writeM2 == 1'b1) begin
-					if(d_cache_hit == 1'b1) begin
-						if(readM2)outputData2 <= d_cache_output;
-						if(writeM2) begin
-							d_cache_data[address2_index][address2[1:0]] <= data2;
-							d_cache_dirty[address2_index] <= 1'b1;
-						end
+				if(readM1 == 1'b1) begin
+					if(i_cache_hit == 1'b1) begin
+						data1 <= i_cache_output;
 					end
 					else begin
-						M2delay <= M2delay + 3'b001;
+						M1delay <= M1delay + 3'b001;
 					end
-				end
+				end	
 
 				if(M1delay >= 3'd5) begin
 					for (i=0; i<`LINE_SIZE; i=i+1) begin
@@ -346,14 +355,5 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 					i_cache_tag[address1_index] <= address1_tag;
 					M1delay <= 3'b0;
 				end
-
-				if(readM1 == 1'b1) begin
-					if(i_cache_hit == 1'b1) begin
-						data1 <= i_cache_output;
-					end
-					else begin
-						M1delay <= M1delay + 3'b001;
-					end
-				end					  
 			end
 endmodule
