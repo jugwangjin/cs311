@@ -333,7 +333,7 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 							d_cache_dirty[address2_index] <= 1'b1;
 						end
 					end
-					else if (M2busy) begin
+					else begin
 						M2delay <= M2delay + 3'b001;
 					end
 				end
@@ -351,7 +351,7 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 					if(i_cache_hit == 1'b1) begin
 						data1 <= i_cache_output;
 					end
-					else if (M1busy) begin
+					else begin
 						M1delay <= M1delay + 3'b001;
 					end
 				end					  
