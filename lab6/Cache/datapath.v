@@ -96,8 +96,6 @@ module datapath (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, writeM2,
     wire [`WORD_SIZE-1:0]ID_ReadData1;
     wire [`WORD_SIZE-1:0]ID_ReadData2;
     wire ID_flush;
-    wire ID_stall_haz;
-    wire ID_stall_mem;
     wire ID_stall;
     wire ID_use_rs;
     wire ID_use_rt;
@@ -130,8 +128,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, writeM2,
     assign IF_flush = ((IDEX_IsBubble == 1'b0) && ((EX_bcond == 1'b1 && IDEX_controls[5] == 1'b1) || IDEX_controls[8])) || ((IFID_IsBubble == 1'b0) && controls[9] == 1'b1);
 
     assign ID_flush = (IDEX_IsBubble == 1'b0) && ((EX_bcond == 1'b1 && IDEX_controls[5] == 1'b1) || IDEX_controls[8]);
-    assign ID_stall = ID_stall_haz || ID_stall_mem;
-
+   
     assign ID_opcode = IFID_instruction[15:12];
     assign ID_rs = IFID_instruction[11:10];
     assign ID_rt = IFID_instruction[9:8];
@@ -154,13 +151,12 @@ module datapath (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, writeM2,
     ALUcontrol ALUCONTROL_MODULE (EX_ALUOp, IDEX_controls[7], IDEX_opcode, IDEX_func);
 	ALU ALU_MODULE (EX_ALUInput1, EX_ALUInput2, EX_ALUOp, EX_ALUOutput, EX_OverflowFlag);
     forwarding FORWARDING_MODULE (EX_forwardA, EX_forwardB, IDEX_rs, IDEX_rt, EXMEM_controls[1], EXMEM_rd, MEMWB_controls[1], MEMWB_rd);
-    hazard HAZARD_MODULE(ID_stall_haz, ID_use_rs, ID_rs, ID_use_rt, ID_rt, IDEX_controls[4], IDEX_rd);
+    hazard HAZARD_MODULE(ID_stall, IF_stall, IDEX_IsBubble, IDEX_controls[8], ID_use_rs, ID_rs, ID_use_rt, ID_rt, IDEX_controls[4], IDEX_rd);
     branchcondition BRANCHCONDITION_MODULE (EX_bcond, IDEX_controls[5], IDEX_opcode, EX_ALUOutput);
     adder EX_branchPC_ADDER_MODULE(EX_branchPC, IDEX_PC, IDEX_imm);
     adder PC_ADDER_MODULE(IF_PCAdderOutput, PC, `WORD_SIZE'd1);
 
-    memorydelay MEMORYDELAY_MODULE(IF_stall, ID_stall_mem, M1busy, readM1, IDEX_IsBubble, EX_bcond, IDEX_controls[5], IDEX_controls[8], IFID_IsBubble, controls[9], MEM_stall, M2busy, writeM2, readM2, EXMEM_IsBubble);
-
+    memorydelay MEMORYDELAY_MODULE(IF_stall, M1busy, readM1, MEM_stall, M2busy, writeM2, readM2, EXMEM_IsBubble);
 
     initial begin
         num_inst = `WORD_SIZE'b0;
