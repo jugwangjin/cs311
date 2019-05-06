@@ -266,7 +266,7 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 				end
 				else begin
 					if (readM2 == 1'b1 || writeM2 == 1'b1) begin
-						M1delay <= 1'b1;
+						M2delay <= 1'b1;
 					end
 				end														  
 			end
