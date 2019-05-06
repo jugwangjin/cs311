@@ -74,14 +74,8 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 	assign d_cache_tag_hit = (address2_tag == d_cache_tag[address2_index]);
 	assign d_cache_hit = (d_cache_tag_hit && d_cache_valid[address2_index]);
 	assign d_cache_output = d_cache_data[address2_index][address2[1:0]];
-
-	wire [`WORD_SIZE-1:0] const_bz [`LINE_SIZE];
-	assign const_bz[0] = `WORD_SIZE'bz;
-	assign const_bz[1] = `WORD_SIZE'bz;
-	assign const_bz[2] = `WORD_SIZE'bz;
-	assign const_bz[3] = `WORD_SIZE'bz;
 	
-	assign data2 = readM2?outputData2:const_bz;
+	assign data2 = readM2?outputData2:`WORD_SIZE'bz;
 	assign M1busy = (M1delay != 3'b0);
 	assign M2busy = (M2delay != 3'b0);
 
@@ -95,14 +89,14 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 				M2delay = 3'b0;
 				for(i=0; i<`LINE_NUMBER; i=i+1) begin
 					i_cache_tag[i] = `TAG_SIZE'b0;
-					i_cache_valid = 1'b0;
+					i_cache_valid[i] = 1'b0;
 					i_cache_data[i][0] = `WORD_SIZE'b0;
 					i_cache_data[i][1] = `WORD_SIZE'b0;
 					i_cache_data[i][2] = `WORD_SIZE'b0;
 					i_cache_data[i][3] = `WORD_SIZE'b0;
 					d_cache_tag[i] = `TAG_SIZE'b0;
-					d_cache_valid = 1'b0;
-					d_cache_dirty = 1'b0;
+					d_cache_valid[i] = 1'b0;
+					d_cache_dirty[i] = 1'b0;
 					d_cache_data[i][0] = `WORD_SIZE'b0;
 					d_cache_data[i][1] = `WORD_SIZE'b0;
 					d_cache_data[i][2] = `WORD_SIZE'b0;
