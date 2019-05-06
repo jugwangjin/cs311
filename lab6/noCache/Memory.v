@@ -4,7 +4,7 @@
 `define WORD_SIZE 16	//	instead of 2^16 words to reduce memory
 			//	requirements in the Active-HDL simulator 
 
-module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, address2, data2, M2busy);
+module Memory(clk, reset_n, readM1, address1, data1, readM2, writeM2, address2, data2, Mbusy);
 	input clk;
 	wire clk;
 	input reset_n;
@@ -26,10 +26,8 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 	inout data2;
 	wire [`WORD_SIZE-1:0] data2;
 
-	output M1busy;
-	wire M1busy;
-	output M2busy;
-	wire M2busy;
+	output Mbusy;
+	wire Mbusy;
 	
 	reg [`WORD_SIZE-1:0] memory [0:`MEMORY_SIZE-1];
 	reg [`WORD_SIZE-1:0] outputData2;
@@ -38,8 +36,7 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 	reg M2delay;
 	
 	assign data2 = readM2?outputData2:`WORD_SIZE'bz;
-	assign M1busy = M1delay;
-	assign M2busy = M2delay;
+	assign Mbusy = M1delay || M2delay;
 	
 	always@(posedge clk)
 		if(!reset_n)
@@ -250,16 +247,7 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 			end
 		else
 			begin
-				if(M1delay == 1'b1) begin
-					data1 <= (writeM2 & address1==address2)?data2:memory[address1];
-					M1delay <= 1'b0;
-				end
-				else begin
-					if (readM1 == 1'b1) begin
-						M1delay <= 1'b1;
-					end
-				end
-				if(M2delay == 1'b1) begin
+				if(M1delay == 1'b0 && M2delay == 1'b1) begin
 					if(readM2)outputData2 <= memory[address2];
 					if(writeM2)memory[address2] <= data2;	
 					M2delay <= 1'b0;
@@ -268,6 +256,15 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 					if (readM2 == 1'b1 || writeM2 == 1'b1) begin
 						M2delay <= 1'b1;
 					end
-				end														  
+				end					
+				if(M2delay == 1'b0 && M1delay == 1'b1) begin
+					data1 <= (writeM2 & address1==address2)?data2:memory[address1];
+					M1delay <= 1'b0;
+				end
+				else begin
+					if (readM1 == 1'b1) begin
+						M1delay <= 1'b1;
+					end
+				end												  
 			end
 endmodule

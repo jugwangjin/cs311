@@ -4,7 +4,10 @@
 `define WORD_SIZE 16	//	instead of 2^16 words to reduce memory
 			//	requirements in the Active-HDL simulator 
 
-module Memory(clk, reset_n, readM1, address1, data1, readM2, writeM2, address2, data2);
+`define LINE_SIZE 4
+`define TAG_SIZE 14
+
+module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, address2, data2, M2busy);
 	input clk;
 	wire clk;
 	input reset_n;
@@ -25,15 +28,39 @@ module Memory(clk, reset_n, readM1, address1, data1, readM2, writeM2, address2, 
 	wire [`WORD_SIZE-1:0] address2;
 	inout data2;
 	wire [`WORD_SIZE-1:0] data2;
+
+	output M1busy;
+	wire M1busy;
+	output M2busy;
+	wire M2busy;
 	
 	reg [`WORD_SIZE-1:0] memory [0:`MEMORY_SIZE-1];
 	reg [`WORD_SIZE-1:0] outputData2;
+
+	reg [2:0]M1delay;
+	reg [2:0]M2delay;
+
+
+
+	wire [`WORD_SIZE-1:0] const_bz [`LINE_SIZE];
+	assign const_bz[0] = `WORD_SIZE'bz;
+	assign const_bz[1] = `WORD_SIZE'bz;
+	assign const_bz[2] = `WORD_SIZE'bz;
+	assign const_bz[3] = `WORD_SIZE'bz;
 	
-	assign data2 = readM2?outputData2:`WORD_SIZE'bz;
+	assign data2 = readM2?outputData2:const_bz;
+	assign M1busy = (M1delay != 3'b0);
+	assign M2busy = (M2delay != 3'b0);
+
+	integer i;
 	
 	always@(posedge clk)
 		if(!reset_n)
 			begin
+				// init delays
+				M1delay = 3'b0;
+				M2delay = 3'b0;
+			
 				memory[16'h0] <= 16'h9023;
 				memory[16'h1] <= 16'h1;
 				memory[16'h2] <= 16'hffff;
@@ -236,8 +263,28 @@ module Memory(clk, reset_n, readM1, address1, data1, readM2, writeM2, address2, 
 			end
 		else
 			begin
-				if(readM1)data1 <= (writeM2 & address1==address2)?data2:memory[address1];
-				if(readM2)outputData2 <= memory[address2];
-				if(writeM2)memory[address2] <= data2;															  
+				if(M2delay == 3'd5) begin
+					for (i=0; i<`LINE_SIZE; i=i+1) begin
+						if(readM2)outputData2[i] <= memory[{{address2}, {i}}];
+						if(writeM2)memory[{{address2},{i}}] <= data2[i];
+					end	
+					M2delay <= 3'b0;
+				end
+				else begin
+					if (readM2 == 1'b1 || writeM2 == 1'b1) begin
+						M2delay = M2delay + 3'b001;
+					end
+				end		
+				if(M1delay == 3'd5) begin
+					for (i=0; i<`LINE_SIZE; i=i+1) begin
+						data1[i] <= (writeM2 & address1==address2)?data2[i]:memory[{{address1}, {i}}];
+					end
+					M1delay <= 3'b0;
+				end
+				else begin
+					if (readM1 == 1'b1) begin
+						M1delay = M1delay + 3'b001;
+					end
+				end							  
 			end
 endmodule

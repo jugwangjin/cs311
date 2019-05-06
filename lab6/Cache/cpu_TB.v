@@ -23,8 +23,8 @@ module cpu_TB();
 	wire is_halted;				// set if the cpu is halted
 
 	// instantiate the unit under test
-	cpu UUT (clk, reset_n, readM1, address1, data1, readM2, writeM2, address2, data2, num_inst, output_port, is_halted);
-	Memory NUUT(!clk, reset_n, readM1, address1, data1, readM2, writeM2, address2, data2);
+	cpu UUT (clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, address2, data2, M2busy, num_inst, output_port, is_halted);
+	Memory NUUT(!clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, address2, data2, M2busy);
 
 	// initialize inputs
 	initial begin
