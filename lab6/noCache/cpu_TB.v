@@ -24,7 +24,6 @@ module cpu_TB();
 
 
 	// edited interfaces of cpu and memory
-	input Mbusy;
 	wire Mbusy;
 
 	// instantiate the unit under test
