@@ -1,7 +1,7 @@
 `timescale 1ns/1ns
 `define WORD_SIZE 16    // data and address word size
 
-module cpu(Clk, Reset_N, readM1, address1, data1, M1busy, readM2, writeM2, address2, data2, M2busy, num_inst, output_port, is_halted);
+module cpu(Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address2, data2, num_inst, output_port, is_halted);
 	input Clk;
 	wire Clk;
 	input Reset_N;
@@ -17,11 +17,6 @@ module cpu(Clk, Reset_N, readM1, address1, data1, M1busy, readM2, writeM2, addre
 	wire writeM2;
 	output [`WORD_SIZE-1:0] address2;
 	wire [`WORD_SIZE-1:0] address2;
-
-	input M1busy;
-	wire M1busy;
-	input M2busy;
-	wire M2busy;
 
 	input [`WORD_SIZE-1:0] data1;
 	wire [`WORD_SIZE-1:0] data1;
@@ -40,5 +35,5 @@ module cpu(Clk, Reset_N, readM1, address1, data1, M1busy, readM2, writeM2, addre
 
 	// TODO : Implement your pipelined CPU!
 	control CONTROL_MODULE(Clk, instruction, is_halted, Reset_N, controls);
-	datapath DATAPATH_MODULE (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, writeM2, address2, data2, M2busy, controls, is_halted, instruction, num_inst, output_port);
+	datapath DATAPATH_MODULE (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address2, data2, controls, is_halted, instruction, num_inst, output_port);
 endmodule
