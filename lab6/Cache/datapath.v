@@ -159,7 +159,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, writeM2,
     adder EX_branchPC_ADDER_MODULE(EX_branchPC, IDEX_PC, IDEX_imm);
     adder PC_ADDER_MODULE(IF_PCAdderOutput, PC, `WORD_SIZE'd1);
 
-    memorydelay MEMORYDELAY_MODULE(IF_stall, ID_stall_mem, M1busy, readM1, IDEX_IsBubble, IDEX_controls[5], IDEX_controls[8], IFID_IsBubble, controls[9], MEM_stall, M2busy, writeM2, readM2, EXMEM_IsBubble);
+    memorydelay MEMORYDELAY_MODULE(IF_stall, ID_stall_mem, M1busy, readM1, IDEX_IsBubble, EX_bcond, IDEX_controls[5], IDEX_controls[8], IFID_IsBubble, controls[9], MEM_stall, M2busy, writeM2, readM2, EXMEM_IsBubble);
 
 
     initial begin
