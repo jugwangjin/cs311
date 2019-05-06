@@ -36,6 +36,8 @@ module Memory(clk, reset_n, readM1, address1, data1, readM2, writeM2, address2, 
 	reg M2delay;
 	
 	assign data2 = readM2?outputData2:`WORD_SIZE'bz;
+
+	// to make single port memory
 	assign Mbusy = M1delay || M2delay;
 	
 	always@(posedge clk)
@@ -252,7 +254,7 @@ module Memory(clk, reset_n, readM1, address1, data1, readM2, writeM2, address2, 
 					if(writeM2)memory[address2] <= data2;	
 					M2delay = 1'b0;
 				end
-				else if (M1delay == 1'b0) begin
+				else if (Mbusy == 1'b0) begin
 					if (readM2 == 1'b1 || writeM2 == 1'b1) begin
 						M2delay <= 1'b1;
 					end
@@ -261,7 +263,7 @@ module Memory(clk, reset_n, readM1, address1, data1, readM2, writeM2, address2, 
 					data1 <= (writeM2 & address1==address2)?data2:memory[address1];
 					M1delay <= 1'b0;
 				end
-				else if (M2delay == 1'b0) begin
+				else if (Mbusy == 1'b0) begin
 					if (readM1 == 1'b1) begin
 						M1delay <= 1'b1;
 					end
