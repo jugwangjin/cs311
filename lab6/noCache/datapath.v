@@ -124,7 +124,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, writeM2,
     assign writeM2 = EXMEM_controls[3];
     assign readM1 = !is_halted;
     
-    assign IF_nextPC = (MEM_stall == 1'b1 || ID_stall == 1'b1 || IF_stall == 1'b1) ? PC : (IDEX_IsBubble == 1'b0 && EX_bcond == 1'b1 && IDEX_controls[5] == 1'b1) ? EX_branchPC : (IDEX_IsBubble == 1'b0 && IDEX_controls[8] == 1'b1) ? EX_forwardedReadData1 : (IFID_IsBubble == 1'b0 && controls[9] == 1'b1) ? {{PC[15:12]}, {ID_target_address[11:0]}} : IF_PCAdderOutput;
+    assign IF_nextPC = (MEM_stall == 1'b1 || ID_stall == 1'b1) ? PC : (IDEX_IsBubble == 1'b0 && EX_bcond == 1'b1 && IDEX_controls[5] == 1'b1) ? EX_branchPC : (IDEX_IsBubble == 1'b0 && IDEX_controls[8] == 1'b1) ? EX_forwardedReadData1 : (IFID_IsBubble == 1'b0 && controls[9] == 1'b1) ? {{PC[15:12]}, {ID_target_address[11:0]}} : IF_PCAdderOutput;
     assign IF_flush = ((IDEX_IsBubble == 1'b0) && ((EX_bcond == 1'b1 && IDEX_controls[5] == 1'b1) || IDEX_controls[8])) || ((IFID_IsBubble == 1'b0) && controls[9] == 1'b1);
 
     assign ID_flush = (IDEX_IsBubble == 1'b0) && ((EX_bcond == 1'b1 && IDEX_controls[5] == 1'b1) || IDEX_controls[8]);
