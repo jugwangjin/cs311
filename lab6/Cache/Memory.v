@@ -308,7 +308,7 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 			// one port is for I memory read, the other port is for D memory read/write
 			// so the port for D memory read/write does not do the read/write in parallel.
 			begin
-				if(M2delay == 3'd5) begin
+				if(M2delay >= 3'd5) begin
 					if(d_cache_valid[address2_index] == 1'b0 || d_cache_dirty[address2_index] == 1'b0) begin
 						for (i=0; i<`LINE_SIZE; i=i+1) begin
 							d_cache_data[address2_index][i] <= memory[{{address2[`WORD_SIZE-1:2]}, {i}}];
@@ -324,7 +324,7 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 					end
 					M2delay <= 3'b0;
 				end
-				
+
 				if (readM2 == 1'b1 || writeM2 == 1'b1) begin
 					if(d_cache_hit == 1'b1) begin
 						if(readM2)outputData2 <= d_cache_output;
@@ -338,7 +338,7 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 					end
 				end
 
-				if(M1delay == 3'd5) begin
+				if(M1delay >= 3'd5) begin
 					for (i=0; i<`LINE_SIZE; i=i+1) begin
 						i_cache_data[address1_index][i] <= memory[{{address1[`WORD_SIZE-1:2]}, {i}}];
 					end
