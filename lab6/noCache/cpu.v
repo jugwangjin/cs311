@@ -1,7 +1,7 @@
 `timescale 1ns/1ns
 `define WORD_SIZE 16    // data and address word size
 
-module cpu(Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address2, data2, M2busy, num_inst, output_port, is_halted);
+module cpu(Clk, Reset_N, readM1, address1, data1, M1busy, readM2, writeM2, address2, data2, M2busy, num_inst, output_port, is_halted);
 	input Clk;
 	wire Clk;
 	input Reset_N;
