@@ -250,12 +250,17 @@ module datapath (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, writeM2,
             end
 
             // save instruction before update PC, just in case.
-            instruction = data1;
+            if(!M1busy) begin
+                instruction = data1;
+            end
 
             // update PC 
             IDEX_PC = IFID_PC;
             IFID_PC = IF_PCAdderOutput;
-            PC = IF_nextPC;
+            
+            if(!M1busy) begin
+                PC = IF_nextPC;
+            end
 
             // MEMWB Latch
             if (MEM_stall == 1'b0) begin
@@ -324,7 +329,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, writeM2,
                     IFID_IsBubble =1'b0;
                 end
             end
-            else if (IF_stall == 1'b1 && ID_stall == 1'b0 && MEM_stall == 1'b0) begin
+            else if (M1busy==1'b1 || (IF_stall == 1'b1 && ID_stall == 1'b0 && MEM_stall == 1'b0)) begin
                 IFID_IsBubble = 1'b1;
             end
         end
