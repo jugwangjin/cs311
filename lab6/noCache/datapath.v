@@ -5,7 +5,7 @@
 `include "forwarding.v"
 `include "adder.v"
 
-module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address2, data2, Mbusy, controls, is_halted, IFID_instruction, num_inst, output_port);
+module datapath (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, writeM2, address2, data2, M2busy, controls, is_halted, IFID_instruction, num_inst, output_port);
 	input Clk;
 	wire Clk;
 	input Reset_N;
@@ -26,8 +26,10 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
 	inout [`WORD_SIZE-1:0] data2;
 	wire [`WORD_SIZE-1:0] data2;
 
-    input Mbusy;
-    wire Mbusy;
+    input M1busy;
+    wire M1busy;
+    input M2busy;
+    wire M2busy;
 
     input [10:0]controls;
     wire [10:0]controls;
@@ -154,7 +156,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, readM2, writeM2, address
     adder EX_branchPC_ADDER_MODULE(EX_branchPC, IDEX_PC, IDEX_imm);
     adder PC_ADDER_MODULE(IF_PCAdderOutput, PC, `WORD_SIZE'd1);
 
-    memorydelay MEMORYDELAY_MODULE(IF_stall, Mbusy, readM1, MEM_stall, writeM2, readM2, EXMEM_IsBubble);
+    memorydelay MEMORYDELAY_MODULE(IF_stall, M1busy, readM1, MEM_stall, M2busy, writeM2, readM2, EXMEM_IsBubble);
 
     initial begin
         num_inst = `WORD_SIZE'b0;

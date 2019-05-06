@@ -4,7 +4,7 @@
 `define WORD_SIZE 16	//	instead of 2^16 words to reduce memory
 			//	requirements in the Active-HDL simulator 
 
-module Memory(clk, reset_n, readM1, address1, data1, readM2, writeM2, address2, data2, Mbusy);
+module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, address2, data2, M2busy);
 	input clk;
 	wire clk;
 	input reset_n;
@@ -26,8 +26,10 @@ module Memory(clk, reset_n, readM1, address1, data1, readM2, writeM2, address2, 
 	inout data2;
 	wire [`WORD_SIZE-1:0] data2;
 
-	output Mbusy;
-	wire Mbusy;
+	output M1busy;
+	wire M1busy;
+	output M2busy;
+	wire M2busy;
 	
 	reg [`WORD_SIZE-1:0] memory [0:`MEMORY_SIZE-1];
 	reg [`WORD_SIZE-1:0] outputData2;
@@ -36,9 +38,8 @@ module Memory(clk, reset_n, readM1, address1, data1, readM2, writeM2, address2, 
 	reg M2delay;
 	
 	assign data2 = readM2?outputData2:`WORD_SIZE'bz;
-
-	// to make single port memory
-	assign Mbusy = M1delay || M2delay;
+	assign M1busy = M1delay;
+	assign M2busy = M2delay;
 	
 	always@(posedge clk)
 		if(!reset_n)
@@ -249,24 +250,24 @@ module Memory(clk, reset_n, readM1, address1, data1, readM2, writeM2, address2, 
 			end
 		else
 			begin
-				if(M2delay == 1'b1) begin
-					if(readM2)outputData2 <= memory[address2];
-					if(writeM2)memory[address2] <= data2;	
-					M2delay = 1'b0;
-				end
-				else if (Mbusy == 1'b0) begin
-					if (readM2 == 1'b1 || writeM2 == 1'b1) begin
-						M2delay <= 1'b1;
-					end
-				end					
 				if(M1delay == 1'b1) begin
 					data1 <= (writeM2 & address1==address2)?data2:memory[address1];
 					M1delay <= 1'b0;
 				end
-				else if (Mbusy == 1'b0) begin
+				else begin
 					if (readM1 == 1'b1) begin
 						M1delay <= 1'b1;
 					end
-				end												  
+				end
+				if(M2delay == 1'b1) begin
+					if(readM2)outputData2 <= memory[address2];
+					if(writeM2)memory[address2] <= data2;	
+					M2delay <= 1'b0;
+				end
+				else begin
+					if (readM2 == 1'b1 || writeM2 == 1'b1) begin
+						M2delay <= 1'b1;
+					end
+				end														  
 			end
 endmodule
