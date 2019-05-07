@@ -21,7 +21,7 @@ module register(Clk, ReadRegister1, ReadRegister2, WriteRegister, WriteData, Reg
 		end
     end
 
-    always @(posedge Clk) begin
+    always @(negedge Clk) begin
         if (RegWrite) begin
             registers[WriteRegister] = WriteData;
         end
