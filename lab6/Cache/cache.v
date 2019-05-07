@@ -134,7 +134,7 @@ module cache(Clk, Reset_N, M1busy, C1busy, data1, cachedata1, readM1, address1, 
                 d_cache_dirty[address2_index] = 1'b0;
             end
 
-            if(readC2 && readM2 && !M2busy) begin
+            if((readC2 || writeC2) && readM2 && !M2busy) begin
                 d_cache_data[address2_index][0] = data2[63:48];
                 d_cache_data[address2_index][1] = data2[47:32];
                 d_cache_data[address2_index][2] = data2[31:16];
