@@ -1,5 +1,6 @@
 `timescale 1ns/1ns
 `define WORD_SIZE 16    // data and address word size
+`define CACHE_LINE 64
 
 module cpu(Clk, Reset_N, readM1, address1, data1, M1busy, readM2, writeM2, address2, data2, M2busy, num_inst, output_port, is_halted);
 	input Clk;
@@ -23,10 +24,10 @@ module cpu(Clk, Reset_N, readM1, address1, data1, M1busy, readM2, writeM2, addre
 	input M2busy;
 	wire M2busy;
 
-	input [`WORD_SIZE-1:0] data1[3:0];
-	wire [`WORD_SIZE-1:0] data1[3:0];
-	inout [`WORD_SIZE-1:0] data2[3:0];
-	wire [`WORD_SIZE-1:0] data2[3:0];
+	input [`CACHE_LINE-1:0] data1;
+	wire [`CACHE_LINE-1:0] data1;
+	inout [`CACHE_LINE-1:0] data2;
+	wire [`CACHE_LINE-1:0] data2;
 
 	output [`WORD_SIZE-1:0] num_inst;
 	wire [`WORD_SIZE-1:0] num_inst;

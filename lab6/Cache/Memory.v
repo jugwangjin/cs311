@@ -3,7 +3,7 @@
 `define MEMORY_SIZE 256	//	size of memory is 2^8 words (reduced size)
 `define WORD_SIZE 16	//	instead of 2^16 words to reduce memory
 			//	requirements in the Active-HDL simulator 
-
+`define CACHE_LINE 64
 `define LINE_NUMBER 8
 `define LINE_SIZE 4
 `define TAG_SIZE 11
@@ -23,7 +23,7 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 	input [`WORD_SIZE-1:0] address1;
 	wire [`WORD_SIZE-1:0] address1;
 	output data1;
-	reg [`WORD_SIZE-1:0] data1 [`LINE_SIZE-1:0];
+	reg [`CACHE_LINE-1:0] data1;
 	
 	input readM2;
 	wire readM2;
@@ -32,7 +32,7 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 	input [`WORD_SIZE-1:0] address2;
 	wire [`WORD_SIZE-1:0] address2;
 	inout data2;
-	wire [`WORD_SIZE-1:0] data2 [`LINE_SIZE-1:0];
+	wire [`CACHE_LINE-1:0] data2;
 
 	output M1busy;
 	wire M1busy;
@@ -45,10 +45,10 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 	reg [2:0]M1delay;
 	reg [2:0]M2delay;
 
-	assign data2[0] = readM2?outputData2[0]:`WORD_SIZE'bz;
-	assign data2[1] = readM2?outputData2[1]:`WORD_SIZE'bz;
-	assign data2[2] = readM2?outputData2[2]:`WORD_SIZE'bz;
-	assign data2[3] = readM2?outputData2[3]:`WORD_SIZE'bz;
+	assign data2[63:48] = readM2?outputData2[0]:`WORD_SIZE'bz;
+	assign data2[47:32] = readM2?outputData2[1]:`WORD_SIZE'bz;
+	assign data2[31:16] = readM2?outputData2[2]:`WORD_SIZE'bz;
+	assign data2[15:0] = readM2?outputData2[3]:`WORD_SIZE'bz;
 	// M*delay != 0 means memory is accessing memory
 	assign M1busy = (M1delay != 3'b0);
 	assign M2busy = (M2delay != 3'b0);
@@ -278,10 +278,10 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 						outputData2[3] = memory[{{address2[`WORD_SIZE-1:2]}, {2'b11}}]
 					end
 					if(writeM2) begin
-						memory[{{address2[`WORD_SIZE-1:2]}, {2'b00}}] = data2[0];
-						memory[{{address2[`WORD_SIZE-1:2]}, {2'b01}}] = data2[1];
-						memory[{{address2[`WORD_SIZE-1:2]}, {2'b10}}] = data2[2];
-						memory[{{address2[`WORD_SIZE-1:2]}, {2'b11}}] = data2[3];
+						memory[{{address2[`WORD_SIZE-1:2]}, {2'b00}}] = data2[63:48];
+						memory[{{address2[`WORD_SIZE-1:2]}, {2'b01}}] = data2[47:32];
+						memory[{{address2[`WORD_SIZE-1:2]}, {2'b10}}] = data2[31:16];
+						memory[{{address2[`WORD_SIZE-1:2]}, {2'b11}}] = data2[15:0];
 					end
 					M2delay = 3'b000;
 				end
@@ -291,10 +291,10 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 				end		
 				if(M1delay >= 3'd6) begin // fetch to cache
 					if(readM1 == 1'b1) begin
-						data1[0] = memory[{{address1[`WORD_SIZE-1:2]}, {2'b00}}]
-						data1[1] = memory[{{address1[`WORD_SIZE-1:2]}, {2'b01}}]
-						data1[2] = memory[{{address1[`WORD_SIZE-1:2]}, {2'b10}}]
-						data1[3] = memory[{{address1[`WORD_SIZE-1:2]}, {2'b11}}]
+						data1[63:48] = memory[{{address1[`WORD_SIZE-1:2]}, {2'b00}}]
+						data1[47:32] = memory[{{address1[`WORD_SIZE-1:2]}, {2'b01}}]
+						data1[31:16] = memory[{{address1[`WORD_SIZE-1:2]}, {2'b10}}]
+						data1[15:0] = memory[{{address1[`WORD_SIZE-1:2]}, {2'b11}}]
 						M1delay = 3'b000;
 					end
 				end			  

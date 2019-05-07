@@ -6,6 +6,8 @@
 `include "adder.v"
 `include "cache.v"
 
+`define CACHE_LINE 64
+
 module datapath (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, writeM2, address2, data2, M2busy, controls, is_halted, IFID_instruction, num_inst, output_port);
 	input Clk;
 	wire Clk;
@@ -22,10 +24,10 @@ module datapath (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, writeM2,
 	wire writeM2;
 	output [`WORD_SIZE-1:0] address2;
 	wire [`WORD_SIZE-1:0] address2;
-	input [`WORD_SIZE-1:0] data1[3:0];
-	wire [`WORD_SIZE-1:0] data1[3:0];
-	inout [`WORD_SIZE-1:0] data2[3:0];
-	wire [`WORD_SIZE-1:0] data2[3:0];
+	input [`CACHE_LINE-1:0] data1;
+	wire [`CACHE_LINE-1:0] data1;
+	inout [`CACHE_LINE-1:0] data2[;
+	wire [`CACHE_LINE-1:0] data2;
 
     input M1busy;
     wire M1busy;

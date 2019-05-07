@@ -1,5 +1,5 @@
 `include "opcodes.v"
-
+`define CACHE_LINE 64
 module cache(Clk, Reset_N, M1busy, data1, cachedata1, readM1, address1, M2busy, data2, cachedata2, readM2, writeM2, readC1, readC2, writeC2, address2); 
     input Clk;
     wire Clk;
@@ -8,7 +8,7 @@ module cache(Clk, Reset_N, M1busy, data1, cachedata1, readM1, address1, M2busy, 
     input M1busy;
     wire M1busy;
     input data1;
-    wire [`WORD_SIZE-1:0] data1[3:0];
+    wire [`CACHE_LINE-1:0] data1;
     output cachedata1;
     wire [`WORD_SIZE-1:0] cachedata1;
     output readM1;
@@ -18,7 +18,7 @@ module cache(Clk, Reset_N, M1busy, data1, cachedata1, readM1, address1, M2busy, 
     input M2busy;
     wire M2busy;
     inout data2;
-    wire [`WORD_SIZE-1:0] data2 [3:0];
+    wire [`CACHE_LINE-1:0] data2 [3:0];
     inout cachedata2;
     wire [`WORD_SZIE-1:0] cachedata2;
     output readM2;
@@ -109,9 +109,11 @@ module cache(Clk, Reset_N, M1busy, data1, cachedata1, readM1, address1, M2busy, 
         end
         else begin
             if (readC1 && readM1 && !M1busy) begin
-                for (i=0; i<`LINE_SIZE; i=i+1) begin
-                    i_cache_data[address1_index][i[1:0]] = data1[i];
-                end
+                i_cache_data[address1_index][0] = data1[63:48];
+                i_cache_data[address1_index][1] = data1[47:32];
+                i_cache_data[address1_index][2] = data1[31:16];
+                i_cache_data[address1_index][3] = data1[15:0];
+
                 i_cache_valid[address1_index] = 1'b1;
                 i_cache_tag[address1_index] = address1_tag;
             end
@@ -124,9 +126,11 @@ module cache(Clk, Reset_N, M1busy, data1, cachedata1, readM1, address1, M2busy, 
             end
 
             if(readC2 && readM2 && !M2busy) begin
-                for (i=0; i<`LINE_SIZE; i=i+1) begin
-                    d_cache_data[address2_index][i[1:0]] = data2[i[1:0]];
-                end
+                d_cache_data[address2_index][0] = data[63:48];
+                d_cache_data[address2_index][1] = data[47:32];
+                d_cache_data[address2_index][2] = data[31:16];
+                d_cache_data[address2_index][3] = data[15:0];
+
                 d_cache_valid[address2_index] = 1'b1;
                 d_cache_dirty[address2_index] = 1'b0;
                 d_cache_tag[address2_index] = address2_tag;
