@@ -7,7 +7,11 @@
 `define LINE_NUMBER 8
 `define LINE_SIZE 4
 `define TAG_SIZE 11
+// 2 port memory
+// one for I-cache
+// one for D-cache
 
+// cache is also implemented here
 module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, address2, data2, M2busy);
 	input clk;
 	wire clk;
@@ -63,7 +67,6 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 	wire d_cache_tag_hit;
 	wire [`WORD_SIZE-1:0]d_cache_output;
 
-
 	assign address1_tag = address1[`WORD_SIZE-1:`WORD_SIZE-`TAG_SIZE];
 	assign address1_index = address1[`WORD_SIZE-`TAG_SIZE-1:`WORD_SIZE-`TAG_SIZE-3];
 	assign i_cache_tag_hit = (address1_tag == i_cache_tag[address1_index]);
@@ -77,6 +80,7 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 	assign d_cache_output = d_cache_data[address2_index][address2[1:0]];
 	
 	assign data2 = readM2?outputData2:`WORD_SIZE'bz;
+	// M*delay != 0 means memory is accessing memory
 	assign M1busy = (M1delay != 3'b0);
 	assign M2busy = (M2delay != 3'b0);
 
@@ -310,7 +314,7 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 			// so the port for D memory read/write does not do the read/write in parallel.
 			begin
 				if (readM2 == 1'b1 || writeM2 == 1'b1) begin
-					if(d_cache_hit == 1'b1) begin
+					if(d_cache_hit == 1'b1) begin // if hit, remove M2busy signal by assigning 0 value to M2delay
 						if(readM2)outputData2 = d_cache_output;
 						if(writeM2) begin
 							d_cache_data[address2_index][address2[1:0]] = data2;
@@ -318,11 +322,11 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 						end
 						M2delay = 3'b000;
 					end
-					else begin
+					else begin // wait for memory access delay
 						M2delay = M2delay + 3'b001;
 					end
 				end
-				if(M2delay >= 3'd6) begin
+				if(M2delay >= 3'd6) begin // fetch to cache
 					if(d_cache_valid[address2_index] == 1'b0 || d_cache_dirty[address2_index] == 1'b0) begin
 						for (i=0; i<`LINE_SIZE; i=i+1) begin
 							d_cache_data[address2_index][i[1:0]] = memory[{{address2[`WORD_SIZE-1:2]}, {i[1:0]}}];
@@ -330,7 +334,7 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 						d_cache_valid[address2_index] = 1'b1;
 						d_cache_tag[address2_index] = address2_tag;
 					end	
-					else begin
+					else begin // write back
 						for (i=0; i<`LINE_SIZE; i=i+1) begin
 							memory[{{d_cache_tag[address2_index]}, {address2_index}, {i[1:0]}}] = d_cache_data[address2_index][i[1:0]];
 						end
@@ -338,16 +342,16 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 					end
 				end
 
-				if(readM1 == 1'b1) begin
+				if(readM1 == 1'b1) begin // if hit, remove M1busy signal by assigning 0 value to M1delay
 					if(i_cache_hit == 1'b1) begin
 						data1 = i_cache_output;
 						M1delay = 3'b000;
 					end
-					else begin
+					else begin // wait for memory access delay
 						M1delay = M1delay + 3'b001;
 					end
 				end		
-				if(M1delay >= 3'd6) begin
+				if(M1delay >= 3'd6) begin // fetch to cache
 					for (i=0; i<`LINE_SIZE; i=i+1) begin
 						i_cache_data[address1_index][i[1:0]] = memory[{{address1[`WORD_SIZE-1:2]}, {i[1:0]}}];
 					end

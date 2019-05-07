@@ -1,5 +1,5 @@
 `include "opcodes.v"
-
+// computes IF stall
 module memorydelay(IF_stall, M1busy, readM1, MEM_stall, M2busy, MemWrite, MemRead, EXMEM_IsBubble);
     output MEM_stall;
     wire MEM_stall;
