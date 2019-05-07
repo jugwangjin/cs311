@@ -267,7 +267,6 @@ module datapath (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, writeM2,
                 end
             end
 
-            controls = controls_in;
             instruction = cachedata1;
 
             // update PC 
@@ -350,6 +349,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, writeM2,
                 IFID_IsBubble = 1'b1;
                 IFID_instruction = `WORD_SIZE'b0;
             end
+            controls = controls_in;
         end
     end
 
