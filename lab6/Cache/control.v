@@ -25,7 +25,7 @@ module control(Clk, instruction, is_halted, Reset_N, controls);
         controls = 10'b0;
     end
 
-    always @(negedge Clk) begin
+    always @(posedge Clk) begin
         if (!Reset_N) begin 
             controls = 11'b00000000000;
         end
