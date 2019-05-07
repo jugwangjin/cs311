@@ -4,14 +4,6 @@
 `define WORD_SIZE 16	//	instead of 2^16 words to reduce memory
 			//	requirements in the Active-HDL simulator 
 
-`define LINE_NUMBER 8
-`define LINE_SIZE 4
-`define TAG_SIZE 11
-// 2 port memory
-// one for I-cache
-// one for D-cache
-
-// cache is also implemented here
 module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, address2, data2, M2busy);
 	input clk;
 	wire clk;
@@ -23,7 +15,7 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 	input [`WORD_SIZE-1:0] address1;
 	wire [`WORD_SIZE-1:0] address1;
 	output data1;
-	reg [`WORD_SIZE-1:0] data1 [`LINE_SIZE-1:0];
+	reg [`WORD_SIZE-1:0] data1;
 	
 	input readM2;
 	wire readM2;
@@ -32,7 +24,7 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 	input [`WORD_SIZE-1:0] address2;
 	wire [`WORD_SIZE-1:0] address2;
 	inout data2;
-	wire [`WORD_SIZE-1:0] data2 [`LINE_SIZE-1:0];
+	wire [`WORD_SIZE-1:0] data2;
 
 	output M1busy;
 	wire M1busy;
@@ -40,27 +32,21 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 	wire M2busy;
 	
 	reg [`WORD_SIZE-1:0] memory [0:`MEMORY_SIZE-1];
-	reg [`WORD_SIZE-1:0] outputData2 [`LINE_SIZE-1:0];
+	reg [`WORD_SIZE-1:0] outputData2;
 
-	reg [2:0]M1delay;
-	reg [2:0]M2delay;
-
-	assign data2[0] = readM2?outputData2[0]:`WORD_SIZE'bz;
-	assign data2[1] = readM2?outputData2[1]:`WORD_SIZE'bz;
-	assign data2[2] = readM2?outputData2[2]:`WORD_SIZE'bz;
-	assign data2[3] = readM2?outputData2[3]:`WORD_SIZE'bz;
-	// M*delay != 0 means memory is accessing memory
-	assign M1busy = (M1delay != 3'b0);
-	assign M2busy = (M2delay != 3'b0);
-
-	integer i;
+	reg M1delay;
+	reg M2delay;
+	
+	assign data2 = readM2?outputData2:`WORD_SIZE'bz;
+	assign M1busy = M1delay;
+	assign M2busy = M2delay;
 	
 	always@(posedge clk)
 		if(!reset_n)
 			begin
-				// init delays and cache
-				M1delay = 3'b0;
-				M2delay = 3'b0;
+				// init delays
+				M1delay = 1'b0;
+				M2delay = 1'b0;
 			
 				memory[16'h0] <= 16'h9023;
 				memory[16'h1] <= 16'h1;
@@ -263,40 +249,25 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 				memory[16'hc6] <= 16'hf01d;
 			end
 		else
-			// this memory has 2 ports
-			// one port is for I memory read, the other port is for D memory read/write
-			// so the port for D memory read/write does not do the read/write in parallel.
 			begin
-				if (readM2 == 1'b1 || writeM2 == 1'b1) begin
-					M2delay = M2delay + 3'b001;
+				if(M1delay == 1'b1) begin
+					data1 <= (writeM2 & address1==address2)?data2:memory[address1];
+					M1delay <= 1'b0;
 				end
-				if(M2delay >= 3'd6) begin // fetch to cache
-					if(readM2) begin
-						outputData2[0] = memory[{{address2[`WORD_SIZE-1:2]}, {2'b00}}]
-						outputData2[1] = memory[{{address2[`WORD_SIZE-1:2]}, {2'b01}}]
-						outputData2[2] = memory[{{address2[`WORD_SIZE-1:2]}, {2'b10}}]
-						outputData2[3] = memory[{{address2[`WORD_SIZE-1:2]}, {2'b11}}]
+				else begin
+					if (readM1 == 1'b1) begin
+						M1delay <= 1'b1;
 					end
-					if(writeM2) begin
-						memory[{{address2[`WORD_SIZE-1:2]}, {2'b00}}] = data2[0];
-						memory[{{address2[`WORD_SIZE-1:2]}, {2'b01}}] = data2[1];
-						memory[{{address2[`WORD_SIZE-1:2]}, {2'b10}}] = data2[2];
-						memory[{{address2[`WORD_SIZE-1:2]}, {2'b11}}] = data2[3];
-					end
-					M2delay = 3'b000;
 				end
-
-				if(readM1 == 1'b1) begin // if hit, remove M1busy signal by assigning 0 value to M1delay
-						M1delay = M1delay + 3'b001;
-				end		
-				if(M1delay >= 3'd6) begin // fetch to cache
-					if(readM1 == 1'b1) begin
-						data1[0] = memory[{{address1[`WORD_SIZE-1:2]}, {2'b00}}]
-						data1[1] = memory[{{address1[`WORD_SIZE-1:2]}, {2'b01}}]
-						data1[2] = memory[{{address1[`WORD_SIZE-1:2]}, {2'b10}}]
-						data1[3] = memory[{{address1[`WORD_SIZE-1:2]}, {2'b11}}]
-						M1delay = 3'b000;
+				if(M2delay == 1'b1) begin
+					if(readM2)outputData2 <= memory[address2];
+					if(writeM2)memory[address2] <= data2;	
+					M2delay <= 1'b0;
+				end
+				else begin
+					if (readM2 == 1'b1 || writeM2 == 1'b1) begin
+						M2delay <= 1'b1;
 					end
-				end			  
+				end														  
 			end
 endmodule

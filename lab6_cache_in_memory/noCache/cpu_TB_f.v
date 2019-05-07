@@ -6,16 +6,18 @@
 `define TESTID_SIZE 5
 
 module cpu_TB();
+	integer f;
+
 	reg reset_n;    // active-low RESET signal
 	reg clk;        // clock signal	
 	
 	wire readM1;
 	wire [`WORD_SIZE-1:0] address1;
-	wire [`WORD_SIZE-1:0] data1 [3:0];
+	wire [`WORD_SIZE-1:0] data1;
 	wire readM2;
 	wire writeM2;
 	wire [`WORD_SIZE-1:0] address2;
-	wire [`WORD_SIZE-1:0] data2 [3:0];
+	wire [`WORD_SIZE-1:0] data2;
 
 	// for debuging purpose
 	wire [`WORD_SIZE-1:0] num_inst;		// number of instruction during execution
@@ -23,11 +25,13 @@ module cpu_TB();
 	wire is_halted;				// set if the cpu is halted
 
 	// instantiate the unit under test
-	cpu UUT (clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, address2, data2, M2busy, num_inst, output_port, is_halted);
-	Memory NUUT(!clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, address2, data2, M2busy);
+	cpu UUT (clk, reset_n, readM1, address1, data1, readM2, writeM2, address2, data2, num_inst, output_port, is_halted);
+	Memory NUUT(!clk, reset_n, readM1, address1, data1, readM2, writeM2, address2, data2);
 
 	// initialize inputs
 	initial begin
+		f = $fopen("output.txt", "w");
+
 		clk = 0;           // set initial clock value	
 		
 		reset_n = 1;       // generate a LOW pulse for reset_n
@@ -117,8 +121,8 @@ module cpu_TB();
 					end
 					else begin
 						TestPassed[i] = 1'b0;
-						$display("Test #%s has been failed!", TestID[i]);
-						$display("output_port = 0x%0x (Ans : 0x%0x)", output_port, TestAns[i]);
+						$fdisplay(f, "Test #%s has been failed!", TestID[i]);
+						$fdisplay(f, "output_port = 0x%0x (Ans : 0x%0x)", output_port, TestAns[i]);
 						-> testbench_finish;
 					end
 				end
@@ -138,18 +142,19 @@ module cpu_TB();
 	end
 	always @(testbench_finish) begin
 		
-		$display("Clock #%d", num_clock);
-		$display("The testbench is finished. Summarizing...");
+		$fdisplay(f, "Clock #%d", num_clock);
+		$fdisplay(f, "The testbench is finished. Summarizing...");
 		for(i=0; i<`NUM_TEST; i=i+1) begin
 			if (TestPassed[i] == 1)
 				Passed=Passed+1;
 			else									   
-				$display("Test #%s : %s", TestID[i], (TestPassed[i] === 0)?"Wrong" : "No Result");
+				$fdisplay(f, "Test #%s : %s", TestID[i], (TestPassed[i] === 0)?"Wrong" : "No Result");
 		end
 		if (Passed == `NUM_TEST)
-			$display("All Pass!");
+			$fdisplay(f, "All Pass!");
 		else
-			$display("Pass : %0d/%0d", Passed, `NUM_TEST);
+			$fdisplay(f, "Pass : %0d/%0d", Passed, `NUM_TEST);
+		$fclose(f);
 		$finish;
 	end
 
