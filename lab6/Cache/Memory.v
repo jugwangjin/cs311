@@ -346,7 +346,7 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 							address2_fetching = 1'b1;
 							M2delay <= 3'b001;
 						end
-						else begin
+						else if (address2_fetching == 1'b1) begin
 							M2delay <= M2delay + 3'b001;
 						end
 					end
@@ -373,7 +373,7 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 							address1_fetching = 1'b1;
 							M1delay <= 3'b001;
 						end
-						else begin
+						else if (address1_fetching == 1'b1) begin
 							M1delay <= M1delay + 3'b001;
 						end
 					end
