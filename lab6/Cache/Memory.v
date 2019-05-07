@@ -51,14 +51,12 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 	reg [`WORD_SIZE-1:0] d_cache_data [`LINE_NUMBER-1:0][`LINE_SIZE-1:0];
 	reg d_cache_dirty [`LINE_NUMBER-1:0];	
 
-	reg address1_fetching;
 	reg [`TAG_SIZE-1:0]address1_tag;
 	reg [2:0]address1_index;
 	wire i_cache_hit;
 	wire i_cache_tag_hit;
 	wire [`WORD_SIZE-1:0]i_cache_output;
 
-	reg address2_fetching;
 	reg [`TAG_SIZE-1:0]address2_tag;
 	reg [2:0]address2_index;
 	wire d_cache_hit;
@@ -88,10 +86,8 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 				M2delay = 3'b0;
 				address1_tag = 0;
 				address1_index = 0;
-				address1_fetching = 0;
 				address2_tag = 0;
 				address2_index = 0;
-				address2_fetching = 0;
 				for(i=0; i<`LINE_NUMBER; i=i+1) begin
 					i_cache_tag[i] = `TAG_SIZE'b0;
 					i_cache_valid[i] = 1'b0;
@@ -328,7 +324,6 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 						d_cache_dirty[address2_index] = 1'b0;
 					end
 					M2delay = 3'b000;
-					address2_fetching = 1'b0;
 				end
 
 				if (readM2 == 1'b1 || writeM2 == 1'b1) begin
@@ -341,13 +336,12 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 						M2delay = 3'b000;
 					end
 					else begin
-						if (address2_fetching == 1'b0) begin
+						if (M2delay == 3'b000) begin
 							address2_tag = address2[`WORD_SIZE-1:`WORD_SIZE-`TAG_SIZE];
 							address2_index = address2[`WORD_SIZE-`TAG_SIZE-1:`WORD_SIZE-`TAG_SIZE-3];
-							address2_fetching = 1'b1;
 							M2delay = 3'b001;
 						end
-						else if (address2_fetching == 1'b1) begin
+						else begin
 							M2delay = M2delay + 3'b001;
 						end
 					end
@@ -360,7 +354,6 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 					i_cache_valid[address1_index] = 1'b1;
 					i_cache_tag[address1_index] = address1_tag;
 					M1delay = 3'b000;
-					address1_fetching = 1'b0;
 				end
 
 				if(readM1 == 1'b1) begin
@@ -369,13 +362,12 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 						M1delay = 3'b000;
 					end
 					else begin
-						if (address1_fetching == 1'b0) begin
+						if (M1delay == 3'b000) begin
 							address1_tag = address1[`WORD_SIZE-1:`WORD_SIZE-`TAG_SIZE];
 							address1_index = address1[`WORD_SIZE-`TAG_SIZE-1:`WORD_SIZE-`TAG_SIZE-3];
-							address1_fetching = 1'b1;
 							M1delay = 3'b001;
 						end
-						else if (address1_fetching == 1'b1) begin
+						else begin
 							M1delay = M1delay + 3'b001;
 						end
 					end
