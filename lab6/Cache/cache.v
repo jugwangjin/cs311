@@ -82,7 +82,7 @@ module cache(Clk, Reset_N, M1busy, C1busy, data1, cachedata1, readM1, address1, 
 	assign d_cache_output = d_cache_data[address2_index][address2[1:0]];
 
     assign readM1 = readC1 && !i_cache_hit;
-    assign readM2 = readC2 && !d_cache_hit && !d_cache_dirty[address2_index];
+    assign readM2 = (readC2 || writeC2) && !d_cache_hit && !d_cache_dirty[address2_index];
     assign writeM2 = readC2 && !d_cache_hit && d_cache_valid[address2_index] && d_cache_dirty[address2_index];
 
     assign data2[63:48] = (!readM2)?d_cache_data[address2_index][0]:`WORD_SIZE'bz;
