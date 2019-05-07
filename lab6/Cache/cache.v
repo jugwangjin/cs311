@@ -126,9 +126,6 @@ module cache(Clk, Reset_N, M1busy, C1busy, data1, cachedata1, readM1, address1, 
                 i_cache_valid[address1_index] = 1'b1;
                 i_cache_tag[address1_index] = address1_tag;
             end
-            // if(i_cache_hit) begin
-            //     cachedata1 = i_cache_output;
-            // end
 
             if(readC2 && writeM2 && !M2busy) begin
                 d_cache_dirty[address2_index] = 1'b0;
@@ -146,7 +143,6 @@ module cache(Clk, Reset_N, M1busy, C1busy, data1, cachedata1, readM1, address1, 
             end
 
             if(d_cache_hit) begin
-                // if(readC2)cachedata2=d_cache_output;
                 if(writeC2) begin
                     d_cache_data[address2_index][address2[1:0]] = cachedata2;
                     d_cache_dirty[address2_index] = 1'b1;
