@@ -34,6 +34,9 @@ module datapath (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, writeM2,
     input M2busy;
     wire M2busy;
 
+    wire C1busy;
+    wire C2busy;
+
     wire readC1;
     wire readC2;
     wire writeC2;
@@ -148,7 +151,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, writeM2,
     assign ID_use_rs = (IFID_IsBubble == 1'b1) ? 1'b0 : (ID_opcode == `JMP_OP || ID_opcode == `JAL_OP) ? 1'b0 : 1'b1;
     assign ID_use_rt = (IFID_IsBubble == 1'b1) ? 1'b0 : ((ID_opcode == 4'd15 && ID_func > 6'd24) || (ID_opcode > 4'd1 && ID_opcode != 4'd8 && ID_opcode != 4'd15) || ID_use_rs == 1'b0) ? 1'b0 : 1'b1;
 
-    assign EX_stall = (IDEX_IsBubble == 1'b0 && M1busy == 1'b1 && (IDEX_controls[8] || (IDEX_controls[5] && EX_bcond == 1'b1)));
+    assign EX_stall = (IDEX_IsBubble == 1'b0 && C1busy == 1'b1 && (IDEX_controls[8] || (IDEX_controls[5] && EX_bcond == 1'b1)));
     assign EX_forwardedReadData1 = (EX_forwardA == 2'b10) ? WB_WriteData : (EX_forwardA == 2'b01) ? EXMEM_ALUOutput : IDEX_ReadData1;
     assign EX_ALUInput1 = (IDEX_controls[1] == 1'b1 && (IDEX_controls[8] == 1'b1 || IDEX_controls[9] == 1'b1)) ? IDEX_PC : EX_forwardedReadData1;
     assign EX_forwardedReadData2 = (EX_forwardB == 2'b10) ? WB_WriteData : (EX_forwardB == 2'b01) ? EXMEM_ALUOutput : IDEX_ReadData2;
@@ -160,12 +163,12 @@ module datapath (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, writeM2,
     ALUcontrol ALUCONTROL_MODULE (EX_ALUOp, IDEX_controls[7], IDEX_opcode, IDEX_func);
 	ALU ALU_MODULE (EX_ALUInput1, EX_ALUInput2, EX_ALUOp, EX_ALUOutput, EX_OverflowFlag);
     forwarding FORWARDING_MODULE (EX_forwardA, EX_forwardB, IDEX_rs, IDEX_rt, EXMEM_controls[1], EXMEM_rd, MEMWB_controls[1], MEMWB_rd);
-    memorydelay MEMORYDELAY_MODULE(IF_stall, M1busy, readM1, MEM_stall, M2busy, writeM2, readM2, EXMEM_IsBubble);
-    hazard HAZARD_MODULE(ID_stall, M1busy, IFID_IsBubble, controls[9], ID_use_rs, ID_rs, ID_use_rt, ID_rt, IDEX_controls[4], IDEX_rd);
+    memorydelay MEMORYDELAY_MODULE(IF_stall, C1busy, readM1, MEM_stall, C2busy, writeM2, readM2, EXMEM_IsBubble);
+    hazard HAZARD_MODULE(ID_stall, C1busy, IFID_IsBubble, controls[9], ID_use_rs, ID_rs, ID_use_rt, ID_rt, IDEX_controls[4], IDEX_rd);
     branchcondition BRANCHCONDITION_MODULE (EX_bcond, IDEX_controls[5], IDEX_opcode, EX_ALUOutput);
     adder EX_branchPC_ADDER_MODULE(EX_branchPC, IDEX_PC, IDEX_imm);
     adder PC_ADDER_MODULE(IF_PCAdderOutput, PC, `WORD_SIZE'd1);
-    cache CACHE_MODULE(Clk, Reset_N, M1busy, data1, cachedata1, readM1, address1, M2busy, data2, cachedata2, readM2, writeM2, readC1, readC2, writeC2, address2); 
+    cache CACHE_MODULE(Clk, Reset_N, M1busy, C1busy, data1, cachedata1, readM1, address1, M2busy, C2busy, data2, cachedata2, readM2, writeM2, readC1, readC2, writeC2, address2); 
  
 
     initial begin

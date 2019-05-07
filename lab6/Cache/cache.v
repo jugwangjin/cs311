@@ -5,13 +5,15 @@
 `define LINE_SIZE 4
 `define TAG_SIZE 11
 
-module cache(Clk, Reset_N, M1busy, data1, cachedata1, readM1, address1, M2busy, data2, cachedata2, readM2, writeM2, readC1, readC2, writeC2, address2); 
+module cache(Clk, Reset_N, M1busy, C1busy, data1, cachedata1, readM1, address1, M2busy, C2busy, data2, cachedata2, readM2, writeM2, readC1, readC2, writeC2, address2); 
     input Clk;
     wire Clk;
     input Reset_N;
     wire Reset_N;
     input M1busy;
     wire M1busy;
+    output C1busy;
+    wire C1busy;
     input data1;
     wire [`CACHE_LINE-1:0] data1;
     output cachedata1;
@@ -22,6 +24,8 @@ module cache(Clk, Reset_N, M1busy, data1, cachedata1, readM1, address1, M2busy, 
     wire [`WORD_SIZE-1:0] address1;
     input M2busy;
     wire M2busy;
+    output C2busy;
+    wire C2busy;
     inout data2;
     wire [`CACHE_LINE-1:0] data2;
     inout cachedata2;
@@ -91,7 +95,9 @@ module cache(Clk, Reset_N, M1busy, data1, cachedata1, readM1, address1, M2busy, 
     assign cachedata1 = i_cache_output;
     assign cachedata2 = readC2?outputcacheData2:`WORD_SIZE'bz;
     
-	
+    assign C1busy = !i_cache_hit;
+    assign C2busy = !d_cache_hit;
+
     always @(posedge Clk) begin
         if(!Reset_N) begin
             for(i=0; i<`LINE_NUMBER; i=i+1) begin
