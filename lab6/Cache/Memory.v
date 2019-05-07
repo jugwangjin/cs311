@@ -327,7 +327,7 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 						end
 						d_cache_dirty[address2_index] = 1'b0;
 					end
-					M2delay = 3'b0;
+					M2delay = 3'b000;
 					address2_fetching = 1'b0;
 				end
 
@@ -358,7 +358,7 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 					end
 					i_cache_valid[address1_index] = 1'b1;
 					i_cache_tag[address1_index] = address1_tag;
-					M1delay = 3'b0;
+					M1delay = 3'b000;
 					address1_fetching = 1'b0;
 				end
 
