@@ -333,6 +333,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, writeM2,
             end
             else if (IF_stall == 1'b1 && ID_stall == 1'b0 && EX_stall == 1'b0 && MEM_stall == 1'b0) begin
                 IFID_IsBubble = 1'b1;
+                IFID_instruction = `WORD_SIZE'b0;
             end
         end
     end
