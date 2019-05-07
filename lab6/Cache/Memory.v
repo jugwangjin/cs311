@@ -4,6 +4,7 @@
 `define WORD_SIZE 16	//	instead of 2^16 words to reduce memory
 			//	requirements in the Active-HDL simulator 
 `define CACHE_LINE 64
+`define LINE_SIZE 4 
 
 // 2 port memory
 // one for I-cache
@@ -269,10 +270,10 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 				end
 				if(M2delay >= 3'd6) begin // fetch to cache
 					if(readM2) begin
-						outputData2[0] = memory[{{address2[`WORD_SIZE-1:2]}, {2'b00}}]
-						outputData2[1] = memory[{{address2[`WORD_SIZE-1:2]}, {2'b01}}]
-						outputData2[2] = memory[{{address2[`WORD_SIZE-1:2]}, {2'b10}}]
-						outputData2[3] = memory[{{address2[`WORD_SIZE-1:2]}, {2'b11}}]
+						outputData2[0] = memory[{{address2[`WORD_SIZE-1:2]}, {2'b00}}];
+						outputData2[1] = memory[{{address2[`WORD_SIZE-1:2]}, {2'b01}}];
+						outputData2[2] = memory[{{address2[`WORD_SIZE-1:2]}, {2'b10}}];
+						outputData2[3] = memory[{{address2[`WORD_SIZE-1:2]}, {2'b11}}];
 					end
 					if(writeM2) begin
 						memory[{{address2[`WORD_SIZE-1:2]}, {2'b00}}] = data2[63:48];
@@ -288,10 +289,10 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 				end		
 				if(M1delay >= 3'd6) begin // fetch to cache
 					if(readM1 == 1'b1) begin
-						data1[63:48] = memory[{{address1[`WORD_SIZE-1:2]}, {2'b00}}]
-						data1[47:32] = memory[{{address1[`WORD_SIZE-1:2]}, {2'b01}}]
-						data1[31:16] = memory[{{address1[`WORD_SIZE-1:2]}, {2'b10}}]
-						data1[15:0] = memory[{{address1[`WORD_SIZE-1:2]}, {2'b11}}]
+						data1[63:48] = memory[{{address1[`WORD_SIZE-1:2]}, {2'b00}}];
+						data1[47:32] = memory[{{address1[`WORD_SIZE-1:2]}, {2'b01}}];
+						data1[31:16] = memory[{{address1[`WORD_SIZE-1:2]}, {2'b10}}];
+						data1[15:0] = memory[{{address1[`WORD_SIZE-1:2]}, {2'b11}}];
 						M1delay = 3'b000;
 					end
 				end			  
