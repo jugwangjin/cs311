@@ -37,6 +37,9 @@ module datapath (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, writeM2,
     wire C1busy;
     wire C2busy;
 
+    wire [`WORD_SIZE-1:0] cachedata1;
+    wire [`WORD_SIZE-1:0] cachedata2;
+
     wire readC1;
     wire readC2;
     wire writeC2;
