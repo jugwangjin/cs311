@@ -256,8 +256,6 @@ module datapath (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, writeM2,
             instruction = data1;
 
             // update PC 
-            IDEX_PC = IFID_PC;
-            IFID_PC = IF_PCAdderOutput;
             PC = IF_nextPC;
 
             // MEMWB Latch
@@ -303,6 +301,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, writeM2,
                 IDEX_opcode = ID_opcode;
                 IDEX_func = ID_func;
                 IDEX_imm = {{8{ID_imm[7]}}, ID_imm[7:0]};
+                IDEX_PC = IFID_PC;
                 if(ID_flush) begin
                     IDEX_IsBubble = 1'b1;
                 end
@@ -329,6 +328,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, writeM2,
                 else begin
                     IFID_instruction = instruction;
                     IFID_IsBubble =1'b0;
+                    IFID_PC = IF_PCAdderOutput;
                 end
             end
             else if (IF_stall == 1'b1 && ID_stall == 1'b0 && EX_stall == 1'b0 && MEM_stall == 1'b0) begin
