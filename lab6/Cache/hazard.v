@@ -4,6 +4,10 @@ module hazard(stall, IFID_IsBubble, ID_IsJumpI, use_rs, rs, use_rt, rt, IDEX_Mem
     output stall;
     wire stall;
 
+    input IFID_IsBubble;
+    wire IFID_IsBubble;
+    input ID_IsJumpI;
+    wire ID_IsJumpI;
     input use_rs;
     input [1:0]rs;
     input use_rt;
