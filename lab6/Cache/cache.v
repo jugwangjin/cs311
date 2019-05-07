@@ -23,7 +23,7 @@ module cache(Clk, Reset_N, M1busy, data1, cachedata1, readM1, address1, M2busy, 
     input M2busy;
     wire M2busy;
     inout data2;
-    wire [`CACHE_LINE-1:0] data2 [3:0];
+    wire [`CACHE_LINE-1:0] data2;
     inout cachedata2;
     wire [`WORD_SZIE-1:0] cachedata2;
     output readM2;
@@ -42,10 +42,6 @@ module cache(Clk, Reset_N, M1busy, data1, cachedata1, readM1, address1, M2busy, 
     wire [`WORD_SIZE-1:0]outputcacheData2;
 
     integer i;
-	
-    assign readM1 = readC1 && !i_cache_hit;
-    assign readM2 = readC2 && !d_cache_hit && !d_cache_dirty[address2_index];
-    assign writeM2 = readC2 && !d_cache_hit && d_cache_valid[address2_index] && d_cache_dirty[address2_index];
 
     // I/D separated cache
 	reg [`TAG_SIZE-1:0] i_cache_tag [`LINE_NUMBER-1:0];
@@ -80,6 +76,10 @@ module cache(Clk, Reset_N, M1busy, data1, cachedata1, readM1, address1, M2busy, 
 	assign d_cache_tag_hit = (address2_tag == d_cache_tag[address2_index]);
 	assign d_cache_hit = (d_cache_tag_hit && d_cache_valid[address2_index]);
 	assign d_cache_output = d_cache_data[address2_index][address2[1:0]];
+
+    assign readM1 = readC1 && !i_cache_hit;
+    assign readM2 = readC2 && !d_cache_hit && !d_cache_dirty[address2_index];
+    assign writeM2 = readC2 && !d_cache_hit && d_cache_valid[address2_index] && d_cache_dirty[address2_index];
 
     assign data2[0] = readM2?outputcacheData2[0]:`WORD_SIZE'bz;
     assign data2[1] = readM2?outputcacheData2[1]:`WORD_SIZE'bz;
