@@ -152,7 +152,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, writeM2,
     ALUcontrol ALUCONTROL_MODULE (EX_ALUOp, IDEX_controls[7], IDEX_opcode, IDEX_func);
 	ALU ALU_MODULE (EX_ALUInput1, EX_ALUInput2, EX_ALUOp, EX_ALUOutput, EX_OverflowFlag);
     forwarding FORWARDING_MODULE (EX_forwardA, EX_forwardB, IDEX_rs, IDEX_rt, EXMEM_controls[1], EXMEM_rd, MEMWB_controls[1], MEMWB_rd);
-    hazard HAZARD_MODULE(ID_stall, IFID_IsBubble, controls[9], ID_use_rs, ID_rs, ID_use_rt, ID_rt, IDEX_controls[4], IDEX_rd);
+    hazard HAZARD_MODULE(ID_stall, IDEX_IsBubble, controls[8], ID_use_rs, ID_rs, ID_use_rt, ID_rt, IDEX_controls[4], IDEX_rd);
     branchcondition BRANCHCONDITION_MODULE (EX_bcond, IDEX_controls[5], IDEX_opcode, EX_ALUOutput);
     adder EX_branchPC_ADDER_MODULE(EX_branchPC, IDEX_PC, IDEX_imm);
     adder PC_ADDER_MODULE(IF_PCAdderOutput, PC, `WORD_SIZE'd1);
