@@ -51,23 +51,27 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 	reg [`WORD_SIZE-1:0] d_cache_data [`LINE_NUMBER-1:0][`LINE_SIZE-1:0];
 	reg d_cache_dirty [`LINE_NUMBER-1:0];	
 
-	reg [`TAG_SIZE-1:0]address1_tag;
-	reg [2:0]address1_index;
+	wire [`TAG_SIZE-1:0]address1_tag;
+	wire [2:0]address1_index;
 	wire i_cache_hit;
 	wire i_cache_tag_hit;
 	wire [`WORD_SIZE-1:0]i_cache_output;
 
-	reg [`TAG_SIZE-1:0]address2_tag;
-	reg [2:0]address2_index;
+	wire [`TAG_SIZE-1:0]address2_tag;
+	wire [2:0]address2_index;
 	wire d_cache_hit;
 	wire d_cache_tag_hit;
 	wire [`WORD_SIZE-1:0]d_cache_output;
 
-	
+
+	assign address1_tag = address1[`WORD_SIZE-1:`WORD_SIZE-`TAG_SIZE];
+	assign address1_index = address1[`WORD_SIZE-`TAG_SIZE-1:`WORD_SIZE-`TAG_SIZE-3];
 	assign i_cache_tag_hit = (address1_tag == i_cache_tag[address1_index]);
 	assign i_cache_hit = (i_cache_tag_hit && i_cache_valid[address1_index]);
 	assign i_cache_output = i_cache_data[address1_index][address1[1:0]];
 
+	assign address2_tag = address2[`WORD_SIZE-1:`WORD_SIZE-`TAG_SIZE];
+	assign address2_index = address2[`WORD_SIZE-`TAG_SIZE-1:`WORD_SIZE-`TAG_SIZE-3];
 	assign d_cache_tag_hit = (address2_tag == d_cache_tag[address2_index]);
 	assign d_cache_hit = (d_cache_tag_hit && d_cache_valid[address2_index]);
 	assign d_cache_output = d_cache_data[address2_index][address2[1:0]];
@@ -319,14 +323,7 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 						M2delay = 3'b000;
 					end
 					else begin
-						if (M2delay == 3'b000) begin
-							address2_tag = address2[`WORD_SIZE-1:`WORD_SIZE-`TAG_SIZE];
-							address2_index = address2[`WORD_SIZE-`TAG_SIZE-1:`WORD_SIZE-`TAG_SIZE-3];
-							M2delay = 3'b001;
-						end
-						else begin
-							M2delay = M2delay + 3'b001;
-						end
+						M2delay = M2delay + 3'b001;
 					end
 				end
 
@@ -352,14 +349,7 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 						M1delay = 3'b000;
 					end
 					else begin
-						if (M1delay == 3'b000) begin
-							address1_tag = address1[`WORD_SIZE-1:`WORD_SIZE-`TAG_SIZE];
-							address1_index = address1[`WORD_SIZE-`TAG_SIZE-1:`WORD_SIZE-`TAG_SIZE-3];
-							M1delay = 3'b001;
-						end
-						else begin
-							M1delay = M1delay + 3'b001;
-						end
+						M1delay = M1delay + 3'b001;
 					end
 				end		
 				if(M1delay >= 3'd5) begin
