@@ -329,6 +329,7 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 					end
 					M2delay = 3'b000;
 					address2_fetching = 1'b0;
+					if(readM2)outputData2 = d_cache_output;
 				end
 
 				if (readM2 == 1'b1 || writeM2 == 1'b1) begin
@@ -360,6 +361,7 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 					i_cache_tag[address1_index] = address1_tag;
 					M1delay = 3'b000;
 					address1_fetching = 1'b0;
+					data1 = i_cache_output;
 				end
 
 				if(readM1 == 1'b1) begin
