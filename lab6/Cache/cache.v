@@ -25,7 +25,7 @@ module cache(Clk, Reset_N, M1busy, data1, cachedata1, readM1, address1, M2busy, 
     inout data2;
     wire [`CACHE_LINE-1:0] data2;
     inout cachedata2;
-    wire [`WORD_SZIE-1:0] cachedata2;
+    wire [`WORD_SIZE-1:0] cachedata2;
     output readM2;
     wire readM2;
     output writeM2;
