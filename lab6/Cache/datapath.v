@@ -8,7 +8,7 @@
 
 `define CACHE_LINE 64
 
-module datapath (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, writeM2, address2, data2, M2busy, controls_in, is_halted, IFID_instruction, num_inst, output_port);
+module datapath (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, writeM2, address2, data2, M2busy, controls, is_halted, IFID_instruction, num_inst, output_port);
 	input Clk;
 	wire Clk;
 	input Reset_N;
@@ -44,10 +44,8 @@ module datapath (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, writeM2,
     wire readC2;
     wire writeC2;
 
-    input [10:0]controls_in;
-    wire [10:0]controls_in;
-
-    reg [10:0]controls;
+    input [10:0]controls;
+    wire [10:0]controls;
 
     output is_halted;
 	reg is_halted;
@@ -267,6 +265,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, writeM2,
                 end
             end
 
+            // save instruction before update PC, just in case.
             instruction = cachedata1;
 
             // update PC 
@@ -349,7 +348,6 @@ module datapath (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, writeM2,
                 IFID_IsBubble = 1'b1;
                 IFID_instruction = `WORD_SIZE'b0;
             end
-            controls = controls_in;
         end
     end
 
