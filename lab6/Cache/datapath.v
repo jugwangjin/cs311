@@ -26,7 +26,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, writeM2,
 	wire [`WORD_SIZE-1:0] address2;
 	input [`CACHE_LINE-1:0] data1;
 	wire [`CACHE_LINE-1:0] data1;
-	inout [`CACHE_LINE-1:0] data2[;
+	inout [`CACHE_LINE-1:0] data2;
 	wire [`CACHE_LINE-1:0] data2;
 
     input M1busy;
