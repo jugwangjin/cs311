@@ -4,14 +4,11 @@
 `define WORD_SIZE 16	//	instead of 2^16 words to reduce memory
 			//	requirements in the Active-HDL simulator 
 `define CACHE_LINE 64
-`define LINE_NUMBER 8
-`define LINE_SIZE 4
-`define TAG_SIZE 11
+
 // 2 port memory
 // one for I-cache
 // one for D-cache
 
-// cache is also implemented here
 module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, address2, data2, M2busy);
 	input clk;
 	wire clk;

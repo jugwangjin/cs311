@@ -1,5 +1,10 @@
 `include "opcodes.v"
+
 `define CACHE_LINE 64
+`define LINE_NUMBER 8
+`define LINE_SIZE 4
+`define TAG_SIZE 11
+
 module cache(Clk, Reset_N, M1busy, data1, cachedata1, readM1, address1, M2busy, data2, cachedata2, readM2, writeM2, readC1, readC2, writeC2, address2); 
     input Clk;
     wire Clk;
