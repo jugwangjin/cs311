@@ -85,15 +85,15 @@ module cache(Clk, Reset_N, M1busy, C1busy, data1, cachedata1, readM1, address1, 
     assign readM2 = readC2 && !d_cache_hit && !d_cache_dirty[address2_index];
     assign writeM2 = readC2 && !d_cache_hit && d_cache_valid[address2_index] && d_cache_dirty[address2_index];
 
-    assign data2[63:48] = readM2?d_cache_data[address2_index][0]:`WORD_SIZE'bz;
-    assign data2[47:32] = readM2?d_cache_data[address2_index][1]:`WORD_SIZE'bz;
-    assign data2[31:16] = readM2?d_cache_data[address2_index][2]:`WORD_SIZE'bz;
-    assign data2[15:0] = readM2?d_cache_data[address2_index][3]:`WORD_SIZE'bz;
+    assign data2[63:48] = (!readM2)?d_cache_data[address2_index][0]:`WORD_SIZE'bz;
+    assign data2[47:32] = (!readM2)?d_cache_data[address2_index][1]:`WORD_SIZE'bz;
+    assign data2[31:16] = (!readM2)?d_cache_data[address2_index][2]:`WORD_SIZE'bz;
+    assign data2[15:0] = (!readM2)?d_cache_data[address2_index][3]:`WORD_SIZE'bz;
 
     assign outputcacheData2 = d_cache_output;
 
     assign cachedata1 = i_cache_output;
-    assign cachedata2 = readC2?outputcacheData2:`WORD_SIZE'bz;
+    assign cachedata2 = (readC2)?outputcacheData2:`WORD_SIZE'bz;
     
     assign C1busy = !i_cache_hit;
     assign C2busy = !d_cache_hit;
