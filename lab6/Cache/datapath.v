@@ -111,6 +111,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, writeM2,
     wire EX_OverflowFlag;
     wire EX_bcond; // branch condition
     wire [`WORD_SIZE-1:0]EX_branchPC; // PC when branch condition is True
+    wire EX_stall;
 
     wire MEM_stall;
 
@@ -124,7 +125,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, writeM2,
     assign writeM2 = EXMEM_controls[3];
     assign readM1 = !is_halted;
     
-    assign IF_nextPC = (MEM_stall == 1'b1 || ID_stall == 1'b1) ? PC : (IDEX_IsBubble == 1'b0 && EX_bcond == 1'b1 && IDEX_controls[5] == 1'b1) ? EX_branchPC : (IDEX_IsBubble == 1'b0 && IDEX_controls[8] == 1'b1) ? EX_forwardedReadData1 : (IFID_IsBubble == 1'b0 && controls[9] == 1'b1) ? {{PC[15:12]}, {ID_target_address[11:0]}} : (IF_stall == 1'b0) ? IF_PCAdderOutput : PC;
+    assign IF_nextPC = (MEM_stall == 1'b1 || EX_stall == 1'b1 || ID_stall == 1'b1) ? PC : (IDEX_IsBubble == 1'b0 && EX_bcond == 1'b1 && IDEX_controls[5] == 1'b1) ? EX_branchPC : (IDEX_IsBubble == 1'b0 && IDEX_controls[8] == 1'b1) ? EX_forwardedReadData1 : (IFID_IsBubble == 1'b0 && controls[9] == 1'b1) ? {{PC[15:12]}, {ID_target_address[11:0]}} : (IF_stall == 1'b0) ? IF_PCAdderOutput : PC;
     assign IF_flush = ((IDEX_IsBubble == 1'b0) && ((EX_bcond == 1'b1 && IDEX_controls[5] == 1'b1) || IDEX_controls[8])) || ((IFID_IsBubble == 1'b0) && controls[9] == 1'b1);
 
     assign ID_flush = (IDEX_IsBubble == 1'b0) && ((EX_bcond == 1'b1 && IDEX_controls[5] == 1'b1) || IDEX_controls[8]);
@@ -157,6 +158,8 @@ module datapath (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, writeM2,
     adder PC_ADDER_MODULE(IF_PCAdderOutput, PC, `WORD_SIZE'd1);
 
     memorydelay MEMORYDELAY_MODULE(IF_stall, M1busy, readM1, MEM_stall, M2busy, writeM2, readM2, EXMEM_IsBubble);
+
+    assign EX_stall = (IDEX_IsBubble == 1'b0 && M1busy == 1'b1 && IDEX_controls[8]);
 
     initial begin
         num_inst = `WORD_SIZE'b0;
@@ -272,7 +275,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, writeM2,
             end
 
             // EXMEM Latch
-            if (MEM_stall == 1'b0) begin
+            if (MEM_stall == 1'b0 && EX_stall == 1'b0) begin
                 if (IDEX_opcode == `LHI_OP) begin
                     EXMEM_ALUOutput = {{IDEX_imm[7:0]}, {8{1'b0}}};
                 end
@@ -285,9 +288,13 @@ module datapath (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, writeM2,
                 EXMEM_controls = IDEX_controls[4:0];
                 EXMEM_IsHLT = ((IDEX_opcode == `HLT_OP) && (IDEX_func == `INST_FUNC_HLT));
             end
+            else if (EX_stall == 1'b1 && MEM_stall == 1'b0) begin
+                EXMEM_IsBubble = 1'b1;
+                EXMEM_controls = 5'b0;
+            end
     
             // IDEX Latch
-            if (MEM_stall == 1'b0 && ID_stall == 1'b0) begin
+            if (MEM_stall == 1'b0 && EX_stall == 1'b0 && ID_stall == 1'b0) begin
                 IDEX_ReadData1 = ID_ReadData1;
                 IDEX_ReadData2 = ID_ReadData2;
                 IDEX_rs = ID_rs;
@@ -309,13 +316,13 @@ module datapath (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, writeM2,
                     IDEX_controls = controls[9:0];
                 end
             end
-            else if (ID_stall == 1'b1 && MEM_stall == 1'b0) begin
+            else if (ID_stall == 1'b1 && EX_stall == 1'b0 && MEM_stall == 1'b0) begin
                 IDEX_IsBubble = 1'b1;
                 IDEX_controls = 10'b0;
             end
 
             // IFID Latch
-            if (MEM_stall == 1'b0 && ID_stall == 1'b0 && IF_stall == 1'b0) begin
+            if (MEM_stall == 1'b0 && EX_stall == 1'b0 && ID_stall == 1'b0 && IF_stall == 1'b0) begin
                 if(IF_flush) begin
                     IFID_IsBubble = 1'b1;
                 end
