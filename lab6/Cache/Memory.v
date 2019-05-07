@@ -340,7 +340,7 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 						end
 					end
 					else begin
-						if (address2_fetching = 1'b0 || address2[`WORD_SIZE-1:`WORD_SIZE-`TAG_SIZE] != address2_tag || address2[`WORD_SIZE-`TAG_SIZE-1:`WORD_SIZE-`TAG_SIZE-3] != address2_index) begin
+						if (address2_fetching == 1'b0 || address2[`WORD_SIZE-1:`WORD_SIZE-`TAG_SIZE] != address2_tag || address2[`WORD_SIZE-`TAG_SIZE-1:`WORD_SIZE-`TAG_SIZE-3] != address2_index) begin
 							address2_tag = address2[`WORD_SIZE-1:`WORD_SIZE-`TAG_SIZE];
 							address2_index = address2[`WORD_SIZE-`TAG_SIZE-1:`WORD_SIZE-`TAG_SIZE-3];
 							address2_fetching = 1'b1;

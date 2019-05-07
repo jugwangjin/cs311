@@ -26,6 +26,6 @@ module hazard(stall, IFID_IsBubble, ID_IsJumpI, use_rs, rs, use_rt, rt, IDEX_Mem
     assign rsstall = (rs == IDEX_rd) && use_rs == 1'b1;
     assign rtstall = (rt == IDEX_rd) && use_rt == 1'b1;
 
-    assign stall = (((rsstall == 1'b1 || rtstall == 1'b1) && IDEX_MemRead == 1'b1) || (IFID_IsBubble == 1'b0 && ID_IsJumpI == 1'b1])) ? 1'b1 : 1'b0;
+    assign stall = (((rsstall == 1'b1 || rtstall == 1'b1) && IDEX_MemRead == 1'b1) || (IFID_IsBubble == 1'b0 && ID_IsJumpI == 1'b1)) ? 1'b1 : 1'b0;
 
 endmodule
