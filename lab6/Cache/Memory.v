@@ -42,14 +42,14 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 	reg [2:0]M2delay;
 
 	// I/D separated cache
-	reg [`TAG_SIZE-1:0] i_cache_tag [`LINE_NUMBER:0];
-	reg i_cache_valid [`LINE_NUMBER:0];
-	reg [`WORD_SIZE-1:0] i_cache_data [`LINE_NUMBER:0][`LINE_SIZE:0];
+	reg [`TAG_SIZE-1:0] i_cache_tag [`LINE_NUMBER-1:0];
+	reg i_cache_valid [`LINE_NUMBER-1:0];
+	reg [`WORD_SIZE-1:0] i_cache_data [`LINE_NUMBER-1:0][`LINE_SIZE-1:0];
 
-	reg [`TAG_SIZE-1:0] d_cache_tag [`LINE_NUMBER:0];
-	reg d_cache_valid [`LINE_NUMBER:0];
-	reg [`WORD_SIZE-1:0] d_cache_data [`LINE_NUMBER:0][`LINE_SIZE:0];
-	reg d_cache_dirty [`LINE_NUMBER:0];	
+	reg [`TAG_SIZE-1:0] d_cache_tag [`LINE_NUMBER-1:0];
+	reg d_cache_valid [`LINE_NUMBER-1:0];
+	reg [`WORD_SIZE-1:0] d_cache_data [`LINE_NUMBER-1:0][`LINE_SIZE-1:0];
+	reg d_cache_dirty [`LINE_NUMBER-1:0];	
 
 	reg address1_fetching;
 	reg [`TAG_SIZE-1:0]address1_tag;
@@ -340,7 +340,7 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 						end
 					end
 					else begin
-						if (address2_fetching == 1'b0 || address2[`WORD_SIZE-1:`WORD_SIZE-`TAG_SIZE] != address2_tag || address2[`WORD_SIZE-`TAG_SIZE-1:`WORD_SIZE-`TAG_SIZE-3] != address2_index) begin
+						if (address2_fetching == 1'b0) begin
 							address2_tag = address2[`WORD_SIZE-1:`WORD_SIZE-`TAG_SIZE];
 							address2_index = address2[`WORD_SIZE-`TAG_SIZE-1:`WORD_SIZE-`TAG_SIZE-3];
 							address2_fetching = 1'b1;
@@ -367,7 +367,7 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 						data1 = i_cache_output;
 					end
 					else begin
-						if (address1_fetching == 1'b0 ||address1[`WORD_SIZE-1:`WORD_SIZE-`TAG_SIZE] != address1_tag || address1[`WORD_SIZE-`TAG_SIZE-1:`WORD_SIZE-`TAG_SIZE-3] != address1_index) begin
+						if (address1_fetching == 1'b0) begin
 							address1_tag = address1[`WORD_SIZE-1:`WORD_SIZE-`TAG_SIZE];
 							address1_index = address1[`WORD_SIZE-`TAG_SIZE-1:`WORD_SIZE-`TAG_SIZE-3];
 							address1_fetching = 1'b1;
