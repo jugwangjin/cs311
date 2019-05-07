@@ -326,8 +326,7 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 						M2delay = M2delay + 3'b001;
 					end
 				end
-
-				if(M2delay >= 3'd5) begin
+				if(M2delay >= 3'd6) begin
 					if(d_cache_valid[address2_index] == 1'b0 || d_cache_dirty[address2_index] == 1'b0) begin
 						for (i=0; i<`LINE_SIZE; i=i+1) begin
 							d_cache_data[address2_index][i[1:0]] = memory[{{address2[`WORD_SIZE-1:2]}, {i[1:0]}}];
@@ -352,7 +351,7 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 						M1delay = M1delay + 3'b001;
 					end
 				end		
-				if(M1delay >= 3'd5) begin
+				if(M1delay >= 3'd6) begin
 					for (i=0; i<`LINE_SIZE; i=i+1) begin
 						i_cache_data[address1_index][i[1:0]] = memory[{{address1[`WORD_SIZE-1:2]}, {i[1:0]}}];
 					end

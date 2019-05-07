@@ -331,7 +331,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, writeM2,
                     IFID_IsBubble =1'b0;
                 end
             end
-            else if (IF_stall == 1'b1 && ID_stall == 1'b0 && MEM_stall == 1'b0) begin
+            else if (IF_stall == 1'b1 && ID_stall == 1'b0 && EX_stall == 1'b0 && MEM_stall == 1'b0) begin
                 IFID_IsBubble = 1'b1;
             end
         end
