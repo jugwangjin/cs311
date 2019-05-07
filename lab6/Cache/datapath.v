@@ -159,7 +159,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, writeM2,
 
     memorydelay MEMORYDELAY_MODULE(IF_stall, M1busy, readM1, MEM_stall, M2busy, writeM2, readM2, EXMEM_IsBubble);
 
-    assign EX_stall = (IDEX_IsBubble == 1'b0 && M1busy == 1'b1 && (IDEX_controls[8] || (IDEX_controls[5] && EX_bcond == 1'b1)));
+    assign EX_stall = (IDEX_IsBubble == 1'b0 && M1busy == 1'b1 && (IDEX_controls[8] || IDEX_controls[5]));
 
     initial begin
         num_inst = `WORD_SIZE'b0;
