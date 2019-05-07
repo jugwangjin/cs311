@@ -131,10 +131,10 @@ module cache(Clk, Reset_N, M1busy, data1, cachedata1, readM1, address1, M2busy, 
             end
 
             if(readC2 && readM2 && !M2busy) begin
-                d_cache_data[address2_index][0] = data[63:48];
-                d_cache_data[address2_index][1] = data[47:32];
-                d_cache_data[address2_index][2] = data[31:16];
-                d_cache_data[address2_index][3] = data[15:0];
+                d_cache_data[address2_index][0] = data2[63:48];
+                d_cache_data[address2_index][1] = data2[47:32];
+                d_cache_data[address2_index][2] = data2[31:16];
+                d_cache_data[address2_index][3] = data2[15:0];
 
                 d_cache_valid[address2_index] = 1'b1;
                 d_cache_dirty[address2_index] = 1'b0;
