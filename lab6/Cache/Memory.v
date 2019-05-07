@@ -88,10 +88,6 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 				// init delays and cache
 				M1delay = 3'b0;
 				M2delay = 3'b0;
-				address1_tag = 0;
-				address1_index = 0;
-				address2_tag = 0;
-				address2_index = 0;
 				for(i=0; i<`LINE_NUMBER; i=i+1) begin
 					i_cache_tag[i] = `TAG_SIZE'b0;
 					i_cache_valid[i] = 1'b0;
