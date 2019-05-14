@@ -44,6 +44,11 @@ module DMA_controller(Clk, Reset_N, M2busy, dma_set_address, dma_address, BR, BG
     end
     always @(posedge dma_begin_interrupt) begin
         BR = 1'b1;
+        idx = 4'd0;
+    end
+    always @(posedge dma_end_interrupt) begin
+        BR = 1'b0;
+        idx = 4'd0;
     end
 
     always @(posedge Clk) begin
@@ -52,10 +57,6 @@ module DMA_controller(Clk, Reset_N, M2busy, dma_set_address, dma_address, BR, BG
                 idx = nextidx;
                 nextidx = idx + 4;
             end
-        end
-        else if (!BG) begin
-                BR = 1'b0;
-                idx = 4'd0;
         end
     end
 endmodule
