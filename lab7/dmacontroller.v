@@ -33,7 +33,7 @@ module DMA_controller(Clk, Reset_N, M2busy, dma_address, BR, BG, use_bus, idx, d
         idx = 4'd0;
     end
     always @(posedge Clk) begin
-        if (BG && !M2busy)
+        if (BG && !M2busy) begin
             if(idx < `LENGTH)begin
                 BR = 1'b1;
                 idx = idx + 4;
