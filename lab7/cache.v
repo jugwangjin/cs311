@@ -5,7 +5,7 @@
 `define LINE_SIZE 4
 `define TAG_SIZE 11
 
-module cache(Clk, Reset_N, M1busy, C1busy, data1, cachedata1, readM1, address1, M2busy, C2busy, cpu_data2, cachedata2, readM2, cpu_writeM2, readC1, readC2, writeC2, cpu_address2, BG); 
+module cache(Clk, Reset_N, M1busy, C1busy, data1, cachedata1, readM1, address1, M2busy, C2busy, data2, cachedata2, readM2, cpu_writeM2, readC1, readC2, writeC2, cpu_address2, BG); 
     input Clk;
     wire Clk;
     input Reset_N;
@@ -26,8 +26,8 @@ module cache(Clk, Reset_N, M1busy, C1busy, data1, cachedata1, readM1, address1, 
     wire M2busy;
     output C2busy;
     wire C2busy;
-    inout cpu_data2;
-    wire [`BLOCK_SIZE-1:0] cpu_data2;
+    inout data2;
+    wire [`BLOCK_SIZE-1:0] data2;
     inout cachedata2;
     wire [`WORD_SIZE-1:0] cachedata2;
     output readM2;
@@ -138,10 +138,10 @@ module cache(Clk, Reset_N, M1busy, C1busy, data1, cachedata1, readM1, address1, 
             end
 
             if((readC2 || writeC2) && readM2 && !M2busy) begin
-                d_cache_data[cpu_address2_index][0] = cpu_data2[63:48];
-                d_cache_data[cpu_address2_index][1] = cpu_data2[47:32];
-                d_cache_data[cpu_address2_index][2] = cpu_data2[31:16];
-                d_cache_data[cpu_address2_index][3] = cpu_data2[15:0];
+                d_cache_data[cpu_address2_index][0] = data2[63:48];
+                d_cache_data[cpu_address2_index][1] = data2[47:32];
+                d_cache_data[cpu_address2_index][2] = data2[31:16];
+                d_cache_data[cpu_address2_index][3] = data2[15:0];
                 d_cache_valid[cpu_address2_index] = 1'b1;
                 d_cache_dirty[cpu_address2_index] = 1'b0;
                 d_cache_tag[cpu_address2_index] = cpu_address2_tag;
