@@ -266,7 +266,7 @@ module datapath (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, cpu_writ
         end
         else begin
             // when BR is high and conditions are fulfilled, set BG high
-            if (BR && !M1busy && !M2busy) begin
+            if (BR && !C1busy && !C2busy) begin
                 BG = 1'b1;
             end
 
