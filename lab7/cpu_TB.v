@@ -41,7 +41,7 @@ module cpu_TB();
 
 	assign writeM2 = use_bus? dma_writeM2 : cpu_writeM2;
 	assign address2 = use_bus? {{dma_address[`WORD_SIZE-1:4]}, {idx[3:0]}} : cpu_address2;
-	assign data2 = readM2 ? `WORD_SIZE'bz : (use_bus? external_data : cpu_data2);
+	assign data2 = readM2 ? `BLOCK_SIZE'bz : (use_bus? external_data : cpu_data2);
 
 	// instantiate the unit under test
 	cpu UUT (clk, reset_n, readM1, address1, data1, M1busy, readM2, cpu_writeM2, cpu_address2, cpu_data2, M2busy, num_inst, output_port, is_halted, dma_begin_interrupt, dma_end_interrupt, BR, BG, dma_address);
