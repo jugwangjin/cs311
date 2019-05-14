@@ -156,18 +156,18 @@ module cache(Clk, Reset_N, M1busy, C1busy, data1, cachedata1, readM1, address1, 
 
             if(i_cache_hit) begin
                 hit = hit + 1;
-                $display("hit: %d", hit)
+                $display("hit: %d", hit);
             end else begin
                 miss = miss + 1;
-                $display("miss: %d", miss)
+                $display("miss: %d", miss);
             end
             
             if(d_cache_hit) begin
                 hit = hit + 1;
-                $display("hit: %d", hit)
+                $display("hit: %d", hit);
             end else begin
                 miss = miss + 1;
-                $display("miss: %d", miss)
+                $display("miss: %d", miss);
             end
         end
     end
