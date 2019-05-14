@@ -27,6 +27,7 @@ module cpu_TB();
 	wire M1busy;
 	wire M2busy;
 	wire dma_begin_interrupt;
+	wire dma_end_interrupt;
 	wire [`WORD_SIZE-1:0] dma_address;
 	wire BG;
 	wire BR;
@@ -43,9 +44,9 @@ module cpu_TB();
 	assign data2 = use_bus? external_data : cpu_data2;
 
 	// instantiate the unit under test
-	cpu UUT (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, cpu_writeM2, cpu_address2, cpu_data2, M2busy, controls, is_halted, IFID_instruction, num_inst, output_port, dma_begin_interrupt, BR, BG, dma_address);
+	cpu UUT (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, cpu_writeM2, cpu_address2, cpu_data2, M2busy, controls, is_halted, IFID_instruction, num_inst, output_port, dma_begin_interrupt, dma_end_interrupt, BR, BG, dma_address);
 	Memory NUUT(!clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, address2, data2, M2busy);
-	DMA_controller DMAC (Clk, Reset_N, M2busy, dma_address, BR, BG, use_bus, idx, dma_writeM2);
+	DMA_controller DMAC (Clk, Reset_N, M2busy, dma_address, BR, BG, use_bus, idx, dma_writeM2, dma_end_interrupt);
 	external_device ED (external_data, use_bus, idx, dma_begin_interrupt);
 
 	// initialize inputs

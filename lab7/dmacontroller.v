@@ -1,7 +1,7 @@
 `include "opcodes.v"
 `define LENGTH 4
 
-module DMA_controller(Clk, Reset_N, M2busy, dma_address, BR, BG, use_bus, idx, dma_writeM2); 
+module DMA_controller(Clk, Reset_N, M2busy, dma_address, BR, BG, use_bus, idx, dma_writeM2, dma_end_interrupt); 
     input Clk;
     wire Clk;
     input Reset_N;

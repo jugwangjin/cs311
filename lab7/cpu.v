@@ -2,7 +2,7 @@
 `define WORD_SIZE 16    // data and address word size
 `define BLOCK_SIZE 64
 
-module cpu(Clk, Reset_N, readM1, address1, data1, M1busy, readM2, cpu_writeM2, cpu_address2, cpu_data2, M2busy, num_inst, output_port, is_halted, dma_begin_interrupt, BR, BG, dma_address);
+module cpu(Clk, Reset_N, readM1, address1, data1, M1busy, readM2, cpu_writeM2, cpu_address2, cpu_data2, M2busy, num_inst, output_port, is_halted, dma_begin_interrupt, dma_end_interrupt, BR, BG, dma_address);
 	input Clk;
 	wire Clk;
 	input Reset_N;
