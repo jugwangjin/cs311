@@ -8,7 +8,7 @@
 
 `define BLOCK_SIZE 64
 
-module datapath (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, cpu_writeM2, cpu_address2, cpu_data2, M2busy, controls, is_halted, IFID_instruction, num_inst, output_port, dma_begin_interrupt, BR, BG, dma_set_address);
+module datapath (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, cpu_writeM2, cpu_address2, cpu_data2, M2busy, controls, is_halted, IFID_instruction, num_inst, output_port, dma_end_interrupt, BR, BG, dma_set_address);
 	input Clk;
 	wire Clk;
 	input Reset_N;
@@ -56,8 +56,8 @@ module datapath (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, cpu_writ
 	output [`WORD_SIZE-1:0] output_port;
 	reg [`WORD_SIZE-1:0] output_port;
 
-    input dma_begin_interrupt;
-    wire dma_begin_interrupt;
+    input dma_end_interrupt;
+    wire dma_end_interrupt;
    	input BR;
 	wire BR;
 	output BG;
@@ -102,7 +102,6 @@ module datapath (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, cpu_writ
     reg [1:0]MEMWB_rd;
     reg MEMWB_IsBubble;
     reg MEMWB_IsHLT;
-    reg dma_set;
 
     wire [`WORD_SIZE-1:0]IF_nextPC;
     wire [`WORD_SIZE-1:0]IF_PCAdderOutput;
@@ -203,7 +202,6 @@ module datapath (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, cpu_writ
         EXMEM_IsHLT = 1'b0;
         MEMWB_IsHLT = 1'b0;
         BG = 1'b0;
-        dma_set = 0;
 
         //not important down here. just check that is not x
         IFID_PC = 0;

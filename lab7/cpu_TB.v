@@ -46,9 +46,9 @@ module cpu_TB();
 	assign cpu_data2 = readM2 ? data2 : `BLOCK_SIZE'bz;
 
 	// instantiate the unit under test
-	cpu UUT (clk, reset_n, readM1, address1, data1, M1busy, readM2, cpu_writeM2, cpu_address2, cpu_data2, M2busy, num_inst, output_port, is_halted, dma_begin_interrupt, dma_end_interrupt, BR, BG, dma_set_address);
+	cpu UUT (clk, reset_n, readM1, address1, data1, M1busy, readM2, cpu_writeM2, cpu_address2, cpu_data2, M2busy, num_inst, output_port, is_halted, dma_end_interrupt, BR, BG, dma_set_address);
 	Memory NUUT(!clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, address2, data2, M2busy);
-	DMA_controller DMAC (clk, reset_n, M2busy, dma_set_address, dma_address, BR, BG, use_bus, idx, dma_writeM2, dma_end_interrupt);
+	DMA_controller DMAC (clk, reset_n, M2busy, dma_set_address, dma_address, BR, BG, use_bus, idx, dma_writeM2, dma_begin_interrupt, dma_end_interrupt);
 	external_device ED (external_data, use_bus, idx, dma_begin_interrupt);
 
 	// initialize inputs
