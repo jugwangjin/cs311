@@ -261,22 +261,22 @@ module Memory(clk, reset_n, readM1, address1, data1, M1busy, readM2, writeM2, ad
 				memory[16'hc6] <= 16'hf01d;
 				
 				//for DMA
-				memory[16'hf0] <= 16'ha0b2;
-				memory[16'hf1] <= 16'h7dff;
-				memory[16'hf2] <= 16'h7efe;
-				memory[16'hf3] <= 16'hf100;
-				memory[16'hf4] <= 16'h4ffe;
-				memory[16'hf5] <= 16'hf819;
-				memory[16'hf6] <= 16'hf01d;
-				memory[16'hf7] <= 16'hf01d;
-				memory[16'hf8] <= 16'hf01d;
-				memory[16'hf9] <= 16'hf01d;
-				memory[16'hfa] <= 16'hf01d;
-				memory[16'hfb] <= 16'hf01d;
-				memory[16'hfc] <= 16'hf01d;
-				memory[16'hfd] <= 16'hf01d;
-				memory[16'hfe] <= 16'hf01d;
-				memory[16'hff] <= 16'hf01d;
+				memory[16'hf0] <= 16'h0000;
+				memory[16'hf1] <= 16'h0000;
+				memory[16'hf2] <= 16'h0000;
+				memory[16'hf3] <= 16'h0000;
+				memory[16'hf4] <= 16'h0000;
+				memory[16'hf5] <= 16'h0000;
+				memory[16'hf6] <= 16'h0000;
+				memory[16'hf7] <= 16'h0000;
+				memory[16'hf8] <= 16'h0000;
+				memory[16'hf9] <= 16'h0000;
+				memory[16'hfa] <= 16'h0000;
+				memory[16'hfb] <= 16'h0000;
+				memory[16'hfc] <= 16'h0000;
+				memory[16'hfd] <= 16'h0000;
+				memory[16'hfe] <= 16'h0000;
+				memory[16'hff] <= 16'h0000;
 
 			end
 		else
