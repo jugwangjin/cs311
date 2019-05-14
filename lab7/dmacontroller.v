@@ -32,7 +32,7 @@ module DMA_controller(Clk, Reset_N, M2busy, dma_set_address, dma_address, BR, BG
 
     reg [3:0] nextidx;
 
-    assign dma_end_interrupt = (BG && !M2busy && (idx == `LENGTH));
+    assign dma_end_interrupt = (BG && (idx == `LENGTH));
     assign dma_writeM2 = (BG && (idx < `LENGTH));
     assign dma_address = dma_set_address + idx;
     assign use_bus = BR && !dma_end_interrupt;
