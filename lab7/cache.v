@@ -123,30 +123,31 @@ module cache(Clk, Reset_N, M1busy, C1busy, data1, cachedata1, readM1, address1, 
                 d_cache_data[i][3] = `WORD_SIZE'b0;
             end
         end
-        else if(!BG)begin
-            if (readC1 && readM1 && !M1busy) begin
-                i_cache_data[address1_index][0] = data1[63:48];
-                i_cache_data[address1_index][1] = data1[47:32];
-                i_cache_data[address1_index][2] = data1[31:16];
-                i_cache_data[address1_index][3] = data1[15:0];
-                i_cache_valid[address1_index] = 1'b1;
-                i_cache_tag[address1_index] = address1_tag;
-            end
+        else begin
+            if(!BG)begin
+                if (readC1 && readM1 && !M1busy) begin
+                    i_cache_data[address1_index][0] = data1[63:48];
+                    i_cache_data[address1_index][1] = data1[47:32];
+                    i_cache_data[address1_index][2] = data1[31:16];
+                    i_cache_data[address1_index][3] = data1[15:0];
+                    i_cache_valid[address1_index] = 1'b1;
+                    i_cache_tag[address1_index] = address1_tag;
+                end
 
-            if(readC2 && cpu_writeM2 && !M2busy) begin
-                d_cache_dirty[cpu_address2_index] = 1'b0;
-            end
+                if(readC2 && cpu_writeM2 && !M2busy) begin
+                    d_cache_dirty[cpu_address2_index] = 1'b0;
+                end
 
-            if((readC2 || writeC2) && readM2 && !M2busy) begin
-                d_cache_data[cpu_address2_index][0] = data2[63:48];
-                d_cache_data[cpu_address2_index][1] = data2[47:32];
-                d_cache_data[cpu_address2_index][2] = data2[31:16];
-                d_cache_data[cpu_address2_index][3] = data2[15:0];
-                d_cache_valid[cpu_address2_index] = 1'b1;
-                d_cache_dirty[cpu_address2_index] = 1'b0;
-                d_cache_tag[cpu_address2_index] = cpu_address2_tag;
+                if((readC2 || writeC2) && readM2 && !M2busy) begin
+                    d_cache_data[cpu_address2_index][0] = data2[63:48];
+                    d_cache_data[cpu_address2_index][1] = data2[47:32];
+                    d_cache_data[cpu_address2_index][2] = data2[31:16];
+                    d_cache_data[cpu_address2_index][3] = data2[15:0];
+                    d_cache_valid[cpu_address2_index] = 1'b1;
+                    d_cache_dirty[cpu_address2_index] = 1'b0;
+                    d_cache_tag[cpu_address2_index] = cpu_address2_tag;
+                end
             end
-
             if(d_cache_hit) begin
                 if(writeC2) begin
                     d_cache_data[cpu_address2_index][cpu_address2[1:0]] = cachedata2;

@@ -1,7 +1,7 @@
 `include "opcodes.v"
 `define LENGTH 12
 
-module DMA_controller(Clk, Reset_N, M2busy, dma_set_address, dma_address, BR, BG, use_bus, idx, dma_writeM2, dma_begin_interrupt, dma_end_interrupt); 
+module DMA_controller(Clk, Reset_N, M2busy, dma_set_address, dma_address, BR, BG, use_bus, idx, dma_writeM2, dma_end_interrupt); 
     input Clk;
     wire Clk;
     input Reset_N;
@@ -19,10 +19,7 @@ module DMA_controller(Clk, Reset_N, M2busy, dma_set_address, dma_address, BR, BG
     reg BR;
     input BG;
     wire BG;
-    input dma_begin_interrupt;
-    wire dma_begin_interrupt;
     output dma_end_interrupt;
-    wire dma_end_interrupt;
 
     output use_bus;
     wire use_bus;
@@ -32,7 +29,7 @@ module DMA_controller(Clk, Reset_N, M2busy, dma_set_address, dma_address, BR, BG
 
     reg [3:0] nextidx;
 
-    assign dma_end_interrupt = !BR;
+    assign dma_end_interrupt = (BG && !M2busy && (idx == `LENGTH));
     assign dma_writeM2 = (BG && (idx < `LENGTH));
     assign dma_address = dma_set_address + idx;
     assign use_bus = BR && !dma_end_interrupt;
@@ -43,20 +40,21 @@ module DMA_controller(Clk, Reset_N, M2busy, dma_set_address, dma_address, BR, BG
         nextidx = 4'd0;
     end
 
-    always @(posedge dma_begin_interrupt) begin
-        BR = 1'b1;
-    end
-
     always @(posedge Clk) begin
         if (BG && !M2busy) begin
             if(idx < `LENGTH)begin
                 idx = nextidx;
+                BR = 1'b1;
                 nextidx = idx + 4;
             end
             else begin
-                idx = 4'd0;
                 BR = 1'b0;
+                idx = 4'd0;
             end
+        end
+        else if (!BG) begin
+                BR = 1'b0;
+                idx = 4'd0;
         end
     end
 endmodule
