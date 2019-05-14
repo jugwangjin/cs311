@@ -58,9 +58,5 @@ module DMA_controller(Clk, Reset_N, M2busy, dma_set_address, dma_address, BR, BG
                 BR = 1'b0;
             end
         end
-        else if (!BG) begin
-                idx = 4'd0;
-                BR = 1'b0;
-        end
     end
 endmodule
