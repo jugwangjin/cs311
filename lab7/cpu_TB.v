@@ -36,7 +36,7 @@ module cpu_TB();
 	wire cpu_writeM2;
 	wire [`WORD_SIZE-1:0]cpu_address2;
 	wire [`BLOCK_SIZE-1:0]external_data;
-	wire [`BLCCK_SIZE-1:0]cpu_data2;
+	wire [`BLOCK_SIZE-1:0]cpu_data2;
 
 	assign writeM2 = use_bus? dma_writeM2 : cpu_writeM2;
 	assign address2 = use_bus? {{dma_address[`WORD_SIZE-1:4]}, {idx[3:0]}} : cpu_address2;
