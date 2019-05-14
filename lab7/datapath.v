@@ -223,6 +223,10 @@ module datapath (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, cpu_writ
         MEMWB_rd = 0;
     end
 
+    always @(posedge dma_end_interrupt) begin
+        BG = 1'b0;
+    end
+
     always @(posedge Clk) begin
         if (is_halted) begin
             output_port = 0;
@@ -264,9 +268,6 @@ module datapath (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, cpu_writ
             // when BR is high and conditions are fulfilled, set BG high
             if (BR && !M1busy && !M2busy) begin
                 BG = 1'b1;
-            end
-            if (BG && !BR) begin
-                BG = 1'b0;
             end
 
             // Check if the instruction in WB stage is bubble or not
