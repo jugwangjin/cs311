@@ -36,8 +36,6 @@ module cpu(Clk, Reset_N, readM1, address1, data1, M1busy, readM2, cpu_writeM2, c
 	output is_halted;
 	wire is_halted;
 
-	input dma_begin_interrupt;
-	wire dma_begin_interrupt;
 	input dma_end_interrupt;
 	wire dma_end_interrupt;
 
