@@ -2,7 +2,7 @@
 `define WORD_SIZE 16    // data and address word size
 `define BLOCK_SIZE 64
 
-module cpu(Clk, Reset_N, readM1, address1, data1, M1busy, readM2, cpu_writeM2, cpu_address2, cpu_data2, M2busy, num_inst, output_port, is_halted, dma_begin_interrupt, dma_end_interrupt, BR, BG, dma_set_address);
+module cpu(Clk, Reset_N, readM1, address1, data1, M1busy, readM2, cpu_writeM2, cpu_address2, cpu_data2, M2busy, num_inst, output_port, is_halted, dma_begin_interrupt, dma_end_interrupt, BR, BG, dma_address);
 	input Clk;
 	wire Clk;
 	input Reset_N;
@@ -45,13 +45,13 @@ module cpu(Clk, Reset_N, readM1, address1, data1, M1busy, readM2, cpu_writeM2, c
 	wire BR;
 	output BG;
 	wire BG;
-	output dma_set_address;
-	wire [`WORD_SIZE-1:0]dma_set_address;
+	output dma_address;
+	wire [`WORD_SIZE-1:0]dma_address;
 
 	wire [`WORD_SIZE-1:0]instruction;
 	wire [10:0]controls;
 
 	// TODO : Implement your pipelined CPU!
 	control CONTROL_MODULE(Clk, instruction, is_halted, Reset_N, controls);
-	datapath DATAPATH_MODULE (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, cpu_writeM2, cpu_address2, cpu_data2, M2busy, controls, is_halted, instruction, num_inst, output_port, dma_begin_interrupt, BR, BG, dma_set_address);
+	datapath DATAPATH_MODULE (Clk, Reset_N, readM1, address1, data1, M1busy, readM2, cpu_writeM2, cpu_address2, cpu_data2, M2busy, controls, is_halted, instruction, num_inst, output_port, dma_begin_interrupt, BR, BG, dma_address);
 endmodule

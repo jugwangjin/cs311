@@ -86,9 +86,9 @@ module cache(Clk, Reset_N, M1busy, C1busy, data1, cachedata1, readM1, address1, 
 	assign d_cache_hit = (d_cache_tag_hit && d_cache_valid[cpu_address2_index]);
 	assign d_cache_output = d_cache_data[cpu_address2_index][cpu_address2[1:0]];
 
-    assign readM1 = !BG && readC1 && !i_cache_hit;
-    assign readM2 = !BG && (readC2 || writeC2) && !d_cache_hit && !d_cache_dirty[cpu_address2_index];
-    assign cpu_writeM2 = !BG && readC2 && !d_cache_hit && d_cache_valid[cpu_address2_index] && d_cache_dirty[cpu_address2_index];
+    assign readM1 = readC1 && !i_cache_hit;
+    assign readM2 = (readC2 || writeC2) && !d_cache_hit && !d_cache_dirty[cpu_address2_index];
+    assign cpu_writeM2 = readC2 && !d_cache_hit && d_cache_valid[cpu_address2_index] && d_cache_dirty[cpu_address2_index];
 
     assign data2[63:48] = (!readM2)?d_cache_data[cpu_address2_index][0]:`WORD_SIZE'bz;
     assign data2[47:32] = (!readM2)?d_cache_data[cpu_address2_index][1]:`WORD_SIZE'bz;

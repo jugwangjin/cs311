@@ -1,7 +1,7 @@
 `include "opcodes.v"
-`define LENGTH 4
+`define LENGTH 12
 
-module DMA_controller(Clk, Reset_N, M2busy, dma_address, BR, BG, use_bus, idx, dma_writeM2, dma_end_interrupt); 
+module DMA_controller(Clk, Reset_N, M2busy, dma_set_address, dma_address, BR, BG, use_bus, idx, dma_writeM2, dma_begin_interrupt, dma_end_interrupt); 
     input Clk;
     wire Clk;
     input Reset_N;
@@ -9,14 +9,20 @@ module DMA_controller(Clk, Reset_N, M2busy, dma_address, BR, BG, use_bus, idx, d
 
     input M2busy;
     wire M2busy;
-    input dma_address;
-    wire [`WORD_SIZE-1:0]dma_address;
+    input dma_set_address;
+    wire [`WORD_SIZE-1:0]dma_set_address;
+
+    output dma_address;
+    wire [`WORD_SIZE-1:0] dma_address;
 
     output BR;
     reg BR;
     input BG;
     wire BG;
+    input dma_begin_interrupt;
+    wire dma_begin_interrupt;
     output dma_end_interrupt;
+    wire dma_end_interrupt;
 
     output use_bus;
     wire use_bus;
@@ -24,24 +30,37 @@ module DMA_controller(Clk, Reset_N, M2busy, dma_address, BR, BG, use_bus, idx, d
     reg [3:0] idx;
     output dma_writeM2;
 
-    assign use_bus = BG;
-    assign dma_end_interrupt = (BG && !M2busy && (idx>`LENGTH));
-    assign dma_writeM2 = (BG && !M2busy && (idx<`LENGTH));
+    reg [3:0] nextidx;
+
+    assign dma_end_interrupt = (BG && !M2busy && (idx == `LENGTH));
+    assign dma_writeM2 = (BG && (idx < `LENGTH));
+    assign dma_address = dma_set_address + idx;
+    assign use_bus = BR && !dma_end_interrupt;
 
     initial begin
         BR = 1'b0;
         idx = 4'd0;
+        nextidx = 4'd0;
     end
+
+    always @(posedge dma_begin_interrupt) begin
+        BR = 1'b1;
+    end
+
     always @(posedge Clk) begin
         if (BG && !M2busy) begin
             if(idx < `LENGTH)begin
-                BR = 1'b1;
-                idx = idx + 4;
+                idx = nextidx;
+                nextidx = idx + 4;
             end
             else begin
-                BR = 1'b0;
                 idx = 4'd0;
+                BR = 1'b0;
             end
+        end
+        else if (!BG) begin
+                idx = 4'd0;
+                BR = 1'b0;
         end
     end
 endmodule
