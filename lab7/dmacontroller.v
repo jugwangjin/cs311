@@ -44,7 +44,6 @@ module DMA_controller(Clk, Reset_N, M2busy, dma_set_address, dma_address, BR, BG
     end
     always @(posedge dma_begin_interrupt) begin
         BR = 1'b1;
-        idx = 4'd0;
     end
     always @(posedge dma_end_interrupt) begin
         BR = 1'b0;
