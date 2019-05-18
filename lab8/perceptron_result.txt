@@ -1,0 +1,33 @@
+perceptron predictor
+test 600 finished
+test 602 finished
+test 605 finished
+test 623 finished
+test 631 finished
+all finished
+================================
+test - 600:
+	instruction:     1588454
+	misprediction:      132450
+	prediction accuracy: 91.66%
+================================
+test - 602:
+	instruction:     2328511
+	misprediction:       15238
+	prediction accuracy: 99.35%
+================================
+test - 605:
+	instruction:     1121643
+	misprediction:       71133
+	prediction accuracy: 93.66%
+================================
+test - 623:
+	instruction:     2924800
+	misprediction:      454684
+	prediction accuracy: 84.45%
+================================
+test - 631:
+	instruction:     1218240
+	misprediction:      485054
+	prediction accuracy: 60.18%
+================================

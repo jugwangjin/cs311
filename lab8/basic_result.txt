@@ -1,0 +1,33 @@
+basic predictor
+test 600 finished
+test 602 finished
+test 605 finished
+test 623 finished
+test 631 finished
+all finished
+================================
+test - 600:
+	instruction:     1588454
+	misprediction:      145218
+	prediction accuracy: 90.86%
+================================
+test - 602:
+	instruction:     2328511
+	misprediction:         952
+	prediction accuracy: 99.96%
+================================
+test - 605:
+	instruction:     1121643
+	misprediction:       16323
+	prediction accuracy: 98.54%
+================================
+test - 623:
+	instruction:     2924800
+	misprediction:      107012
+	prediction accuracy: 96.34%
+================================
+test - 631:
+	instruction:     1218240
+	misprediction:      269953
+	prediction accuracy: 77.84%
+================================
