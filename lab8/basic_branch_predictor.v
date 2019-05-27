@@ -15,8 +15,8 @@ module basic_branch_predictor(clk, reset_n, input_ip, output_prediction, input_t
 
 	reg [63:0] recent_ip; //update recent index with input_taken
 
-	reg [`TAG_SIZE-1:0] tag_table [`INDEX_SIZE-1:0]; 
-	reg [1:0] state [`INDEX_SIZE-1:0]; // 00 SNT 01 WNT 10 WT 11 ST
+	reg [`INDEX_SIZE-1:0] tag_table [`TAG_SIZE-1:0]; 
+	reg [`INDEX_SIZE-1:0] state [1:0]; // 00 SNT 01 WNT 10 WT 11 ST
 
 	wire [`TAG_SIZE-1:0] input_tag;
 	wire [`INDEX_SIZE-1:0] input_index;
@@ -28,7 +28,7 @@ module basic_branch_predictor(clk, reset_n, input_ip, output_prediction, input_t
 
 	wire input_taken_filter;
 	
-	assign input_taken_filter = (input_taken_filter == 1) ? 1'b1 : 1'b0;
+	assign input_taken_filter = (input_taken_filter == 1'b1) ? 1'b1 : 1'b0;
 
 	assign input_tag = input_ip[63:64-`TAG_SIZE];
 	assign input_index = input_ip[`INDEX_SIZE-1:0];
@@ -41,7 +41,7 @@ module basic_branch_predictor(clk, reset_n, input_ip, output_prediction, input_t
 	assign output_prediction = (input_tag_correct && state[input_index][1]);
 
 	initial begin
-		recent_ip <= 0;
+		recent_ip <= 64'd0;
 		for (i=0;i<`TABLE_SIZE;i=i+1) begin
 			tag_table[i] <= `TAG_SIZE'd0;
 			state[i] <= 2'b10;
@@ -50,7 +50,7 @@ module basic_branch_predictor(clk, reset_n, input_ip, output_prediction, input_t
 
 	always @ (negedge reset_n) begin
 		// reset all state asynchronously
-		recent_ip <= 0;
+		recent_ip <= 64'd0;
 		for (i=0;i<`TABLE_SIZE;i=i+1) begin
 			tag_table[i] <= `TAG_SIZE'd0;
 			state[i] <= 2'b10;
