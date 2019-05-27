@@ -19,7 +19,7 @@ module perceptron_branch_predictor(clk, reset_n, input_ip, output_prediction, in
 	integer i;
 	integer j;
 
-	reg history_register [`HISTORY_LEN-1:0];
+	reg [`HISTORY_LEN-1:0]history_register;
 	reg [7:0] perceptron [`TABLE_SIZE-1:0][`HISTORY_LEN:0]; // 8 bit integer
 	reg [`HISTORY_LEN:0] selected_perceptron;
 	reg [7:0] computed_y;
@@ -51,9 +51,7 @@ module perceptron_branch_predictor(clk, reset_n, input_ip, output_prediction, in
 				perceptron[i][j] <= 0;
 			end
 		end
-		for(j=0; j<`HISTORY_LEN; j=j+1) begin
-			history_register[j] = 0;
-		end
+		history_register = 0;
 	end
 
 	always @ (negedge reset_n) begin
@@ -74,9 +72,7 @@ module perceptron_branch_predictor(clk, reset_n, input_ip, output_prediction, in
 				perceptron[i][j] <= 0;
 			end
 		end
-		for(j=0; j<`HISTORY_LEN; j=j+1) begin
-			history_register[j] = 0;
-		end
+		history_register = 0;
 	end
 
 	always @ (posedge clk) begin
