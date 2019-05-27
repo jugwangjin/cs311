@@ -15,8 +15,8 @@ module basic_branch_predictor(clk, reset_n, input_ip, output_prediction, input_t
 
 	reg [63:0] recent_ip; //update recent index with input_taken
 
-	reg [`INDEX_SIZE-1:0] tag_table [`TAG_SIZE-1:0]; 
-	reg [`INDEX_SIZE-1:0] state [1:0]; // 00 SNT 01 WNT 10 WT 11 ST
+	reg [`TABLE_SIZE-1:0] tag_table [`TAG_SIZE-1:0]; 
+	reg [`TABLE_SIZE-1:0] state [1:0]; // 00 SNT 01 WNT 10 WT 11 ST
 
 	wire [`TAG_SIZE-1:0] input_tag;
 	wire [`INDEX_SIZE-1:0] input_index;
