@@ -8,8 +8,16 @@ module basic_branch_predictor(clk, reset_n, input_ip, output_prediction, input_t
 
 	input [63:0] input_ip; // 56 bit tag, 8 bit index
 	input [0:0] input_taken;
+
+	input [63:0] input_ip;
+	input [0:0] input_taken;
 	output [0:0] output_prediction;
-	wire [0:0] output_prediction;
+
+	reg [0:0] output_reg;
+
+	// you can add more variables
+
+	assign output_prediction = output_reg;
 
 	integer i;
 
@@ -34,9 +42,8 @@ module basic_branch_predictor(clk, reset_n, input_ip, output_prediction, input_t
 	assign input_tag_correct = (tag_table[input_index] == input_tag) ? 1'b1 : 1'b0;
 	assign recent_tag_correct = (tag_table[recent_index] == recent_tag) ? 1'b1 : 1'b0;
 
-	assign output_prediction = (input_tag_correct && state[input_index][1]) ? 1'b1 : 1'b0;
-
 	initial begin
+		output_reg <= 0;
 		recent_ip <= 64'd0;
 		for (i=0;i<`TABLE_SIZE;i=i+1) begin
 			tag_table[i] <= `TAG_SIZE'd0;
@@ -46,6 +53,7 @@ module basic_branch_predictor(clk, reset_n, input_ip, output_prediction, input_t
 
 	always @ (negedge reset_n) begin
 		// reset all state asynchronously
+		output_reg <= 0;
 		recent_ip <= 64'd0;
 		for (i=0;i<`TABLE_SIZE;i=i+1) begin
 			tag_table[i] <= `TAG_SIZE'd0;
@@ -67,6 +75,8 @@ module basic_branch_predictor(clk, reset_n, input_ip, output_prediction, input_t
 			state[recent_index] = 2'b01 + {{1'b0}, {input_taken}};
 		end
 		
+		output_reg = (input_tag_correct && state[input_index][1]) ? 1'b1 : 1'b0;
+
 		recent_ip = input_ip;
 	end
 
