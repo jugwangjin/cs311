@@ -20,7 +20,7 @@ module perceptron_branch_predictor(clk, reset_n, input_ip, output_prediction, in
 	integer j;
 
 	reg history_register [`HISTORY_LEN-1:0];
-	reg [7:0] perceptron [`TABLE_SIZE-1:0][`HISTORY_LEN:0]; // 1 bit integer
+	reg [7:0] perceptron [`TABLE_SIZE-1:0][`HISTORY_LEN:0]; // 8 bit integer
 	reg [`HISTORY_LEN:0] selected_perceptron;
 	reg [7:0] computed_y;
 	reg [`INDEX_SIZE:0] recent_index;
