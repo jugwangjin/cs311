@@ -62,7 +62,9 @@ module basic_branch_predictor(clk, reset_n, input_ip, output_prediction, input_t
 	end
 
 	always @ (posedge clk) begin
+		// update state
 		if(recent_tag_correct) begin
+		// update state with input_taken when recent ip's tag matches with the tag table's value
 			if(input_taken && state[recent_index] != 2'b11) begin
 				state[recent_index] = state[recent_index] + 2'b01;
 			end
@@ -71,12 +73,16 @@ module basic_branch_predictor(clk, reset_n, input_ip, output_prediction, input_t
 			end
 		end
 		else begin
+		// becuase recent ip's tag does not match, we take new value
+		// initial value for new tag entry will be 2'b01 when not taken, 2'b10 when taken
 			tag_table[recent_index] = recent_tag;
 			state[recent_index] = 2'b01 + {{1'b0}, {input_taken}};
 		end
-		
+
+		// we predict the instruction is taken when tag is correct and state's 1st bit is 1
 		output_reg = (input_tag_correct && state[input_index][1]) ? 1'b1 : 1'b0;
 
+		// to update the state at the next clock
 		recent_ip = input_ip;
 	end
 
