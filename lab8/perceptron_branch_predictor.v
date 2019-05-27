@@ -39,8 +39,8 @@ module perceptron_branch_predictor(clk, reset_n, input_ip, output_prediction, in
 		computed_y <= 0;
 		selected_perceptron <= 0;
 		recent_index <= 0;
-		for (i=0;i<`TABLE_SIZE;i=i+1)begin
-			for (j=0; j<=`HISTORY_LEN; j=j+1)  begin
+		for (i=0;i<`TABLE_SIZE;i=i+1) begin
+			for (j=0; j<=`HISTORY_LEN; j=j+1) begin
 				perceptron[i][j] <= 0;
 				perceptron[i][j] <= 0;
 				perceptron[i][j] <= 0;
