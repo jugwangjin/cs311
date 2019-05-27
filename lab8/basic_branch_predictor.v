@@ -9,64 +9,65 @@ module basic_branch_predictor(clk, reset_n, input_ip, output_prediction, input_t
 	input [63:0] input_ip; // 56 bit tag, 8 bit index
 	input [0:0] input_taken;
 	output [0:0] output_prediction;
+	wire [0:0] output_prediction;
 
-	reg [0:0] output_reg;
+	integer i;
 
-	reg [`INDEX_SIZE-1:0] i;
-	reg input_taken_valid; //pass recent index state update at first clock
-	reg [`INDEX_SIZE-1:0] recent_index; //update recent index with input_taken
+	reg [63:0] recent_ip; //update recent index with input_taken
 
-	reg [`TAG_SIZE-1:0] tag_table [`INDEX_SIZE-1:0];
+	reg [`TAG_SIZE-1:0] tag_table [`INDEX_SIZE-1:0]; 
 	reg [1:0] state [`INDEX_SIZE-1:0]; // 00 SNT 01 WNT 10 WT 11 ST
 
-	wire [`TAG_SIZE-1:0] tag;
-	wire [`INDEX_SIZE-1:0] index;
+	wire [`TAG_SIZE-1:0] input_tag;
+	wire [`INDEX_SIZE-1:0] input_index;
+	wire [`TAG_SIZE-1:0] recent_tag;
+	wire [`INDEX_SIZE-1:0] recent_index;
 
-	assign output_prediction = output_reg;
+	wire input_tag_correct; // input_ip's tag matches the tag table value
+	wire recent_tag_correct; // recent_ip's tag matches the tag table value
 
-	assign tag = input_ip[63:8];
-	assign index = input_ip[7:0];
+	assign input_tag = input_ip[63:64-`TAG_SIZE];
+	assign input_index = input_ip[`INDEX_SIZE-1:0];
+	assign recent_tag = recent_ip[63:64-`TAG_SIZE];
+	assign recent_index = recent_ip[`INDEX_SIZE-1:0];
+
+	assign input_tag_correct = (tag_table[input_index] == input_tag);
+	assign recent_tag_correct = (tag_table[recent_index] == recent_tag);
+
+	assign output_prediction = (input_tag_correct && state[input_index][1]);
 
 	initial begin
-		output_reg <= 0;
 		recent_index <= 0;
-		input_taken_valid <= 0;
 		for (i=0;i<`TABLE_SIZE;i=i+1) begin
-			tag_table[i] <= 0;
-			state[i] <= 0;
+			tag_table[i] <= `TAG_SIZE'd0;
+			state[i] <= 2'd0;
 		end
-	end
-
-	always @ (*) begin
 	end
 
 	always @ (negedge reset_n) begin
 		// reset all state asynchronously
-		output_reg <= 0;
 		recent_index <= 0;
-		input_taken_valid <= 0;
 		for (i=0;i<`TABLE_SIZE;i=i+1) begin
 			tag_table[i] <= 0;
-			state[i] <= 0;
+			state[i] <= 2b'10;
 		end
 	end
 
 	always @ (posedge clk) begin
-		if (!input_taken_valid) begin
-			input_taken_valid = 1;
-		end else begin
-			if (state[recent_index]<2'b11 && input_taken) begin
-				state[recent_index] = state[recent_index] + 2'b01; 
-			end else if (state[recent_index]>2'b00 && !input_taken) begin
+		if(recent_tag_correct) begin
+			if(input_taken && state[recent_index] != 2'b11) begin
 				state[recent_index] = state[recent_index] + 2'b01;
 			end
+			else if(!input_taken && state[recent_index] != 2'b00) begin
+				state[recent_index] = state[recent_index] - 2'b01;
+			end
 		end
-		if (tag_table[index] != tag) begin
-			tag_table[index] = tag;
-			state[index] = 2'b00;
+		else begin
+			tag_table[recent_index] = recent_tag;
+			state[recent_index] = 2'b01 + {{1'b}, {input_taken}};
 		end
-			output_reg = state[index][1];
-		recent_index = index;
+		
+		recent_ip = input_ip;
 	end
 
 endmodule
