@@ -1,6 +1,14 @@
 `define TABLE_SIZE 256
 `define TAG_SIZE 56
 `define INDEX_SIZE 8
+// to test other HW budget, change values above (TABLE_SIZE, TAG_SIZE, INDEX_SIZE)
+// `TAG_SIZE + `INDEX_SIZE = 64
+// `TABLE_SIZE = 2^`INDEX_SIZE
+// HW budget
+// (`TAG_SIZE + 2) * `TABLE_SIZE
+// = ( 66 - `INDEX_SIZE ) * 2^`INDEX_SIZE
+// ex) INDEX_SIZE = 8 -> (66-8)*(2^8)= 14848(bits) = 1856(Bytes) = 1.825(KB)
+
 
 module basic_branch_predictor(clk, reset_n, input_ip, output_prediction, input_taken);
 	input clk;
@@ -44,9 +52,9 @@ module basic_branch_predictor(clk, reset_n, input_ip, output_prediction, input_t
 
 	initial begin
 		output_reg <= 0;
-		recent_ip <= 64'd0;
+		recent_ip <= 0;
 		for (i=0;i<`TABLE_SIZE;i=i+1) begin
-			tag_table[i] <= `TAG_SIZE'd0;
+			tag_table[i] <= 0;
 			state[i] <= 2'b10;
 		end
 	end
@@ -54,9 +62,9 @@ module basic_branch_predictor(clk, reset_n, input_ip, output_prediction, input_t
 	always @ (negedge reset_n) begin
 		// reset all state asynchronously
 		output_reg <= 0;
-		recent_ip <= 64'd0;
+		recent_ip <= 0;
 		for (i=0;i<`TABLE_SIZE;i=i+1) begin
-			tag_table[i] <= `TAG_SIZE'd0;
+			tag_table[i] <= 0;
 			state[i] <= 2'b10;
 		end
 	end

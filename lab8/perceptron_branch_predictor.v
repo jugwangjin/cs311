@@ -2,7 +2,15 @@
 `define TABLE_SIZE 256
 `define INDEX_SIZE 8
 `define THRESHOLD 38
-// the best threshold is floor(1.93*history_length + 14);
+// change INDEX_SIZE/TABLE_SIZE to test various HW budget predictor
+// the best `THRESHOLD = floor(1.93*`HISTORY_LEN + 14);
+// `TABLE_SIZE = 2^`INDEX_SIZE
+// HW budget 
+// we exclude history_register, selected_perceptron, computed_y because it has fixed size
+// 8 * `TABLE_SIZE * `HISTORY_LEN
+// = 8 * 2 ^ `INDEX_SIZE * `HISTORY_LEN
+// ex) `INDEX_SIZE = 8, `HISTORY_LEN = 12 -> 8 * 2^8 * 12 = 24576(bits) = 3072(Bytes) = 3(KB)
+
 
 module perceptron_branch_predictor(clk, reset_n, input_ip, output_prediction, input_taken);
 	input clk;
