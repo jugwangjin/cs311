@@ -26,7 +26,7 @@ module perceptron_branch_predictor(clk, reset_n, input_ip, output_prediction, in
 	reg [`INDEX_SIZE:0] recent_index;
 
 	wire [`INDEX_SIZE-1:0]index;
-	wire [7:0] abs_computed_y;
+	wire [7:0] abs_computed_y; // to check the THRESHOLD
 	wire train;
 
 	assign output_prediction = output_reg;
@@ -86,7 +86,8 @@ module perceptron_branch_predictor(clk, reset_n, input_ip, output_prediction, in
 			selected_perceptron[`HISTORY_LEN] = selected_perceptron[`HISTORY_LEN] + {{7{!(input_taken)}},{1'b1}};
 			perceptron[recent_index][`HISTORY_LEN] = selected_perceptron[`HISTORY_LEN];
 		end
-
+		// shift the history register
+		// history_register[0] is the latest history
 		history_register[`HISTORY_LEN-1:1] = history_register[`HISTORY_LEN-2:0];
 		history_register[0] = input_taken;
 
@@ -100,7 +101,11 @@ module perceptron_branch_predictor(clk, reset_n, input_ip, output_prediction, in
 			computed_y = computed_y + (selected_perceptron[i]^{8{!history_register[i]}}) + (!history_register[i]);
 		end
 
-		output_reg = computed_y[7];
+		// update the recent index, to update perceptron at the next clock
+		recent_index = index;
+		// non-negative computed_y means output_reg is 1 (taken)
+		// negative computed_y (computed_y[7]==1) means output_reg is 0 (not taken)
+		output_reg = !computed_y[7];
 	end
 
 endmodule
