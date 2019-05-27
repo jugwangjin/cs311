@@ -28,7 +28,7 @@ module basic_branch_predictor(clk, reset_n, input_ip, output_prediction, input_t
 
 	wire input_taken_filter;
 	
-	assign input_taken_filter = (input_taken_filter == 1'b1) ? 1'b1 : 1'b0;
+	assign input_taken_filter = (input_taken_filter == 1'bx) ? 1'b0 : input_taken;
 
 	assign input_tag = input_ip[63:64-`TAG_SIZE];
 	assign input_index = input_ip[`INDEX_SIZE-1:0];
