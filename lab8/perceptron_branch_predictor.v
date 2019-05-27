@@ -83,7 +83,7 @@ module perceptron_branch_predictor(clk, reset_n, input_ip, output_prediction, in
 		history_register[0] = input_taken;
 
 		computed_y = selected_perceptron[`HISTORY_LEN];
-		for(i=0; i<=`HISTORY_LEN; i=i+1) begin
+		for(i=0; i<`HISTORY_LEN; i=i+1) begin
 			// fetch from table
 			selected_perceptron[i] = perceptron[index][i];
 			// compute y
