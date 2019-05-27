@@ -1,8 +1,8 @@
-`define HISTORY_LEN 12;
-`define TABLE_SIZE 256;
-`define INDEX_SIZE 8;
+`define HISTORY_LEN 12
+`define TABLE_SIZE 256
+`define INDEX_SIZE 8
+`define THRESHOLD 38
 // the best threshold is floor(1.93*history_length + 14);
-`define THRESHOLD 38;
 
 module perceptron_branch_predictor(clk, reset_n, input_ip, output_prediction, input_taken);
 	input clk;
