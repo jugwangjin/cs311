@@ -68,7 +68,7 @@ module basic_branch_predictor(clk, reset_n, input_ip, output_prediction, input_t
 		end
 		else begin
 			tag_table[recent_index] = recent_tag;
-			state[recent_index] = 2'b01 + {{1'b0}, {input_taken_filter[0]}};
+			state[recent_index] = 2'b01 + {{1'b0}, {input_taken_filter}};
 		end
 		
 		recent_ip = input_ip;
