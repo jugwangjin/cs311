@@ -23,11 +23,11 @@ module perceptron_branch_predictor(clk, reset_n, input_ip, output_prediction, in
 	reg [7:0] perceptron [`TABLE_SIZE-1:0][`HISTORY_LEN:0]; // 8 bit integer
 	reg [`HISTORY_LEN:0] selected_perceptron;
 	reg [7:0] computed_y;
-	reg [`INDEX_SIZE:0] recent_index;
+	reg [`INDEX_SIZE:0] recent_index; // to update perceptron with prev clock's result
 
 	wire [`INDEX_SIZE-1:0]index;
 	wire [7:0] abs_computed_y; // to check the THRESHOLD
-	wire train;
+	wire train; // train condition : wrong prediction or less confident than threshold
 
 	assign output_prediction = output_reg;
 	assign index = input_ip[`INDEX_SIZE-1:0];
@@ -78,6 +78,7 @@ module perceptron_branch_predictor(clk, reset_n, input_ip, output_prediction, in
 	always @ (posedge clk) begin
 		if(train) begin
 			for(i=0; i<`HISTORY_LEN; i=i+1) begin
+				// calculate new weight
 				selected_perceptron[i] = selected_perceptron[i] + {{7{(history_register[i])^(input_taken)}},{1'b1}};
 				// update the perceptron
 				perceptron[recent_index][i] = selected_perceptron[i];
