@@ -78,12 +78,12 @@ module perceptron_branch_predictor(clk, reset_n, input_ip, output_prediction, in
 	always @ (posedge clk) begin
 		if(train) begin
 			for(i=0; i<`HISTORY_LEN; i=i+1) begin
-				selected_perceptron[i] = selected_perceptron[i] + {{7{(history_register[i])^(input_taken[0])}},{1}};
+				selected_perceptron[i] = selected_perceptron[i] + {{7{(history_register[i])^(input_taken)}},{1'b1}};
 				// update the perceptron
 				perceptron[recent_index][i] = selected_perceptron[i];
 			end
 			// perceptron[`HISTORY_LEN] is the bias weight
-			selected_perceptron[`HISTORY_LEN] = selected_perceptron[`HISTORY_LEN] + {{7{!(input_taken[0])}},{1}};
+			selected_perceptron[`HISTORY_LEN] = selected_perceptron[`HISTORY_LEN] + {{7{!(input_taken)}},{1'b1}};
 			perceptron[recent_index][`HISTORY_LEN] = selected_perceptron[`HISTORY_LEN];
 		end
 
