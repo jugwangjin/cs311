@@ -35,10 +35,10 @@ module basic_branch_predictor(clk, reset_n, input_ip, output_prediction, input_t
 	assign recent_tag = recent_ip[63:64-`TAG_SIZE];
 	assign recent_index = recent_ip[`INDEX_SIZE-1:0];
 
-	assign input_tag_correct = (tag_table[input_index] == input_tag);
-	assign recent_tag_correct = (tag_table[recent_index] == recent_tag);
+	assign input_tag_correct = (tag_table[input_index] == input_tag) ? 1'b1 : 1'b0;
+	assign recent_tag_correct = (tag_table[recent_index] == recent_tag) ? 1'b1 : 1'b0;
 
-	assign output_prediction = (input_tag_correct && state[input_index][1]);
+	assign output_prediction = (input_tag_correct && state[input_index][1]) ? 1'b1 : 1'b0;
 
 	initial begin
 		recent_ip <= 64'd0;
