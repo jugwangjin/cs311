@@ -37,7 +37,7 @@ module basic_branch_predictor(clk, reset_n, input_ip, output_prediction, input_t
 	assign output_prediction = (input_tag_correct && state[input_index][1]);
 
 	initial begin
-		recent_index <= 0;
+		recent_ip <= 0;
 		for (i=0;i<`TABLE_SIZE;i=i+1) begin
 			tag_table[i] <= `TAG_SIZE'd0;
 			state[i] <= 2'b10;
@@ -46,7 +46,7 @@ module basic_branch_predictor(clk, reset_n, input_ip, output_prediction, input_t
 
 	always @ (negedge reset_n) begin
 		// reset all state asynchronously
-		recent_index <= 0;
+		recent_ip <= 0;
 		for (i=0;i<`TABLE_SIZE;i=i+1) begin
 			tag_table[i] <= `TAG_SIZE'd0;
 			state[i] <= 2'b10;
