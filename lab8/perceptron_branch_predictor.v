@@ -19,7 +19,7 @@ module perceptron_branch_predictor(clk, reset_n, input_ip, output_prediction, in
 	integer i;
 	integer j;
 
-	reg history_register[`HISTORY_LEN-1:0];
+	reg history_register [`HISTORY_LEN-1:0];
 	reg [7:0] perceptron [`TABLE_SIZE-1:0][`HISTORY_LEN:0]; // 1 bit integer
 	reg [`HISTORY_LEN:0] selected_perceptron;
 	reg [7:0] computed_y;
@@ -95,7 +95,7 @@ module perceptron_branch_predictor(clk, reset_n, input_ip, output_prediction, in
 		history_register[0] = input_taken;
 
 		computed_y = selected_perceptron[HISTORY_LEN];
-		for(int i=0; i<=HISTORY_LEN; i=i+1) begin
+		for(i=0; i<=HISTORY_LEN; i=i+1) begin
 			// fetch from table
 			selected_perceptron[i] = perceptron[index][i];
 			// compute y
