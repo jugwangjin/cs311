@@ -26,10 +26,6 @@ module basic_branch_predictor(clk, reset_n, input_ip, output_prediction, input_t
 	wire input_tag_correct; // input_ip's tag matches the tag table value
 	wire recent_tag_correct; // recent_ip's tag matches the tag table value
 
-	wire input_taken_filter;
-	
-	assign input_taken_filter = (input_taken === 1'bx) ? 1'b0 : input_taken;
-
 	assign input_tag = input_ip[63:64-`TAG_SIZE];
 	assign input_index = input_ip[`INDEX_SIZE-1:0];
 	assign recent_tag = recent_ip[63:64-`TAG_SIZE];
@@ -59,16 +55,16 @@ module basic_branch_predictor(clk, reset_n, input_ip, output_prediction, input_t
 
 	always @ (posedge clk) begin
 		if(recent_tag_correct) begin
-			if(input_taken_filter && state[recent_index] != 2'b11) begin
+			if(input_taken && state[recent_index] != 2'b11) begin
 				state[recent_index] = state[recent_index] + 2'b01;
 			end
-			else if(!input_taken_filter && state[recent_index] != 2'b00) begin
+			else if(!input_taken && state[recent_index] != 2'b00) begin
 				state[recent_index] = state[recent_index] - 2'b01;
 			end
 		end
 		else begin
 			tag_table[recent_index] = recent_tag;
-			state[recent_index] = 2'b01 + {{1'b0}, {input_taken_filter}};
+			state[recent_index] = 2'b01 + {{1'b0}, {input_taken}};
 		end
 		
 		recent_ip = input_ip;
