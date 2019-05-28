@@ -73,6 +73,7 @@ module perceptron_branch_predictor(clk, reset_n, input_ip, output_prediction, in
 		history_register = 0;
 	end
 
+	// when new input_ip comes in, predict the result
 	always @ (input_ip) begin
 		// calculate y to predict
 		computed_y = selected_perceptron[`HISTORY_LEN];

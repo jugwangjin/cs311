@@ -69,6 +69,7 @@ module basic_branch_predictor(clk, reset_n, input_ip, output_prediction, input_t
 		end
 	end
 
+	// when new ip comes in, predict the result
 	always @ (input_ip) begin
 		// we predict the instruction is taken when tag is correct and state's 1st bit is 1
 		output_reg = (input_tag_correct && state[input_index][1]) ? 1'b1 : 1'b0;
