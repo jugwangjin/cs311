@@ -55,6 +55,9 @@ module perceptron_branch_predictor(clk, reset_n, input_ip, output_prediction, in
 			selected_perceptron[j] <= 0;
 		end
 		history_register = 0;
+
+		$display("INDEX_SIZE is %d, HISTORY_LEN is %d, THRESHOLD is %d", `INDEX_SIZE, `HISTORY_LEN, `THRESHOLD);
+		$display("HW budget is %d(bits)", 8 * `TABLE_SIZE * `HISTORY_LEN);
 	end
 
 	always @ (negedge reset_n) begin

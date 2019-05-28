@@ -57,6 +57,9 @@ module basic_branch_predictor(clk, reset_n, input_ip, output_prediction, input_t
 			tag_table[i] <= 0;
 			state[i] <= 2'b10;
 		end
+		
+		$display("INDEX_SIZE is %d", `INDEX_SIZE);
+		$display("HW budget is %d(bits)", (66 - `INDEX_SIZE) * `TABLE_SIZE);
 	end
 
 	always @ (negedge reset_n) begin
