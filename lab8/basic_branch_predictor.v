@@ -69,7 +69,7 @@ module basic_branch_predictor(clk, reset_n, input_ip, output_prediction, input_t
 		end
 	end
 
-	always @ (posedge clk) begin
+	always @ (negedge clk) begin
 		// update state
 		if(recent_tag_correct) begin
 		// update state with input_taken when recent ip's tag matches with the tag table's value

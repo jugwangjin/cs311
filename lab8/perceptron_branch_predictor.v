@@ -73,7 +73,7 @@ module perceptron_branch_predictor(clk, reset_n, input_ip, output_prediction, in
 		history_register = 0;
 	end
 
-	always @ (posedge clk) begin
+	always @ (negedge clk) begin
 		// if train condition, update the selected perceptron
 		if(train) begin
 			for(i=0; i<`HISTORY_LEN; i=i+1) begin
