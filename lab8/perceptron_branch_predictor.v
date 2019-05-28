@@ -73,25 +73,7 @@ module perceptron_branch_predictor(clk, reset_n, input_ip, output_prediction, in
 		history_register = 0;
 	end
 
-	always @ (negedge clk) begin
-		// if train condition, update the selected perceptron
-		if(train) begin
-			for(i=0; i<`HISTORY_LEN; i=i+1) begin
-				// calculate new weight
-				selected_perceptron[i] = selected_perceptron[i] + {{7{(history_register[i])^(input_taken)}},{1'b1}};
-				// update the actual perceptron with values of selected perceptron
-				perceptron[recent_index][i] = selected_perceptron[i];
-			end
-			// perceptron[`HISTORY_LEN] is the bias weight
-			selected_perceptron[`HISTORY_LEN] = selected_perceptron[`HISTORY_LEN] + {{7{!(input_taken)}},{1'b1}};
-			perceptron[recent_index][`HISTORY_LEN] = selected_perceptron[`HISTORY_LEN];
-		end
-
-		// shift the history register
-		// history_register[0] is the latest history
-		history_register[`HISTORY_LEN-1:1] = history_register[`HISTORY_LEN-2:0];
-		history_register[0] = input_taken;
-
+	always @ (input_ip) begin
 		// calculate y to predict
 		computed_y = selected_perceptron[`HISTORY_LEN];
 		for(i=0; i<`HISTORY_LEN; i=i+1) begin
@@ -108,6 +90,26 @@ module perceptron_branch_predictor(clk, reset_n, input_ip, output_prediction, in
 		// non-negative computed_y means output_reg is 1 (taken)
 		// negative computed_y (computed_y[7]==1) means output_reg is 0 (not taken)
 		output_reg = !computed_y[7];
+	end
+
+	always @ (posedge clk) begin
+		// if train condition, update the selected perceptron
+		if(train) begin
+			for(i=0; i<`HISTORY_LEN; i=i+1) begin
+				// calculate new weight
+				selected_perceptron[i] = selected_perceptron[i] + {{7{(history_register[i])^(input_taken)}},{1'b1}};
+				// update the actual perceptron with values of selected perceptron
+				perceptron[recent_index][i] = selected_perceptron[i];
+			end
+			// perceptron[`HISTORY_LEN] is the bias weight
+			selected_perceptron[`HISTORY_LEN] = selected_perceptron[`HISTORY_LEN] + {{7{!(input_taken)}},{1'b1}};
+			perceptron[recent_index][`HISTORY_LEN] = selected_perceptron[`HISTORY_LEN];
+		end
+		
+		// shift the history register
+		// history_register[0] is the latest history
+		history_register[`HISTORY_LEN-1:1] = history_register[`HISTORY_LEN-2:0];
+		history_register[0] = input_taken;
 	end
 
 endmodule
